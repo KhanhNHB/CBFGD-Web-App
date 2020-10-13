@@ -7,17 +7,14 @@ import './mixins/chartjs';
 import theme from './theme';
 import routes from './routes';
 
-
 const App = () => {
   const routing = useRoutes(routes);
 
   return (
-    
     <ThemeProvider theme={theme}>
       <GlobalStyles />
       {routing}
     </ThemeProvider>
-
   );
 };
 
