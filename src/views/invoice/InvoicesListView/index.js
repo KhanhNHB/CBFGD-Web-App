@@ -39,7 +39,7 @@ const Invoices = () => {
             container
             spacing={3}
           >
-            <InvoicesList invoices={invoices}/>
+            <InvoicesList invoices={invoices} />
           </Grid>
         </Box>
         <Box

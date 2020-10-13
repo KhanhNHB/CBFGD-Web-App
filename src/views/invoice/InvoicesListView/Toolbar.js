@@ -24,15 +24,18 @@ const useStyles = makeStyles((theme) => ({
 const Toolbar = ({ className, ...rest }) => {
   const [fileSelected, setFileSelected] = useState(null);
   const classes = useStyles();
-  const onFileChange = (e) =>{
+
+  const onFileChange = (e) => {
     const file = e.target.files[0];
-    setFileSelected({fileSelected: file});
+    setFileSelected({ fileSelected: file });
   }
-  const onFileUpload = () =>{
+
+  const onFileUpload = () => {
     const formData = new FormData();
-    formData.append("file",fileSelected);
+    formData.append("file", fileSelected);
     console.log(fileSelected);
   }
+
   return (
     <div
       className={clsx(classes.root, className)}
@@ -42,9 +45,9 @@ const Toolbar = ({ className, ...rest }) => {
         display="flex"
         justifyContent="flex-end"
       >
-          <Input type="file" onChange={onFileChange}/>
-          <Button className={classes.importButton} onClick={onFileUpload}>
-            Import Excel
+        <Input type="file" onChange={onFileChange} />
+        <Button className={classes.importButton} onClick={onFileUpload}>
+          Import Excel
           </Button>
 
         <Button

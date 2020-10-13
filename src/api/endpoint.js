@@ -1,3 +1,3 @@
-export const BASE_URL = "http://54.251.156.230:8000";
+export const BASE_URL = "http://localhost:8090";
 
-export const LOGIN_ENDPOINT = `${BASE_URL}/auth/signin`;
+export const LOGIN_ENDPOINT = `${BASE_URL}/auth/signin/admins`;

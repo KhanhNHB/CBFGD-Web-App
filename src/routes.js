@@ -13,7 +13,7 @@ import RegisterView from './views/auth/RegisterView';
 const routes = [
   {
     path: 'app',
-    // element: <LoginView/>,
+    element: <LoginView />,
     element: <DashboardLayout />,
     children: [
       { path: 'account', element: <AccountView /> },
@@ -26,8 +26,8 @@ const routes = [
     path: '/',
     exact: true,
     element: <MainLayout />,
-      // element: <LoginView/>,
-      children: [
+    element: <LoginView />,
+    children: [
       { path: '/', element: <MainLayout /> },
       { path: 'register', element: <RegisterView /> },
       { path: '/', element: <Navigate to="/app/dashboard" /> },
