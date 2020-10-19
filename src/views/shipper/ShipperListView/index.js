@@ -7,7 +7,6 @@ import {
 import Page from '../../../components/Page';
 import Results from './Results';
 import Toolbar from './Toolbar';
-import data from './data';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -20,7 +19,7 @@ const useStyles = makeStyles((theme) => ({
 
 const ShipperListView = () => {
   const classes = useStyles();
-  const [customers] = useState(data);
+ 
 
   return (
     <Page
@@ -30,7 +29,7 @@ const ShipperListView = () => {
       <Container maxWidth={false}>
         <Toolbar />
         <Box mt={3}>
-          <Results customers={customers} />
+          <Results />
         </Box>
       </Container>
     </Page>
