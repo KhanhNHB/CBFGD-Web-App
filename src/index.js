@@ -5,7 +5,11 @@ import * as serviceWorker from './serviceWorker';
 import App from './App';
 import thunk from 'redux-thunk';
 import rootReducer from './reducers';
-import { createStore, applyMiddleware, compose } from 'redux';
+import {
+  createStore,
+  applyMiddleware,
+  compose
+} from 'redux';
 import { Provider } from 'react-redux';
 const store = createStore(
   rootReducer,

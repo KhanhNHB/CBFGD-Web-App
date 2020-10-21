@@ -4,7 +4,6 @@ import React, {
 } from 'react';
 import {
   Box,
-  CircularProgress,
   Container,
   Grid,
   makeStyles
@@ -17,8 +16,6 @@ import axios from 'axios';
 import {
   INVOICE_ENDPOINT
 } from '../../../api/endpoint';
-
-// import data from './data';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -35,7 +32,6 @@ const useStyles = makeStyles((theme) => ({
 const Invoices = () => {
   const classes = useStyles();
   const [invoices, setInvoices] = useState([]);
-  const [loading, setLoading] = useState(false);
   const [fileSelected, setFileSelected] = useState(null);
 
   useEffect(() => {
@@ -43,7 +39,6 @@ const Invoices = () => {
   }, []);
 
   const onHandleFileUpload = async () => {
-    setLoading(true);
     const formData = new FormData();
     formData.append("file", fileSelected.fileSelected);
     const response = await axios.post(INVOICE_ENDPOINT, formData, {
@@ -53,7 +48,6 @@ const Invoices = () => {
     });
 
     if (response.status !== 200) {
-      setLoading(false);
       return;
     }
 
