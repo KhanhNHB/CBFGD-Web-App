@@ -6,3 +6,18 @@ export const actSignIn = (userToken) =>{
         userToken,
     };
 };
+
+export const actGetAllShipper = (shippers) =>{
+    return{
+        type: types.GET_ALL_SHIPPERS,
+        shippers,
+    }
+};
+
+export const actCreateShipper = (shipper) =>{
+    return{
+        type: types.CREATE_SUCCESSFULLY,
+        shipper,
+    }
+};
+

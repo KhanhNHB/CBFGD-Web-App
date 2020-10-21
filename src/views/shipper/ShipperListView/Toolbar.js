@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
 import {
@@ -12,7 +12,8 @@ import {
   makeStyles
 } from '@material-ui/core';
 import { Search as SearchIcon } from 'react-feather';
-
+import ModalShipperAdd from '../../../components/ModalShipperAdd';
+import Modal from 'react-modal';
 const useStyles = makeStyles((theme) => ({
   root: {},
   importButton: {
@@ -20,11 +21,23 @@ const useStyles = makeStyles((theme) => ({
   },
   exportButton: {
     marginRight: theme.spacing(1)
+  },
+  modal:{
+    width:'60%',
+    height:'60%',
+    marginLeft:350,
+    marginTop:50,
   }
+
 }));
 
 const Toolbar = ({ className, ...rest }) => {
   const classes = useStyles();
+  const [modalOpen, setModalOpen] = useState(false);
+
+  const openModalForm = () => {
+    setModalOpen(true);
+  }
 
   return (
     <div
@@ -44,10 +57,20 @@ const Toolbar = ({ className, ...rest }) => {
         <Button
           color="primary"
           variant="contained"
+          onClick={openModalForm}
         >
           Add Shipper
         </Button>
       </Box>
+      
+      <Modal
+        isOpen={modalOpen}
+      >
+        <div className={classes.modal}>
+        <ModalShipperAdd onCloseModal={() => setModalOpen(false)} />
+        </div>
+      </Modal>
+      
       <Box mt={3}>
         <Card>
           <CardContent>

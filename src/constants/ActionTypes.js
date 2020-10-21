@@ -1,1 +1,4 @@
 export const SIGN_IN = 'SIGN_IN';
+export const GET_ALL_SHIPPERS = 'GET_ALL_SHIPPERS';
+export const CREATE_SUCCESSFULLY = 'CREATE_SUCCESSFULLY';
+export const CREATE_FAILURE = 'CREATE_FAILURE';
