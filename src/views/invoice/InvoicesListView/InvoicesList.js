@@ -4,20 +4,18 @@ import PropTypes from 'prop-types';
 import moment from 'moment';
 import PerfectScrollbar from 'react-perfect-scrollbar';
 import {
-  Avatar,
   Box,
   Card,
-  Checkbox,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TablePagination,
   TableRow,
-  Typography,
-  makeStyles
+  makeStyles,
+  Button,
+  CircularProgress
 } from '@material-ui/core';
-import getInitials from '../../../utils/getInitials';
 
 const useStyles = makeStyles((theme) => ({
   root: {},
@@ -26,119 +24,107 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const InvoicesList = ({ className, invoices, ...rest }) => {
+const InvoicesList = ({ onReload, className, invoices, ...rest }) => {
   const classes = useStyles();
   const [limit, setLimit] = useState(10);
   const [page, setPage] = useState(0);
 
-
- 
-  return (
-    <Card
-      className={clsx(classes.root, className)}
-      {...rest}
-    >
-      <PerfectScrollbar>
-        <Box minWidth={1050}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell padding="checkbox">
-
+  return (<Card
+    className={clsx(classes.root, className)}
+    {...rest}
+  >
+    <Button onClick={() => onReload()} color="primary">
+      Load
+        </Button>
+    <PerfectScrollbar>
+      <Box minWidth={1050}>
+        <Table stickyHeader aria-label="sticky table">
+          <TableHead>
+            <TableRow>
+              <TableCell>
+                Receiver
+                </TableCell>
+              <TableCell>
+                Address
+                </TableCell>
+              <TableCell>
+                Phone Number
+                </TableCell>
+              <TableCell>
+                Priority
+                </TableCell>
+              <TableCell>
+                Shipping Fee
+                </TableCell>
+              <TableCell>
+                Total Amount
+                </TableCell>
+              <TableCell>
+                Total Price
+                </TableCell>
+              <TableCell>
+                From Date
+                </TableCell>
+              <TableCell>
+                To Date
+                </TableCell>
+              <TableCell>
+                Note
+                </TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {invoices.map((invoice) => (
+              <TableRow
+                hover
+                key={invoice.id}
+              >
+                <TableCell>
+                  {invoice.receiver}
                 </TableCell>
                 <TableCell>
-                  STT
+                  {invoice.address}
                 </TableCell>
                 <TableCell>
-                  Tên khách hàng
+                  {invoice.phone_number}
                 </TableCell>
                 <TableCell>
-                  Số điện thoại
+                  {invoice.priority ? 'Express' : 'Standard'}
                 </TableCell>
                 <TableCell>
-                  Mã sản phẩm
+                  {invoice.shipping_fee}
                 </TableCell>
                 <TableCell>
-                 Số lượng
+                  {invoice.total_amount}
                 </TableCell>
                 <TableCell>
-                   Gía tiền
+                  {invoice.total_price}
                 </TableCell>
                 <TableCell>
-                  Phí vận chuyển
+                  {invoice.from_date}
                 </TableCell>
                 <TableCell>
-                 Tình trạng
+                  {invoice.to_date}
                 </TableCell>
                 <TableCell>
-                 Địa chỉ
-                </TableCell>
-                <TableCell>
-                 Ghi chú
+                  {invoice.note}
                 </TableCell>
               </TableRow>
-            </TableHead>
-            {/* <TableBody>
-              {customers.slice(0, limit).map((customer) => (
-                <TableRow
-                  hover
-                  key={customer.id}
-                  selected={selectedCustomerIds.indexOf(customer.id) !== -1}
-                >
-                  <TableCell padding="checkbox">
-                    <Checkbox
-                      checked={selectedCustomerIds.indexOf(customer.id) !== -1}
-                      onChange={(event) => handleSelectOne(event, customer.id)}
-                      value="true"
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Box
-                      alignItems="center"
-                      display="flex"
-                    >
-                      <Avatar
-                        className={classes.avatar}
-                        src={customer.avatarUrl}
-                      >
-                        {getInitials(customer.name)}
-                      </Avatar>
-                      <Typography
-                        color="textPrimary"
-                        variant="body1"
-                      >
-                        {customer.name}
-                      </Typography>
-                    </Box>
-                  </TableCell>
-                  <TableCell>
-                    {customer.email}
-                  </TableCell>
-                  <TableCell>
-                    {`${customer.address.city}, ${customer.address.state}, ${customer.address.country}`}
-                  </TableCell>
-                  <TableCell>
-                    {customer.phone}
-                  </TableCell>
-                  <TableCell>
-                    {moment(customer.createdAt).format('DD/MM/YYYY')}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody> */}
-          </Table>
-        </Box>
-      </PerfectScrollbar>
-      <TablePagination
-        component="div"
-        // count={customers.length}
-        // onChangePage={handlePageChange}
-        // onChangeRowsPerPage={handleLimitChange}
-        page={page}
-        rowsPerPage={limit}
-        rowsPerPageOptions={[5, 10, 25]}
-      />
-    </Card>
+            ))}
+          </TableBody>
+        </Table>
+      </Box>
+    </PerfectScrollbar>
+    <TablePagination
+      component="div"
+      // count={customers.length}
+      // onChangePage={handlePageChange}
+      // onChangeRowsPerPage={handleLimitChange}
+      page={page}
+      rowsPerPage={limit}
+      rowsPerPageOptions={[5, 10, 25]}
+    />
+  </Card>
   );
 };
 

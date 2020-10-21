@@ -1,6 +1,10 @@
-import React, { useState } from 'react';
+import React, {
+  useState,
+  useEffect
+} from 'react';
 import {
   Box,
+  CircularProgress,
   Container,
   Grid,
   makeStyles
@@ -9,7 +13,12 @@ import { Pagination } from '@material-ui/lab';
 import Page from '../../../components/Page';
 import Toolbar from './Toolbar';
 import InvoicesList from './InvoicesList';
-import data from './data';
+import axios from 'axios';
+import {
+  INVOICE_ENDPOINT
+} from '../../../api/endpoint';
+
+// import data from './data';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -25,21 +34,76 @@ const useStyles = makeStyles((theme) => ({
 
 const Invoices = () => {
   const classes = useStyles();
-  const [invoices] = useState(data);
+  const [invoices, setInvoices] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [fileSelected, setFileSelected] = useState(null);
+
+  useEffect(() => {
+    fetchInvoice();
+  }, []);
+
+  const onHandleFileUpload = async () => {
+    setLoading(true);
+    const formData = new FormData();
+    formData.append("file", fileSelected.fileSelected);
+    const response = await axios.post(INVOICE_ENDPOINT, formData, {
+      headers: {
+        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluX2NlZWVmZDYxLWU5YmItNDA4ZC1hZTEwLWFhNTM0MGU4N2QwMyIsImZpcnN0X25hbWUiOiJTdXBwb3J0IiwibGFzdF9uYW1lIjoiVGVhbSBHRFMgIiwiYXZhdGFyIjoiIiwicGhvbmUiOm51bGwsImVtYWlsIjoiYWRtaW5AZ21haWwuY29tIiwiZ2VuZGVyIjoiTWFsZSIsImFkZHJlc3MiOiIiLCJET0IiOm51bGwsInJvbGUiOiJBZG1pbiIsImlhdCI6MTYwMzE5ODI0NiwiZXhwIjoxNjM0NzM0MjQ2fQ.IADK3WxGIrLmjpByKNvEjZ7kXa8gTrkqlIlrc1K_mD0'
+      }
+    });
+
+    if (response.status !== 200) {
+      setLoading(false);
+      return;
+    }
+
+    setInvoices(response.data);
+  };
+
+  const onFileChange = (e) => {
+    const file = e.target.files[0];
+    setFileSelected({ fileSelected: file });
+  }
+
+  const fetchInvoice = async () => {
+    const response = await fetch(INVOICE_ENDPOINT, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluX2NlZWVmZDYxLWU5YmItNDA4ZC1hZTEwLWFhNTM0MGU4N2QwMyIsImZpcnN0X25hbWUiOiJTdXBwb3J0IiwibGFzdF9uYW1lIjoiVGVhbSBHRFMgIiwiYXZhdGFyIjoiIiwicGhvbmUiOm51bGwsImVtYWlsIjoiYWRtaW5AZ21haWwuY29tIiwiZ2VuZGVyIjoiTWFsZSIsImFkZHJlc3MiOiIiLCJET0IiOm51bGwsInJvbGUiOiJBZG1pbiIsImlhdCI6MTYwMzE5ODI0NiwiZXhwIjoxNjM0NzM0MjQ2fQ.IADK3WxGIrLmjpByKNvEjZ7kXa8gTrkqlIlrc1K_mD0'
+      },
+    });
+
+    if (response.status !== 200) {
+      return;
+    }
+
+    const json = await response.json();
+    const result = json.data;
+
+    const onSuccess = (data) => {
+      setInvoices(data);
+    };
+
+    onSuccess(result);
+  }
+
+  const onReload = async () => {
+    fetchInvoice();
+  };
 
   return (
     <Page
       className={classes.root}
-      title="Invoices"
-    >
+      title="Invoices">
       <Container maxWidth={false}>
-        <Toolbar />
+        <Toolbar onHandleFileUpload={onHandleFileUpload} onHandleFileChange={onFileChange} />
         <Box mt={3}>
           <Grid
             container
             spacing={3}
           >
-            <InvoicesList invoices={invoices} />
+            <InvoicesList invoices={invoices} onReload={onReload} />
           </Grid>
         </Box>
         <Box
