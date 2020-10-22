@@ -34,12 +34,19 @@ const Toolbar = ({ onHandleFileUpload, onHandleFileChange, className, ...rest })
         justifyContent="flex-end"
       >
         <Input type="file" onChange={(e) => onHandleFileChange(e)} />
-        <Button className={classes.importButton} onClick={(e) => onHandleFileUpload(e)}>
+        <Button
+          className={classes.importButton}
+          onClick={(e) => onHandleFileUpload(e)}
+          color="primary"
+          variant="contained"
+          style={{ color: 'white', marginLeft: 10 }}
+        >
           Import Excel
         </Button>
         <Button
           color="primary"
           variant="contained"
+          style={{ color: 'white' }}
         >
           Add Invoice
         </Button>
