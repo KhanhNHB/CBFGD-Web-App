@@ -22,11 +22,11 @@ const useStyles = makeStyles((theme) => ({
   exportButton: {
     marginRight: theme.spacing(1)
   },
-  modal:{
-    width:'60%',
-    height:'60%',
-    marginLeft:350,
-    marginTop:50,
+  modal: {
+    width: '60%',
+    height: '60%',
+    marginLeft: 350,
+    marginTop: 50,
   }
 
 }));
@@ -62,15 +62,15 @@ const Toolbar = ({ className, ...rest }) => {
           Add Shipper
         </Button>
       </Box>
-      
+
       <Modal
         isOpen={modalOpen}
       >
         <div className={classes.modal}>
-        <ModalShipperAdd onCloseModal={() => setModalOpen(false)} />
+          <ModalShipperAdd onCloseModal={() => setModalOpen(false)} />
         </div>
       </Modal>
-      
+
       <Box mt={3}>
         <Card>
           <CardContent>

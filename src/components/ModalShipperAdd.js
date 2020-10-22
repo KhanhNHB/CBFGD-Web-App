@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import {
-    Box,
     Button,
     Divider,
     Container,
@@ -8,8 +7,8 @@ import {
     Grid,
 } from '@material-ui/core';
 import API from '../api/API';
-import { CREATE_SHIPPER_ENDPOINT } from '../api/endpoint';
-import { useDispatch, useSelector } from 'react-redux';
+import { SHIPPER_ENDPOINT } from '../api/endpoint';
+import { useDispatch } from 'react-redux';
 import { actCreateShipper } from '../actions';
 
 const ModalShipperAdd = (props) => {
@@ -23,10 +22,9 @@ const ModalShipperAdd = (props) => {
     const [gender, setGender] = useState('');
     const [identify_number, setIdentify_number] = useState('');
     const [license_number, setLicense_number] = useState('');
-    const listShipper = useSelector(state => state.shippers.listShippers);
 
     const handleCreateShipper = async () => {
-        const response = await API.post(CREATE_SHIPPER_ENDPOINT, {
+        const response = await API.post(SHIPPER_ENDPOINT, {
             name: fullname,
             username: username,
             password: password,
@@ -39,7 +37,6 @@ const ModalShipperAdd = (props) => {
             role: "Shipper",
         });
         const fetchData = await response.json();
-        console.log(fetchData);
         if (!fetchData.message) {
             dispatch(actCreateShipper(fetchData.data));
             props.onCloseModal();
@@ -48,9 +45,7 @@ const ModalShipperAdd = (props) => {
     }
     return (
         <Container maxWidth="md">
-            <Grid
-                container
-                spacing={3}>
+            <Grid container spacing={3}>
                 <Grid item xs={12} sm={6}>
                     <TextField
                         fullWidth

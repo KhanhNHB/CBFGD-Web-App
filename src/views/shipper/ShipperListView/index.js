@@ -19,7 +19,6 @@ const useStyles = makeStyles((theme) => ({
 
 const ShipperListView = () => {
   const classes = useStyles();
- 
 
   return (
     <Page
