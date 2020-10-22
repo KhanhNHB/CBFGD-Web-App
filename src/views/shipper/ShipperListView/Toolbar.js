@@ -14,6 +14,7 @@ import {
 import { Search as SearchIcon } from 'react-feather';
 import ModalShipperAdd from '../../../components/ModalShipperAdd';
 import Modal from 'react-modal';
+
 const useStyles = makeStyles((theme) => ({
   root: {},
   importButton: {
@@ -28,7 +29,6 @@ const useStyles = makeStyles((theme) => ({
     marginLeft: 350,
     marginTop: 50,
   }
-
 }));
 
 const Toolbar = ({ className, ...rest }) => {
@@ -58,6 +58,7 @@ const Toolbar = ({ className, ...rest }) => {
           color="primary"
           variant="contained"
           onClick={openModalForm}
+          style={{ color: 'white' }}
         >
           Add Shipper
         </Button>

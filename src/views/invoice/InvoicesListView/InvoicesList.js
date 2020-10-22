@@ -14,22 +14,25 @@ import {
   TableRow,
   makeStyles,
   Button,
+  Modal
 } from '@material-ui/core';
 
 import TableContainer from '@material-ui/core/TableContainer';
+import ModalAssign from './ModalAssign';
 
 const columns = [
-  { id: 'id', label: 'Code', minWidth: 200, align: 'left' },
-  { id: 'receiver', label: 'Receiver', minWidth: 200, align: 'left' },
-  { id: 'address', label: 'Address', minWidth: 170, align: 'left' },
-  { id: 'phone_number', label: 'Phone', minWidth: 170, align: 'left' },
-  { id: 'priority', label: 'Priority', minWidth: 170, align: 'left' },
-  { id: 'shipping_fee', label: 'Shipping Fee', minWidth: 170, align: 'left' },
-  { id: 'total_amount', label: 'Total Amount', minWidth: 120, align: 'left' },
-  { id: 'total_price', label: 'Total Price', minWidth: 170, align: 'left' },
-  { id: 'from_date', label: 'From Date', minWidth: 200, align: 'left' },
-  { id: 'to_date', label: 'To Date', minWidth: 200, align: 'left' },
-  { id: 'note', label: 'Note', minWidth: 200, align: 'left' },
+  { id: 'id', label: 'Code', minWidth: 200, align: 'center' },
+  { id: 'status', label: 'Status', minWidth: 200, align: 'center' },
+  { id: 'receiver', label: 'Receiver', minWidth: 200, align: 'center' },
+  { id: 'address', label: 'Address', minWidth: 170, align: 'center' },
+  { id: 'phone_number', label: 'Phone', minWidth: 170, align: 'center' },
+  { id: 'priority', label: 'Priority', minWidth: 170, align: 'center' },
+  { id: 'shipping_fee', label: 'Shipping Fee', minWidth: 170, align: 'center' },
+  { id: 'total_amount', label: 'Total Amount', minWidth: 120, align: 'center' },
+  { id: 'total_price', label: 'Total Price', minWidth: 170, align: 'center' },
+  { id: 'from_date', label: 'From Date', minWidth: 200, align: 'center' },
+  { id: 'to_date', label: 'To Date', minWidth: 200, align: 'center' },
+  { id: 'note', label: 'Note', minWidth: 200, align: 'center' },
 ];
 
 const useStyles = makeStyles((theme) => ({
@@ -39,6 +42,15 @@ const useStyles = makeStyles((theme) => ({
   },
   container: {
     maxHeight: 440,
+  },
+  modal: {
+    width: '40%',
+    height: '40%',
+    position: 'absolute',
+    left: '50%',
+    top: '50%',
+    transform: 'translate(-50%, -50%)',
+    padding: '10px',
   }
 }));
 
@@ -46,6 +58,8 @@ const InvoicesList = ({ onReload, className, invoices, ...rest }) => {
   const classes = useStyles();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [visiableModal, setVisibleModal] = useState(false);
+  const [selectedInvoice, setSelectedInvoice] = useState(null);
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -56,66 +70,109 @@ const InvoicesList = ({ onReload, className, invoices, ...rest }) => {
     setPage(0);
   };
 
+  const handleSelectedRow = (invoiceId) => {
+    setSelectedInvoice(invoiceId);
+    setVisibleModal(true);
+  }
+
+  const handleVisibleModal = () => {
+    setVisibleModal(true);
+  };
+
+  const handleInvisibleModal = () => {
+    setVisibleModal(false);
+  };
+
+  const handleAssignInvoice = (shipperId) => {
+    console.log(shipperId);
+    console.log(selectedInvoice);
+    handleInvisibleModal();
+  };
+
   return (
-    <Card className={clsx(classes.root, className)} {...rest} >
-      <Button onClick={() => onReload()} color="primary">Refresh</Button>
-      <Box>
-        <TableContainer className={classes.container}>
-          <Table stickyHeader aria-label="sticky table">
-            <TableHead>
-              <TableRow>
-                {columns.map((column) => (
-                  <TableCell
-                    key={column.id}
-                    align={column.align}
-                    style={{ minWidth: column.minWidth }}
-                  >
-                    {column.label}
-                  </TableCell>
-                ))}
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {invoices.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((invoice) => {
-                return (
-                  <TableRow hover role="checkbox" tabIndex={-1} key={invoice.id}>
-                    {columns.map((column) => {
-                      let value = invoice[column.id];
+    <>
+      <Card className={clsx(classes.root, className)} {...rest} >
+        <Box>
+          <TableContainer className={classes.container}>
+            <Table stickyHeader aria-label="sticky table">
+              <TableHead>
+                <TableRow>
+                  <TableCell align={"center"} style={{ minWidth: 200 }}>
+                    Assign
+                </TableCell>
+                  {columns.map((column) => (
+                    <TableCell
+                      key={column.id}
+                      align={column.align}
+                      style={{ minWidth: column.minWidth }}
 
-                      if (column.id === 'priority') {
-                        value = !value ? 'Standard' : 'Express';
-                      }
+                    >
+                      {column.label}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {invoices.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((invoice) => {
+                  return (
+                    <TableRow hover role="checkbox" tabIndex={-1} key={invoice.id} >
+                      <TableCell align={"center"}>
+                        <Button
+                          color="primary"
+                          variant="contained"
+                          onClick={() => handleSelectedRow(invoice.id)}
+                          style={{ color: 'white' }}
+                        >
+                          Assign
+                        </Button>
+                      </TableCell>
+                      {columns.map((column) => {
+                        let value = invoice[column.id];
 
-                      if (column.id === 'from_date') {
-                        value = datetimeUtils.DisplayDateTimeFormat(new Date(value));
-                      }
+                        if (column.id === 'priority') {
+                          value = !value ? 'Standard' : 'Express';
+                        }
 
-                      if (column.id === 'to_date') {
-                        value = datetimeUtils.DisplayDateTimeFormat(new Date(value));
-                      }
-                      return (
-                        <TableCell key={column.id} align={column.align}>
-                          {value}
-                        </TableCell>
-                      );
-                    })}
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Box>
-      <TablePagination
-        rowsPerPageOptions={[10, 25, 100]}
-        component="div"
-        count={invoices.length}
-        rowsPerPage={rowsPerPage}
-        page={page}
-        onChangePage={handleChangePage}
-        onChangeRowsPerPage={handleChangeRowsPerPage}
-      />
-    </Card>
+                        if (column.id === 'from_date') {
+                          value = datetimeUtils.DisplayDateTimeFormat(new Date(value));
+                        }
+
+                        if (column.id === 'to_date') {
+                          value = datetimeUtils.DisplayDateTimeFormat(new Date(value));
+                        }
+                        return (
+                          <TableCell key={column.id} align={column.align}>
+                            {value}
+                          </TableCell>
+                        );
+                      })}
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Box>
+        <TablePagination
+          rowsPerPageOptions={[10, 25, 100]}
+          component="div"
+          count={invoices.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onChangePage={handleChangePage}
+          onChangeRowsPerPage={handleChangeRowsPerPage}
+        />
+      </Card>
+      <Modal open={visiableModal}>
+        <div className={classes.modal}>
+          <ModalAssign
+            onInvisibleModel={handleInvisibleModal}
+            onVisibleModal={handleVisibleModal}
+            onHandleAssign={handleAssignInvoice}
+          />
+        </div>
+      </Modal>
+    </>
   );
 };
 
