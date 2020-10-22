@@ -6,7 +6,7 @@ import {
   Box,
   Container,
   Grid,
-  makeStyles
+  makeStyles,
 } from '@material-ui/core';
 import { Pagination } from '@material-ui/lab';
 import Page from '../../../components/Page';
@@ -39,19 +39,33 @@ const Invoices = () => {
   }, []);
 
   const onHandleFileUpload = async () => {
+    if (!fileSelected) {
+      alert('Please choose file!');
+      return;
+    }
+
     const formData = new FormData();
     formData.append("file", fileSelected.fileSelected);
     const response = await axios.post(INVOICE_ENDPOINT, formData, {
       headers: {
-        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluX2NlZWVmZDYxLWU5YmItNDA4ZC1hZTEwLWFhNTM0MGU4N2QwMyIsImZpcnN0X25hbWUiOiJTdXBwb3J0IiwibGFzdF9uYW1lIjoiVGVhbSBHRFMgIiwiYXZhdGFyIjoiIiwicGhvbmUiOm51bGwsImVtYWlsIjoiYWRtaW5AZ21haWwuY29tIiwiZ2VuZGVyIjoiTWFsZSIsImFkZHJlc3MiOiIiLCJET0IiOm51bGwsInJvbGUiOiJBZG1pbiIsImlhdCI6MTYwMzE5ODI0NiwiZXhwIjoxNjM0NzM0MjQ2fQ.IADK3WxGIrLmjpByKNvEjZ7kXa8gTrkqlIlrc1K_mD0'
+        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluQGdtYWlsLmNvbSIsImZpcnN0X25hbWUiOiJTdXBwb3J0IiwibGFzdF9uYW1lIjoiVGVhbSBHRFMgIiwiYXZhdGFyIjoiIiwicGhvbmUiOm51bGwsImVtYWlsIjoiYWRtaW5AZ21haWwuY29tIiwiZ2VuZGVyIjoiTWFsZSIsImFkZHJlc3MiOiIiLCJET0IiOm51bGwsInJvbGUiOiJBZG1pbiIsImlhdCI6MTYwMzM0NTMwMiwiZXhwIjoxNjM0ODgxMzAyfQ.aB0n6MARrZAPjO-SLoim5cB8X4NE88aknXu47rfZu1U'
       }
     });
 
     if (response.status !== 200) {
       return;
     }
+    // const json = await response.json();
 
-    setInvoices(response.data);
+    // const result = json.data;
+    // console.log(result);
+
+    // const onSuccess = (data) => {
+    //   setInvoices(data);
+    // };
+
+    // onSuccess(result);
+    fetchInvoice();
   };
 
   const onFileChange = (e) => {

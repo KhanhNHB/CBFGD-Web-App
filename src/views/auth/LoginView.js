@@ -40,9 +40,11 @@ const LoginView = () => {
     });
 
     const json = await response.json();
-    // if (json.message) {
-    //      TODO: Show Alert or message login fail
-    // }
+
+    if (json.message) {
+      alert(json.message);
+      return;
+    }
 
     dispatch(actSignIn(json.data.access_token));
     navigate('/app/dashboard', { replace: true });
@@ -53,7 +55,7 @@ const LoginView = () => {
       <Box display="flex" flexDirection="column" height="100%" justifyContent="center">
         <Container maxWidth="sm">
           <Box mb={2}>
-            <img style={{ height: 200, width: 200, marginLeft: 170 }} src={require("../../images/logo_gds.png")} />
+            <img style={{ height: 200, width: 200, marginLeft: 170 }} src={require("../../images/logo_gds.png")} alt="" />
           </Box>
           <TextField
             placeholder="Phone number or email"

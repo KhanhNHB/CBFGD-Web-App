@@ -13,8 +13,7 @@ import {
   TableRow,
   makeStyles
 } from '@material-ui/core';
-import getInitials from '../../../utils/getInitials';
-import { GET_ALL_SHIPPER_ENDPOINT } from '../../../api/endpoint';
+import { SHIPPER_ENDPOINT } from '../../../api/endpoint';
 import { useDispatch, useSelector } from 'react-redux';
 import { actGetAllShipper } from '../../../actions';
 import API from '../../../api/API';
@@ -29,7 +28,7 @@ const useStyles = makeStyles((theme) => ({
 const Results = ({ className, ...rest }) => {
   const classes = useStyles();
   // const [selectedCustomerIds, setSelectedCustomerIds] = useState([]);
- 
+
   const [limit, setLimit] = useState(10);
   const [page, setPage] = useState(0);
   const dispatch = useDispatch();
@@ -76,7 +75,7 @@ const Results = ({ className, ...rest }) => {
   };
   useEffect(() => {
     const getAllShippers = async () => {
-      const response = await API.get(GET_ALL_SHIPPER_ENDPOINT);
+      const response = await API.get(SHIPPER_ENDPOINT);
       console.log(response.ok);
       if (response.ok) {
         const fetchData = await response.json();
@@ -86,7 +85,7 @@ const Results = ({ className, ...rest }) => {
 
     }
     getAllShippers();
-  },[])
+  }, [])
 
 
   return (
@@ -136,9 +135,9 @@ const Results = ({ className, ...rest }) => {
                 <TableRow
                   hover
                   key={shipper.id}>
-                    <TableCell>
-                      {index + 1}
-                    </TableCell>
+                  <TableCell>
+                    {index + 1}
+                  </TableCell>
                   <TableCell>
                     {shipper.last_name} {shipper.first_name}
                   </TableCell>
