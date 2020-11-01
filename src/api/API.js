@@ -1,10 +1,14 @@
+import { USER_TOKEN } from "../common";
+import Cookies from 'js-cookie';
+
 export default {
     get: async (url) => {
         return await fetch(url, {
             method: 'GET',
             headers: {
                 Accept: 'application/json',
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + Cookies.get(USER_TOKEN)
             }
         })
     },
@@ -13,7 +17,8 @@ export default {
             method: 'POST',
             headers: {
                 Accept: 'application/json',
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + Cookies.get(USER_TOKEN)
             },
             body: JSON.stringify(body),
         })

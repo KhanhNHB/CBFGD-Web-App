@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -14,6 +14,8 @@ import API from '../../api/API';
 import { LOGIN_ENDPOINT } from '../../api/endpoint';
 import { useDispatch } from 'react-redux';
 import { actSignIn } from '../../actions';
+import Cookies from 'js-cookie';
+import { USER_TOKEN } from '../../common';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -33,9 +35,20 @@ const LoginView = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
+  const readCookie = () => {
+    const user = Cookies.get(USER_TOKEN);
+    if (user) {
+      navigate('/app/dashboard', { replace: true });
+    }
+  };
+
+  useEffect(() => {
+    readCookie();
+  }, []);
+
   const signIn = async (username, password) => {
     const response = await API.post(LOGIN_ENDPOINT, {
-      username: username,
+      phone: username,
       password: password,
     });
 
@@ -45,7 +58,7 @@ const LoginView = () => {
       alert(json.message);
       return;
     }
-
+    Cookies.set(USER_TOKEN, json.data.access_token);
     dispatch(actSignIn(json.data.access_token));
     navigate('/app/dashboard', { replace: true });
   }
