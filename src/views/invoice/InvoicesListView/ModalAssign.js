@@ -31,7 +31,11 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-const ModalAssign = ({ onInvisibleModel, onVisibleModal, onHandleAssign }) => {
+const ModalAssign = ({
+    onInvisibleModel,
+    onVisibleModal,
+    onHandleAssign
+}) => {
     const classes = useStyles();
 
     const [shippers, setShippers] = useState([]);
@@ -61,6 +65,7 @@ const ModalAssign = ({ onInvisibleModel, onVisibleModal, onHandleAssign }) => {
             alert('Please select shipper!');
         }
         onHandleAssign(selectedShipper);
+        setSelectedShipper(null);
     };
 
     return (
@@ -73,7 +78,12 @@ const ModalAssign = ({ onInvisibleModel, onVisibleModal, onHandleAssign }) => {
                         onChange={handleChange}
                     >
                         {shippers.map((shipper, index) => (
-                            <FormControlLabel key={index} value={shipper.username} control={<Radio />} label={shipper.last_name + shipper.first_name} />
+                            <FormControlLabel
+                                key={index}
+                                value={shipper.phone}
+                                control={<Radio />}
+                                label={shipper.last_name + shipper.first_name}
+                            />
                         ))}
                     </RadioGroup>
                 </FormControl>

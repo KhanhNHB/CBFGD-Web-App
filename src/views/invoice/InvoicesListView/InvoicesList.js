@@ -19,20 +19,27 @@ import {
 
 import TableContainer from '@material-ui/core/TableContainer';
 import ModalAssign from './ModalAssign';
+import API from '../../../api/API';
+import { DELIVERIES_STATUS_ENDPOINT } from '../../../api/endpoint';
+import { INVOICE_STATUS, INVOICE_PRIORITY } from '../../../common';
 
 const columns = [
   { id: 'id', label: 'Code', minWidth: 200, align: 'center' },
-  { id: 'status', label: 'Status', minWidth: 200, align: 'center' },
-  { id: 'receiver', label: 'Receiver', minWidth: 200, align: 'center' },
+  { id: 'receiver_name', label: 'Receiver', minWidth: 200, align: 'center' },
   { id: 'address', label: 'Address', minWidth: 170, align: 'center' },
-  { id: 'phone_number', label: 'Phone', minWidth: 170, align: 'center' },
+  { id: 'customer_phone_number', label: 'Customer Phone Number', minWidth: 200, align: 'center' },
+  { id: 'receiver_phone_number', label: 'Receiver Phone Number', minWidth: 200, align: 'center' },
   { id: 'priority', label: 'Priority', minWidth: 170, align: 'center' },
-  { id: 'shipping_fee', label: 'Shipping Fee', minWidth: 170, align: 'center' },
+  { id: 'note', label: 'Note', minWidth: 200, align: 'center' },
+  { id: 'product_name', label: 'Product Name', minWidth: 200, align: 'center' },
+  { id: 'product_image', label: 'Phoduct Image', minWidth: 200, align: 'center' },
+  { id: 'status', label: 'Available', minWidth: 200, align: 'center' },
   { id: 'total_amount', label: 'Total Amount', minWidth: 120, align: 'center' },
-  { id: 'total_price', label: 'Total Price', minWidth: 170, align: 'center' },
+  { id: 'quantity', label: 'Quantity', minWidth: 170, align: 'center' },
+  { id: 'shipping_fee', label: 'Shipping Fee', minWidth: 170, align: 'center' },
   { id: 'from_date', label: 'From Date', minWidth: 200, align: 'center' },
   { id: 'to_date', label: 'To Date', minWidth: 200, align: 'center' },
-  { id: 'note', label: 'Note', minWidth: 200, align: 'center' },
+  { id: 'created_at', label: 'Created At', minWidth: 200, align: 'center' },
 ];
 
 const useStyles = makeStyles((theme) => ({
@@ -45,7 +52,7 @@ const useStyles = makeStyles((theme) => ({
   },
   modal: {
     width: '40%',
-    height: '40%',
+    height: '20%',
     position: 'absolute',
     left: '50%',
     top: '50%',
@@ -83,10 +90,43 @@ const InvoicesList = ({ onReload, className, invoices, ...rest }) => {
     setVisibleModal(false);
   };
 
-  const handleAssignInvoice = (shipperId) => {
-    console.log(shipperId);
-    console.log(selectedInvoice);
+  const handleAssignInvoice = async (shipper_id) => {
+    const data = {
+      shipper_id: shipper_id,
+      invoice_id: selectedInvoice
+    };
+
+    const response = await API.post(DELIVERIES_STATUS_ENDPOINT, data);
+    const json = await response.json();
+
+    const message = json.message;
+    if (message) {
+      alert(message);
+      return;
+    }
+
+    onReload();
+    setSelectedInvoice(null);
     handleInvisibleModal();
+  };
+
+  const _hanleRowTableData = (column, value) => {
+    switch (column) {
+      case 'priority':
+        return value ? INVOICE_PRIORITY.EXPRESS : INVOICE_PRIORITY.STANDARD;
+      case 'from_date':
+        return datetimeUtils.DisplayDateTimeFormat(new Date(value));
+      case 'to_date':
+        return datetimeUtils.DisplayDateTimeFormat(new Date(value));
+      case 'status':
+        return value ? INVOICE_STATUS.ACTIVE : INVOICE_STATUS.DEACTIVE;
+      case 'product_image':
+        return (<img alt="Product Image" style={{ height: 60, width: 60 }} src={value} />);
+      case 'created_at':
+        return datetimeUtils.DisplayDateTimeFormat(new Date(value));
+      default:
+        return value;
+    }
   };
 
   return (
@@ -98,14 +138,13 @@ const InvoicesList = ({ onReload, className, invoices, ...rest }) => {
               <TableHead>
                 <TableRow>
                   <TableCell align={"center"} style={{ minWidth: 200 }}>
-                    Assign
+                    Status
                 </TableCell>
                   {columns.map((column) => (
                     <TableCell
                       key={column.id}
                       align={column.align}
                       style={{ minWidth: column.minWidth }}
-
                     >
                       {column.label}
                     </TableCell>
@@ -122,26 +161,15 @@ const InvoicesList = ({ onReload, className, invoices, ...rest }) => {
                           variant="contained"
                           onClick={() => handleSelectedRow(invoice.id)}
                           style={{ color: 'white' }}
+                          disabled={invoice.is_assign ? true : false}
                         >
-                          Assign
+                          {invoice.is_assign ? 'Assigned' : 'Assign'}
                         </Button>
                       </TableCell>
                       {columns.map((column) => {
-                        let value = invoice[column.id];
-
-                        if (column.id === 'priority') {
-                          value = !value ? 'Standard' : 'Express';
-                        }
-
-                        if (column.id === 'from_date') {
-                          value = datetimeUtils.DisplayDateTimeFormat(new Date(value));
-                        }
-
-                        if (column.id === 'to_date') {
-                          value = datetimeUtils.DisplayDateTimeFormat(new Date(value));
-                        }
+                        const value = _hanleRowTableData(column.id, invoice[column.id]);
                         return (
-                          <TableCell key={column.id} align={column.align}>
+                          <TableCell align={column.align}>
                             {value}
                           </TableCell>
                         );
