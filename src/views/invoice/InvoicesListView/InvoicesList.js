@@ -22,6 +22,7 @@ import ModalAssign from './ModalAssign';
 import API from '../../../api/API';
 import { DELIVERIES_STATUS_ENDPOINT } from '../../../api/endpoint';
 import { INVOICE_STATUS, INVOICE_PRIORITY } from '../../../common';
+import ModalInvoiceDetail from '../../../components/ModalInvoiceDetail';
 
 const columns = [
   { id: 'id', label: 'Code', minWidth: 200, align: 'center' },
@@ -67,7 +68,8 @@ const InvoicesList = ({ onReload, className, invoices, ...rest }) => {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [visiableModal, setVisibleModal] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState(null);
-
+  const [visibleModalInvoiceDetail, setVisibleModalInvoiceDetail] = useState(false);
+  const [invoiceDetail, setInvoiceDetail] = useState({});
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
@@ -89,6 +91,20 @@ const InvoicesList = ({ onReload, className, invoices, ...rest }) => {
   const handleInvisibleModal = () => {
     setVisibleModal(false);
   };
+
+
+
+  const handleVisibleModalInvoiceDetail = () => {
+    setVisibleModalInvoiceDetail(true);
+  };
+
+  const handleInvisibleModalInvoiceDetail = () => {
+    setVisibleModalInvoiceDetail(false);
+  };
+
+
+
+
 
   const handleAssignInvoice = async (shipper_id) => {
     const data = {
@@ -133,6 +149,13 @@ const InvoicesList = ({ onReload, className, invoices, ...rest }) => {
     }
   };
 
+
+  const handleClickInvoiceItem = (invoice) =>{
+   setInvoiceDetail(invoice);
+   handleVisibleModalInvoiceDetail();
+  };
+
+
   return (
     <>
       <Card className={clsx(classes.root, className)} {...rest} >
@@ -158,7 +181,8 @@ const InvoicesList = ({ onReload, className, invoices, ...rest }) => {
               <TableBody>
                 {invoices.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((invoice) => {
                   return (
-                    <TableRow hover role="checkbox" tabIndex={-1} key={invoice.id} >
+
+                    <TableRow hover role="checkbox" tabIndex={-1} key={invoice.id} onClick={()=> handleClickInvoiceItem(invoice)}>
                       {columns.map((column) => {
                         const value = _hanleRowTableData(column.id, invoice[column.id]);
                         return (
@@ -203,6 +227,13 @@ const InvoicesList = ({ onReload, className, invoices, ...rest }) => {
             onHandleAssign={handleAssignInvoice}
           />
         </div>
+      </Modal>
+      <Modal open={visibleModalInvoiceDetail}>
+             <ModalInvoiceDetail
+             invoice={invoiceDetail}
+             closeModal={handleInvisibleModalInvoiceDetail}   
+             />
+               
       </Modal>
     </>
   );

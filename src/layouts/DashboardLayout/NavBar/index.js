@@ -53,6 +53,11 @@ const items = [
   //   title: 'Login'
   // },
   {
+    href: '/app/shipping-area',
+    icon: UserPlusIcon,
+    title: 'Shipping Area'
+  },
+  {
     href: '/register',
     icon: UserPlusIcon,
     title: 'Register'
