@@ -8,6 +8,7 @@ import DashboardView from './views/reports/DashboardView/index';
 import LoginView from './views/auth/LoginView';
 import Invoices from './views/invoice/InvoicesListView/index';
 import RegisterView from './views/auth/RegisterView';
+import ShippingArea from './views/shippingarea';
 
 
 const routes = [
@@ -18,6 +19,7 @@ const routes = [
     children: [
       { path: 'account', element: <AccountView /> },
       { path: 'shipper', element: <ShipperListView /> },
+      { path: 'shipping-area', element: <ShippingArea /> },
       { path: 'dashboard', element: <DashboardView /> },
       { path: 'invoices-list', element: <Invoices /> },
     ]

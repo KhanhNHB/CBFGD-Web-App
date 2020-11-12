@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import clsx from 'clsx';
 import PropTypes from 'prop-types';
 import datetimeUtils from '../../../utils/datetimeUtils';
+import formatPrice from '../../../utils/formatPrice';
 import {
   Box,
   Card,
@@ -26,7 +27,7 @@ import ModalInvoiceDetail from '../../../components/ModalInvoiceDetail';
 const columns = [
   { id: 'id', label: 'Code', minWidth: 200, align: 'center' },
   { id: 'receiver_name', label: 'Receiver', minWidth: 200, align: 'center' },
-  { id: 'address', label: 'Address', minWidth: 170, align: 'center' },
+  { id: 'address', label: 'Address', minWidth: 500, align: 'center' },
   { id: 'customer_phone_number', label: 'Customer Phone Number', minWidth: 200, align: 'center' },
   { id: 'receiver_phone_number', label: 'Receiver Phone Number', minWidth: 200, align: 'center' },
   { id: 'priority', label: 'Priority', minWidth: 170, align: 'center' },
@@ -34,7 +35,7 @@ const columns = [
   { id: 'product_name', label: 'Product Name', minWidth: 200, align: 'center' },
   { id: 'product_image', label: 'Phoduct Image', minWidth: 200, align: 'center' },
   { id: 'status', label: 'Available', minWidth: 200, align: 'center' },
-  { id: 'total_amount', label: 'Total Amount', minWidth: 120, align: 'center' },
+  { id: 'total_amount', label: 'Total Amount', minWidth: 170, align: 'center' },
   { id: 'quantity', label: 'Quantity', minWidth: 170, align: 'center' },
   { id: 'shipping_fee', label: 'Shipping Fee', minWidth: 170, align: 'center' },
   { id: 'from_date', label: 'From Date', minWidth: 200, align: 'center' },
@@ -133,6 +134,10 @@ const InvoicesList = ({ onReload, className, invoices, ...rest }) => {
         return datetimeUtils.DisplayDateTimeFormat(new Date(value));
       case 'to_date':
         return datetimeUtils.DisplayDateTimeFormat(new Date(value));
+      case 'total_amount':
+        return formatPrice.format(value) + " VND";
+      case 'shipping_fee':
+        return formatPrice.format(value) + " VND";
       case 'status':
         return value ? INVOICE_STATUS.ACTIVE : INVOICE_STATUS.DEACTIVE;
       case 'product_image':
@@ -159,9 +164,6 @@ const InvoicesList = ({ onReload, className, invoices, ...rest }) => {
             <Table stickyHeader aria-label="sticky table">
               <TableHead>
                 <TableRow>
-                  <TableCell align={"center"} style={{ minWidth: 200 }}>
-                    Status
-                </TableCell>
                   {columns.map((column) => (
                     <TableCell
                       key={column.id}
@@ -171,13 +173,24 @@ const InvoicesList = ({ onReload, className, invoices, ...rest }) => {
                       {column.label}
                     </TableCell>
                   ))}
+                  <TableCell align={"center"} style={{ minWidth: 200 }}>
+                    Status
+                </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {invoices.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((invoice) => {
                   return (
+
                     <TableRow hover role="checkbox" tabIndex={-1} key={invoice.id} onClick={()=> handleClickInvoiceItem(invoice)}>
-                      
+                      {columns.map((column) => {
+                        const value = _hanleRowTableData(column.id, invoice[column.id]);
+                        return (
+                          <TableCell align={column.align}>
+                            {value}
+                          </TableCell>
+                        );
+                      })}
                       <TableCell align={"center"}>
                         <Button
                           color="primary"
@@ -189,14 +202,6 @@ const InvoicesList = ({ onReload, className, invoices, ...rest }) => {
                           {invoice.is_assign ? 'Assigned' : 'Assign'}
                         </Button>
                       </TableCell>
-                      {columns.map((column) => {
-                        const value = _hanleRowTableData(column.id, invoice[column.id]);
-                        return (
-                          <TableCell align={column.align}>
-                            {value}
-                          </TableCell>
-                        );
-                      })}
                     </TableRow>
                   );
                 })}
