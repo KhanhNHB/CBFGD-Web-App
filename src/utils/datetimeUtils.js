@@ -5,8 +5,8 @@ const UNIT_OF_TIME_IS_MONTH = 'month';
 const FORMAT_ORIGIN_DATE_TIME = '';
 const FORMAT_DATE_TIME = 'DD/MM/YYYY h:mm:ss A';
 const FORMAT_DATE = 'DD/MM/YYYY';
-// const LOCALE = "vi-VN";
-// const TIME_ZONE = "Asia/Ho_Chi_Minh";
+const LOCALE = "vi-VN";
+const TIME_ZONE = "Asia/Ho_Chi_Minh";
 
 export default {
     GetStartOrEndOfCurrentDate: (isStartDateTime, isStartMonth) => {
@@ -43,15 +43,12 @@ export default {
         return moment(new Date(milliseconds)).format('DD-MM-YYYY h:mm:ss A');
     },
     DisplayDateTimeFormat: (dateTime) => {
-        return moment(dateTime).format(FORMAT_DATE_TIME);
+        return moment(new Date(dateTime)).utc().format('DD-MM-YYYY h:mm:ss A')
     },
     DisplayDateFormat: (date) => {
         return moment(date).format(FORMAT_DATE);
     },
     DisplayDateTimeFromNow: (dateTime) => {
-        let empty = null;
-        empty = '';
-
-        return moment(new Date(dateTime)).startOf(empty).fromNow();
+        return moment(new Date(dateTime)).startOf('').fromNow();
     }
 };

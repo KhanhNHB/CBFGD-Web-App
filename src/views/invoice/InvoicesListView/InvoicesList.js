@@ -25,7 +25,8 @@ import { INVOICE_STATUS, INVOICE_PRIORITY } from '../../../common';
 import ModalInvoiceDetail from '../../../components/ModalInvoiceDetail';
 
 const columns = [
-  { id: 'id', label: 'Code', minWidth: 200, align: 'center' },
+  { id: 'id', label: 'Id', minWidth: 200, align: 'center' },
+  { id: 'code', label: 'Code', minWidth: 200, align: 'center' },
   { id: 'receiver_name', label: 'Receiver', minWidth: 200, align: 'center' },
   { id: 'address', label: 'Address', minWidth: 500, align: 'center' },
   { id: 'customer_phone_number', label: 'Customer Phone Number', minWidth: 200, align: 'center' },
@@ -92,8 +93,6 @@ const InvoicesList = ({ onReload, className, invoices, ...rest }) => {
     setVisibleModal(false);
   };
 
-
-
   const handleVisibleModalInvoiceDetail = () => {
     setVisibleModalInvoiceDetail(true);
   };
@@ -101,10 +100,6 @@ const InvoicesList = ({ onReload, className, invoices, ...rest }) => {
   const handleInvisibleModalInvoiceDetail = () => {
     setVisibleModalInvoiceDetail(false);
   };
-
-
-
-
 
   const handleAssignInvoice = async (shipper_id) => {
     const data = {
@@ -143,18 +138,16 @@ const InvoicesList = ({ onReload, className, invoices, ...rest }) => {
       case 'product_image':
         return (<img alt="Product Image" style={{ height: 60, width: 60 }} src={value} />);
       case 'created_at':
-        return datetimeUtils.DisplayDateTimeFormat(new Date(value));
+        return datetimeUtils.DisplayDateTimeFormat(value);
       default:
         return value;
     }
   };
 
-
-  const handleClickInvoiceItem = (invoice) =>{
-   setInvoiceDetail(invoice);
-   handleVisibleModalInvoiceDetail();
+  const handleClickInvoiceItem = (invoice) => {
+    setInvoiceDetail(invoice);
+    handleVisibleModalInvoiceDetail();
   };
-
 
   return (
     <>
@@ -181,8 +174,7 @@ const InvoicesList = ({ onReload, className, invoices, ...rest }) => {
               <TableBody>
                 {invoices.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((invoice) => {
                   return (
-
-                    <TableRow hover role="checkbox" tabIndex={-1} key={invoice.id} onClick={()=> handleClickInvoiceItem(invoice)}>
+                    <TableRow hover role="checkbox" tabIndex={-1} key={invoice.id} onClick={() => handleClickInvoiceItem(invoice)}>
                       {columns.map((column) => {
                         const value = _hanleRowTableData(column.id, invoice[column.id]);
                         return (
@@ -229,11 +221,13 @@ const InvoicesList = ({ onReload, className, invoices, ...rest }) => {
         </div>
       </Modal>
       <Modal open={visibleModalInvoiceDetail}>
-             <ModalInvoiceDetail
-             invoice={invoiceDetail}
-             closeModal={handleInvisibleModalInvoiceDetail}   
-             />
-               
+        <ModalInvoiceDetail
+          invoice={invoiceDetail}
+          closeModal={handleInvisibleModalInvoiceDetail}
+          closeModal={handleInvisibleModalInvoiceDetail}
+          closeModal={handleInvisibleModalInvoiceDetail}
+        />
+
       </Modal>
     </>
   );
