@@ -1,41 +1,60 @@
 import React, { useState } from 'react';
 import {
-    Box,
-    Container,
-    makeStyles
+  Box,
+  Container,
+  makeStyles
 } from '@material-ui/core';
-import Page from '../../components/Page';
-import { withGoogleMap, GoogleMap } from "react-google-maps";
+import { Map, GoogleApiWrapper, Marker, Circle } from 'google-maps-react';
 
-const useStyles = makeStyles((theme) => ({
-    root: {
-        backgroundColor: theme.palette.background.dark,
-        minHeight: '100%',
-        paddingBottom: theme.spacing(3),
-        paddingTop: theme.spacing(3)
-    }
-}));
-const GoogleMapExample = withGoogleMap(props => (
-    <GoogleMap
-      defaultCenter = { { lat: 40.756795, lng: -73.954298 } }
-      defaultZoom = { 13 }
-    >
-    </GoogleMap>
- ));
-const ShippingArea = () => {
-    const classes = useStyles();
 
-    return (
-        <Page
-            className={classes.root}
-            title="Shipping Area"
-        >
-            <GoogleMapExample
-          containerElement={ <div style={{ height: `500px`, width: '500px' }} /> }
-          mapElement={ <div style={{ height: `100%` }} /> }
-        />
-        </Page>
-    );
+const mapStyles = {
+  width: '100%',
+  height: '80%',
 };
+export class MapContainer extends React.Component {
+  constructor(props) {
+    super(props);
 
-export default ShippingArea;
+    this.state = {
+      hub: [
+      { latitude: 10.8509176, longitude: 106.6297, rad: 6500 },
+      { latitude: 10.7870685, longitude: 106.693611, rad: 7000 },
+      { latitude: 10.8512383, longitude: 106.7566754 , rad: 8000},
+      ]
+      
+    }
+  }
+
+  displayHubMarkers = () => {
+    return this.state.hub.map((store, index) => {
+      return <Marker  position={{
+        lat: store.latitude,
+        lng: store.longitude
+      }}
+      />
+      
+    })
+  }
+
+  displayCircles = () => {
+    return this.state.hub.map((store, index) => {
+      return <Circle center={{ lat: store.latitude, lng: store.longitude }} radius={store.rad} strokeColor={"#FF0000"}/>
+    })
+  }
+  render() {
+    return (
+      <Map
+        google={this.props.google}
+        zoom={12}
+        style={mapStyles}
+        initialCenter={{ lat: 10.8061536, lng: 106.6853458 }}
+      >
+        {this.displayHubMarkers()}
+        {this.displayCircles()}
+      </Map>
+    );
+  }
+}
+export default GoogleApiWrapper({
+  apiKey: 'AIzaSyAtGg0XWituHRy95vbyislioKh59n_PxHY'
+})(MapContainer);

@@ -1,8 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     makeStyles,
     Button,
 } from '@material-ui/core';
+import API from '../api/API';
+import { BLOCKCHAIN_INVOICES_ENDPOINT } from '../api/endpoint';
+import Moment from 'react-moment';
+
 
 const useStyles = makeStyles((theme) => ({
     container: {
@@ -44,8 +48,9 @@ const useStyles = makeStyles((theme) => ({
     },
     closeBtn: {
         float: "right",
-        backgroundColor: "#00bdb6",
-        transform: 'translate(0%, -98%)',
+        backgroundColor: "#0496a6",
+        borderRadius: "0px",
+        height:"35px",
     },
     tableRow: {
         borderBottom: "1px solid #e0e0e0",
@@ -60,16 +65,40 @@ const useStyles = makeStyles((theme) => ({
     },
     currentstatus: {
         color: "#00bdb6",
+    },
+    detailHeader: {
+        width: "100%",
+        height: '35px',
+        backgroundColor: "#00bdb6",
     }
 }));
 
 const ModalInvoiceDetail = (props) => {
     const classes = useStyles();
+    const [deliveringProcess, setDeliveringProcess] = useState([]);
+
+    useEffect(() => {
+        API.get(`${BLOCKCHAIN_INVOICES_ENDPOINT}${props.invoice.code}`)
+            .then(async response => {
+                if (response.ok) {
+                    const fetchData = await response.json();
+                    setDeliveringProcess(fetchData.data);
+                }
+            });
+    }, []);
     return (
+
         <div className={classes.container}>
+            <div className={classes.detailHeader}>
+            <Button
+                onClick={() => props.closeModal()}
+                className={classes.closeBtn}>
+                Close
+            </Button>
+            </div>
             <div className={classes.wrapperLeft}>
                 <h2 className={classes.titleText}>Invoice Detail</h2>
-                <p className={classes.detailRow}><span><b>Invoice ID:</b> :</span><span>{props.invoice.id}</span></p>
+                <p className={classes.detailRow}><span><b>Invoice ID:</b> :</span><span>{props.invoice.code}</span></p>
                 <p className={classes.detailRow}><span><b>Receiver_name</b>          :</span><span>{props.invoice.receiver_name}</span></p>
                 <p className={classes.detailRow}><span><b>Address</b>                :</span><span>{props.invoice.address}</span></p>
                 <p className={classes.detailRow}><span></span><b>Customer phone number:</b><span>{props.invoice.customer_phone_number}</span></p>
@@ -78,44 +107,39 @@ const ModalInvoiceDetail = (props) => {
             <div className={classes.wrapperRight}>
                 <h2 className={classes.titleText}>Invoice Detail</h2>
                 <table className={classes.table}>
-                    <tr >
-                        <td className={classes.dot}>&bull;</td>
-                        <td className={classes.tableRow}>
-                            <p>Đơn hàng ở kho</p>
-                            <p>10/11/2020 13:00</p>
-                        </td>
-                    </tr>
-                    <tr >
-                        <td className={classes.dot}>&bull;</td>
-                        <td className={classes.tableRow}>
-                            <p>Shipper đã nhận hàng</p>
-                            <p>Shipper: NghiaNC</p>
-                            <p>11/11/2020 06:05</p>
-                        </td>
-                    </tr>
-                    <tr >
-                        <td className={classes.dot}>&bull;</td>
-                        <td className={classes.tableRow}>
-                            <p>Shipper đang giao hàng</p>
-                            <p>Shipper: NghiaNC</p>
-                            <p>11/11/2020 13:13</p>
-                        </td>
-                    </tr>
-                    <tr className={classes.currentstatus}>
-                        <td className={classes.dot}>&bull;</td>
-                        <td className={classes.tableRow}>
-                            <p>Giao hàng thành công</p>
-                            <p>Shipper: NghiaNC</p>
-                            <p>11/11/2020 14:00</p>
-                        </td>
-                    </tr>
+                    {
+                        deliveringProcess.map((process, index) => {
+                            return (index === (deliveringProcess.length - 1))
+                                ?
+                                <tr className={classes.currentstatus}>
+                                    <td className={classes.dot}>&bull;</td>
+                                    <td className={classes.tableRow}>
+                                        <p>{process.Record.status}</p>
+                                        <p>Shipper phone number: {process.Record.shipper_phone}</p>
+                                        <p>Shipper phone number: {process.Record.shipper_phone}</p>
+                                        <p>Time: <Moment format="HH:mm DD-MM-YYYY">
+                                            {process.Record.created_at}
+                                        </Moment></p>
+                                    </td>
+                                </tr>
+
+                                : <tr >
+                                    <td className={classes.dot}>&bull;</td>
+                                    <td className={classes.tableRow}>
+                                        <p>{process.Record.status}</p>
+                                        <p>Shipper phone number: {process.Record.shipper_phone}</p>
+                                        <p>Time: <Moment format="HH:mm DD-MM-YYYY">
+                                            {process.Record.created_at}
+                                        </Moment></p>
+                                    </td>
+                                </tr>
+                        })
+                    }
+
+
                 </table>
             </div>
-            <Button
-                onClick={() => props.closeModal()}
-                className={classes.closeBtn}>
-                Close
-            </Button>
+           
         </div>
     );
 };
