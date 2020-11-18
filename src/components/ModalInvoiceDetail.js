@@ -50,7 +50,7 @@ const useStyles = makeStyles((theme) => ({
         float: "right",
         backgroundColor: "#0496a6",
         borderRadius: "0px",
-        height:"35px",
+        height: "35px",
     },
     tableRow: {
         borderBottom: "1px solid #e0e0e0",
@@ -87,13 +87,13 @@ const ModalInvoiceDetail = (props) => {
             });
     }, []);
     return (
-
         <div className={classes.container}>
             <div className={classes.detailHeader}>
-            <Button
-                onClick={() => props.closeModal()}
-                className={classes.closeBtn}>
-                Close
+                <Button
+                    onClick={() => props.closeModal()}
+                    className={classes.closeBtn}
+                    style={{ color: 'white' }}>
+                    Close
             </Button>
             </div>
             <div className={classes.wrapperLeft}>
@@ -139,7 +139,7 @@ const ModalInvoiceDetail = (props) => {
 
                 </table>
             </div>
-           
+
         </div>
     );
 };
