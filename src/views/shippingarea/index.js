@@ -1,60 +1,79 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Container,
   makeStyles
 } from '@material-ui/core';
 import { Map, GoogleApiWrapper, Marker, Circle } from 'google-maps-react';
+import API from '../../api/API';
+import { HUB_ENDPOINT } from '../../api/endpoint';
+import { useDispatch, useSelector } from 'react-redux';
+import { actGetListHub } from '../../actions';
 
 
-const mapStyles = {
-  width: '100%',
-  height: '80%',
-};
-export class MapContainer extends React.Component {
-  constructor(props) {
-    super(props);
 
-    this.state = {
-      hub: [
-      { latitude: 10.8509176, longitude: 106.6297, rad: 6500 },
-      { latitude: 10.7870685, longitude: 106.693611, rad: 7000 },
-      { latitude: 10.8512383, longitude: 106.7566754 , rad: 8000},
-      ]
-      
-    }
-  }
 
-  displayHubMarkers = () => {
-    return this.state.hub.map((store, index) => {
-      return <Marker  position={{
+
+export  function MapContainer(props) {
+  const dispatch = useDispatch();
+  const mapStyles = {
+    width: '100%',
+    height: '80%',
+  };
+  const hubLocation = useSelector(state => state.hub.listHub);
+  const userToken = useSelector(state => state.user.userToken);
+  const GOOGLEKEY = "AIzaSyAtGg0XWituHRy95vbyislioKh59n_PxHY";
+  // console.log(hubLocation);
+  useEffect(() => {
+    API.get(`${HUB_ENDPOINT}`,userToken)
+      .then(async response => {
+        if (response.ok) {
+          const fetchData = await response.json();
+          dispatch(actGetListHub(fetchData.data));
+        }
+      });
+  }, []);
+
+  const displayHubMarkers = () => {
+    return hubLocation.map((store, index) => {
+      return <Marker position={{
         lat: store.latitude,
         lng: store.longitude
       }}
       />
-      
     })
   }
 
-  displayCircles = () => {
-    return this.state.hub.map((store, index) => {
-      return <Circle center={{ lat: store.latitude, lng: store.longitude }} radius={store.rad} strokeColor={"#FF0000"}/>
+
+
+
+  let circle ;
+
+  const displayCircles = () => {
+    return hubLocation.map((store, index) => {
+      console.log(store.latitude);
+      console.log(store.longitude);
+      console.log(store.radius);
+    return circle = <Circle center={{ lat: parseFloat(store.latitude), lng: parseFloat(store.longitude)}} radius={parseFloat(store.radius)} strokeColor={"#FF0000"}/>
     })
   }
-  render() {
-    return (
-      <Map
-        google={this.props.google}
-        zoom={12}
-        style={mapStyles}
-        initialCenter={{ lat: 10.8061536, lng: 106.6853458 }}
-      >
-        {this.displayHubMarkers()}
-        {this.displayCircles()}
-      </Map>
-    );
-  }
+
+
+  return (
+    <Map
+      google={props.google}
+
+      zoom={12}
+      style={mapStyles}
+      initialCenter={{ lat: 10.8061536, lng: 106.6853458 }}
+    >
+      {displayHubMarkers()}
+      {displayCircles()}
+
+    </Map>
+  );
 }
 export default GoogleApiWrapper({
   apiKey: 'AIzaSyAtGg0XWituHRy95vbyislioKh59n_PxHY'
-})(MapContainer);
+})(MapContainer)
+
