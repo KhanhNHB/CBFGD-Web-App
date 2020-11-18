@@ -1,20 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import {
-  Box,
-  Container,
-  makeStyles
-} from '@material-ui/core';
+import React, { useEffect } from 'react';
 import { Map, GoogleApiWrapper, Marker, Circle } from 'google-maps-react';
 import API from '../../api/API';
 import { HUB_ENDPOINT } from '../../api/endpoint';
 import { useDispatch, useSelector } from 'react-redux';
 import { actGetListHub } from '../../actions';
 
-
-
-
-
-export  function MapContainer(props) {
+export function MapContainer(props) {
   const dispatch = useDispatch();
   const mapStyles = {
     width: '100%',
@@ -23,9 +14,8 @@ export  function MapContainer(props) {
   const hubLocation = useSelector(state => state.hub.listHub);
   const userToken = useSelector(state => state.user.userToken);
   const GOOGLEKEY = "AIzaSyAtGg0XWituHRy95vbyislioKh59n_PxHY";
-  // console.log(hubLocation);
   useEffect(() => {
-    API.get(`${HUB_ENDPOINT}`,userToken)
+    API.get(`${HUB_ENDPOINT}`, userToken)
       .then(async response => {
         if (response.ok) {
           const fetchData = await response.json();
@@ -44,32 +34,25 @@ export  function MapContainer(props) {
     })
   }
 
-
-
-
-  let circle ;
-
+  let circle;
   const displayCircles = () => {
     return hubLocation.map((store, index) => {
       console.log(store.latitude);
       console.log(store.longitude);
       console.log(store.radius);
-    return circle = <Circle center={{ lat: parseFloat(store.latitude), lng: parseFloat(store.longitude)}} radius={parseFloat(store.radius)} strokeColor={"#FF0000"}/>
+      return circle = <Circle center={{ lat: parseFloat(store.latitude), lng: parseFloat(store.longitude) }} radius={parseFloat(store.radius)} strokeColor={"#FF0000"} />
     })
   }
-
 
   return (
     <Map
       google={props.google}
-
       zoom={12}
       style={mapStyles}
       initialCenter={{ lat: 10.8061536, lng: 106.6853458 }}
     >
       {displayHubMarkers()}
       {displayCircles()}
-
     </Map>
   );
 }

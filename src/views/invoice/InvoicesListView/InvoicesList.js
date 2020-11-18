@@ -227,7 +227,6 @@ const InvoicesList = ({ onReload, className, invoices, ...rest }) => {
           closeModal={handleInvisibleModalInvoiceDetail}
           closeModal={handleInvisibleModalInvoiceDetail}
         />
-
       </Modal>
     </>
   );
