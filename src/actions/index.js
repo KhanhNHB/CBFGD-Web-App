@@ -21,3 +21,9 @@ export const actCreateShipper = (shipper) =>{
     }
 };
 
+export const actGetListHub = (listHubs) =>{
+    return{
+        type: types.LIST_HUB,
+        listHubs,
+    }
+};
