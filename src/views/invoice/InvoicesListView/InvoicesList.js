@@ -23,6 +23,7 @@ import API from '../../../api/API';
 import { DELIVERIES_STATUS_ENDPOINT } from '../../../api/endpoint';
 import { INVOICE_STATUS, INVOICE_PRIORITY } from '../../../common';
 import ModalInvoiceDetail from '../../../components/ModalInvoiceDetail';
+import { useSelector } from 'react-redux';
 
 const columns = [
   { id: 'id', label: 'Id', minWidth: 200, align: 'center' },
@@ -63,8 +64,10 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const InvoicesList = ({ onReload, className, invoices, ...rest }) => {
+const InvoicesList = ({ onReload, ...rest }) => {
   const classes = useStyles();
+  let invoices = rest.invoices;
+  const keyword = useSelector(state => state.invoices.keyword);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [visiableModal, setVisibleModal] = useState(false);
@@ -136,7 +139,7 @@ const InvoicesList = ({ onReload, className, invoices, ...rest }) => {
       case 'status':
         return value ? INVOICE_STATUS.ACTIVE : INVOICE_STATUS.DEACTIVE;
       case 'product_image':
-        return (<img alt="Product Image" style={{ height: 60, width: 60 }} src={value} />);
+        return (<img alt="Product" style={{ height: 60, width: 60 }} src={value} />);
       case 'created_at':
         return datetimeUtils.DisplayDateTimeFormat(value);
       default:
@@ -149,9 +152,16 @@ const InvoicesList = ({ onReload, className, invoices, ...rest }) => {
     handleVisibleModalInvoiceDetail();
   };
 
+  // Search if have keyword.
+  if (keyword) {
+    invoices = invoices.filter((invoice) => {
+      return invoice.code.toLowerCase().indexOf(keyword.toLowerCase()) !== -1;
+    });
+  }
+
   return (
     <>
-      <Card className={clsx(classes.root, className)} {...rest} >
+      <Card className={clsx(classes.root)} {...rest} >
         <Box>
           <TableContainer className={classes.container}>
             <Table stickyHeader aria-label="sticky table">
@@ -224,10 +234,7 @@ const InvoicesList = ({ onReload, className, invoices, ...rest }) => {
         <ModalInvoiceDetail
           invoice={invoiceDetail}
           closeModal={handleInvisibleModalInvoiceDetail}
-          closeModal={handleInvisibleModalInvoiceDetail}
-          closeModal={handleInvisibleModalInvoiceDetail}
         />
-
       </Modal>
     </>
   );

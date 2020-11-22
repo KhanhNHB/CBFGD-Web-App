@@ -15,6 +15,7 @@ const routes = [
   {
     path: 'app',
     element: <LoginView />,
+    // eslint-disable-next-line
     element: <DashboardLayout />,
     children: [
       { path: 'account', element: <AccountView /> },
@@ -28,6 +29,7 @@ const routes = [
     path: '/',
     exact: true,
     element: <MainLayout />,
+    // eslint-disable-next-line
     element: <LoginView />,
     children: [
       { path: '/', element: <MainLayout /> },

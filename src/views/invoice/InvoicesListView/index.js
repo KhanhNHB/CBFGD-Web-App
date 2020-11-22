@@ -7,8 +7,9 @@ import {
   Container,
   Grid,
   makeStyles,
+  Modal,
+  CircularProgress,
 } from '@material-ui/core';
-import { Pagination } from '@material-ui/lab';
 import Page from '../../../components/Page';
 import Toolbar from './Toolbar';
 import InvoicesList from './InvoicesList';
@@ -18,6 +19,8 @@ import {
 } from '../../../api/endpoint';
 import Cookies from 'js-cookie';
 import { USER_TOKEN } from '../../../common';
+import { useSelector, useDispatch } from 'react-redux';
+import { actLoadInvoices } from '../../../actions';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -28,43 +31,23 @@ const useStyles = makeStyles((theme) => ({
   },
   productCard: {
     height: '100%'
-  }
+  },
+  loadingModal: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    '& .MuiCircularProgress-root': {
+      outline: 'none'
+    }
+  },
 }));
 
 const Invoices = () => {
   const classes = useStyles();
-  const [invoices, setInvoices] = useState([]);
   const [fileSelected, setFileSelected] = useState(null);
-
-  useEffect(() => {
-    fetchInvoice();
-  }, []);
-
-  const onHandleFileUpload = async () => {
-    if (!fileSelected) {
-      alert('Please choose file!');
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append("file", fileSelected.fileSelected);
-    const response = await axios.post(INVOICE_ENDPOINT, formData, {
-      headers: {
-        'Authorization': 'Bearer ' + Cookies.get(USER_TOKEN)
-      }
-    });
-
-    if (response.status !== 201) {
-      return;
-    }
-
-    fetchInvoice();
-  };
-
-  const onFileChange = (e) => {
-    const file = e.target.files[0];
-    setFileSelected({ fileSelected: file });
-  }
+  const invoices = useSelector(state => state.invoices.invoices);
+  const [loadingModal, setLoadingModal] = useState(false);
+  const dispatch = useDispatch();
 
   const fetchInvoice = async () => {
     const response = await fetch(INVOICE_ENDPOINT, {
@@ -83,15 +66,72 @@ const Invoices = () => {
     const result = json.data;
 
     const onSuccess = (data) => {
-      setInvoices(data);
+      dispatch(actLoadInvoices(data));
     };
 
     onSuccess(result);
+  };
+
+  const onHandleFileUpload = async () => {
+    if (!fileSelected) {
+      alert('Please choose file!');
+      return;
+    }
+
+    setLoadingModal(true);
+
+    const formData = new FormData();
+    formData.append("file", fileSelected.fileSelected);
+    const response = await axios.post(INVOICE_ENDPOINT, formData, {
+      headers: {
+        'Authorization': 'Bearer ' + Cookies.get(USER_TOKEN),
+      },
+    });
+
+    if (response.status !== 201) {
+      setLoadingModal(false);
+      return;
+    }
+
+    setLoadingModal(false);
+    fetchInvoice();
+  };
+
+  const onFileChange = (e) => {
+    const file = e.target.files[0];
+    setFileSelected({ fileSelected: file });
   }
 
   const onReload = async () => {
     fetchInvoice();
   };
+
+  useEffect(() => {
+    const fetchInvoice = async () => {
+      const response = await fetch(INVOICE_ENDPOINT, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + Cookies.get(USER_TOKEN)
+        },
+      });
+
+      if (response.status !== 200) {
+        return;
+      }
+
+      const json = await response.json();
+      const result = json.data;
+
+      const onSuccess = (data) => {
+        dispatch(actLoadInvoices(data));
+      };
+
+      onSuccess(result);
+    };
+
+    fetchInvoice();
+  }, [dispatch]);
 
   return (
     <Page
@@ -105,6 +145,12 @@ const Invoices = () => {
           </Grid>
         </Box>
       </Container>
+      <Modal
+        open={loadingModal}
+        className={classes.loadingModal}
+      >
+        <CircularProgress />
+      </Modal>
     </Page>
   );
 };

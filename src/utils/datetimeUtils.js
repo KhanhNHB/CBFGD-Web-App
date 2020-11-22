@@ -3,10 +3,10 @@ import moment from 'moment';
 const UNIT_OF_TIME_IS_DATE = 'date';
 const UNIT_OF_TIME_IS_MONTH = 'month';
 const FORMAT_ORIGIN_DATE_TIME = '';
-const FORMAT_DATE_TIME = 'DD/MM/YYYY h:mm:ss A';
+// const FORMAT_DATE_TIME = 'DD/MM/YYYY h:mm:ss A';
 const FORMAT_DATE = 'DD/MM/YYYY';
-const LOCALE = "vi-VN";
-const TIME_ZONE = "Asia/Ho_Chi_Minh";
+// const LOCALE = "vi-VN";
+// const TIME_ZONE = "Asia/Ho_Chi_Minh";
 
 export default {
     GetStartOrEndOfCurrentDate: (isStartDateTime, isStartMonth) => {
