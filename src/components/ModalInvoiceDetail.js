@@ -64,8 +64,6 @@ const useStyles = makeStyles((theme) => ({
         color: "#00bdb6",
     },
     detailHeader: {
-        // width: "100%",
-        // height: "35px",
         backgroundColor: "#00bdb6",
         display: "flex",
         borderTopLeftRadius: "5px",
@@ -90,12 +88,6 @@ const ModalInvoiceDetail = (props) => {
     return (
         <div className={classes.container}>
             <div className={classes.detailHeader}>
-                {/* <Button
-                    onClick={() => props.closeModal()}
-                    className={classes.closeBtn}
-                    >
-                    Close
-                </Button> */}
                 <CloseIcon
                     className={classes.closeBtn}
                     onClick={() => props.closeModal()}

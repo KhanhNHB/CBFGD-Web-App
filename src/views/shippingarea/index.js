@@ -41,8 +41,8 @@ export function MapContainer(props) {
       console.log(store.longitude);
       console.log(store.radius);
       return <Circle center={{ lat: parseFloat(store.latitude), lng: parseFloat(store.longitude) }} radius={parseFloat(store.radius)} strokeColor={"#FF0000"} />
-    })
-  }
+    });
+  };
 
   return (
     <Map
