@@ -82,10 +82,9 @@ const Results = ({ className, ...rest }) => {
         console.log(fetchData);
         dispatch(actGetAllShipper(fetchData.data));
       }
-
     }
     getAllShippers();
-  }, [])
+  }, [dispatch])
 
 
   return (

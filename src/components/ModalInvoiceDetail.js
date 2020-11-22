@@ -1,56 +1,53 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
     makeStyles,
-    Button,
-} from '@material-ui/core';
-import API from '../api/API';
-import { BLOCKCHAIN_INVOICES_ENDPOINT } from '../api/endpoint';
-import Moment from 'react-moment';
+} from "@material-ui/core";
+import API from "../api/API";
+import { BLOCKCHAIN_INVOICES_ENDPOINT } from "../api/endpoint";
+import Moment from "react-moment";
+import CloseIcon from '@material-ui/icons/Close';
 
 
 const useStyles = makeStyles((theme) => ({
     container: {
-        width: '60%',
-        height: '80%',
-        position: 'absolute',
-        left: '50%',
-        top: '50%',
-        transform: 'translate(-50%, -50%)',
-        padding: '10px',
-
-
+        width: "60%",
+        height: "80%",
+        position: "absolute",
+        left: "50%",
+        top: "50%",
+        transform: "translate(-50%, -50%)",
+        padding: "10px",
     },
     wrapperLeft: {
         backgroundColor: "white",
         width: "50%",
-        height: '100%',
+        height: "100%",
         float: "left",
         borderRight: "1px solid #e0e0e0",
         borderBottom: "3px solid #e0e0e0",
+        borderBottomLeftRadius: "5px",
     },
     wrapperRight: {
         backgroundColor: "white",
         width: "50%",
-        height: '100%',
+        height: "100%",
         float: "left",
-        overflowY: "scroll",
+        overflowY: "auto",
         borderBottom: "3px solid #e0e0e0",
+        borderBottomRightRadius: "5px",
     },
     titleText: {
         textAlign: "center",
         paddingBottom: "20px",
         paddingTop: "50px",
     },
-
     detailRow: {
         paddingBottom: "15px",
         paddingLeft: "20px",
     },
     closeBtn: {
-        float: "right",
-        backgroundColor: "#0496a6",
-        borderRadius: "0px",
-        height: "35px",
+        margin: "10px",
+        cursor: 'pointer',
     },
     tableRow: {
         borderBottom: "1px solid #e0e0e0",
@@ -67,9 +64,11 @@ const useStyles = makeStyles((theme) => ({
         color: "#00bdb6",
     },
     detailHeader: {
-        width: "100%",
-        height: '35px',
         backgroundColor: "#00bdb6",
+        display: "flex",
+        borderTopLeftRadius: "5px",
+        borderTopRightRadius: "5px",
+        flexDirection: "row-reverse",
     }
 }));
 
@@ -85,16 +84,14 @@ const ModalInvoiceDetail = (props) => {
                     setDeliveringProcess(fetchData.data);
                 }
             });
-    }, []);
+    }, [props.invoice.code]);
     return (
         <div className={classes.container}>
             <div className={classes.detailHeader}>
-                <Button
-                    onClick={() => props.closeModal()}
+                <CloseIcon
                     className={classes.closeBtn}
-                    style={{ color: 'white' }}>
-                    Close
-            </Button>
+                    onClick={() => props.closeModal()}
+                />
             </div>
             <div className={classes.wrapperLeft}>
                 <h2 className={classes.titleText}>Invoice Detail</h2>
@@ -135,8 +132,6 @@ const ModalInvoiceDetail = (props) => {
                                 </tr>
                         })
                     }
-
-
                 </table>
             </div>
 
