@@ -113,7 +113,7 @@ const LoginView = () => {
             >
               {
                 isLoading
-                  ? <CircularProgress color='#FFFFFF' size={26} />
+                  ? <CircularProgress size={26} />
                   : 'Sign in now'
               }
             </Button>
