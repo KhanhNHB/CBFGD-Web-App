@@ -15,19 +15,26 @@ import { SHIPPER_ENDPOINT } from '../../../api/endpoint';
 
 const useStyles = makeStyles((theme) => ({
     root: {
-        maxHeight: 200
+        display: 'flex',
+        flexDirection: 'column',
+        backgroundColor: '#FFFFFF',
+        padding: 20,
+        borderRadius: '5px',
     },
     container: {
         width: '100%',
         backgroundColor: 'white',
         position: 'relative',
-        overflow: 'auto',
-        maxHeight: '100%',
+        overflowY: 'auto',
     },
     formControl: {
         padding: 10,
         top: 10,
-        maxHeight: '50%',
+        height: '250px',
+    },
+    actions: {
+        display: 'flex',
+        justifyContent: 'space-between',
     }
 }));
 
@@ -69,7 +76,7 @@ const ModalAssign = ({
     };
 
     return (
-        <>
+        <div className={classes.root}>
             <List className={classes.container} subheader={<li />}>
                 <FormControl component="fieldset" className={classes.formControl}>
                     <FormLabel component="legend">List Shipper</FormLabel>
@@ -89,23 +96,25 @@ const ModalAssign = ({
                 </FormControl>
             </List>
             <Divider />
-            <Button
-                color="primary"
-                variant="contained"
-                onClick={handleSubmit}
-                style={{ color: 'white', margin: 10 }}
-            >
-                Submit
+            <div className={classes.actions}>
+                <Button
+                    color="primary"
+                    variant="contained"
+                    onClick={handleSubmit}
+                    style={{ color: 'white', margin: 10 }}
+                >
+                    Submit
                  </Button>
-            <Button
-                color="primary"
-                variant="contained"
-                onClick={() => onInvisibleModel()}
-                style={{ color: 'white', margin: 10 }}
-            >
-                Close
+                <Button
+                    color="primary"
+                    variant="contained"
+                    onClick={() => onInvisibleModel()}
+                    style={{ color: 'white', margin: 10 }}
+                >
+                    Close
              </Button>
-        </>
+            </div>
+        </div>
     );
 };
 

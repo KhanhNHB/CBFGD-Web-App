@@ -61,6 +61,7 @@ const useStyles = makeStyles((theme) => ({
     top: '50%',
     transform: 'translate(-50%, -50%)',
     padding: '10px',
+    outline: 'none',
   }
 }));
 
@@ -182,31 +183,42 @@ const InvoicesList = ({ onReload, ...rest }) => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {invoices.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((invoice) => {
-                  return (
-                    <TableRow hover role="checkbox" tabIndex={-1} key={invoice.id} onClick={() => handleClickInvoiceItem(invoice)}>
-                      {columns.map((column) => {
-                        const value = _hanleRowTableData(column.id, invoice[column.id]);
-                        return (
-                          <TableCell align={column.align}>
-                            {value}
-                          </TableCell>
-                        );
-                      })}
-                      <TableCell align={"center"}>
-                        <Button
-                          color="primary"
-                          variant="contained"
-                          onClick={() => handleSelectedRow(invoice.id)}
-                          style={{ color: 'white' }}
-                          disabled={invoice.is_assign ? true : false}
+                {
+                  invoices.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((invoice, index) => {
+                    return (
+                      <TableRow hover role="checkbox" tabIndex={-1} key={invoice.id}>
+                        {
+                          columns.map((column, index) => {
+                            const value = _hanleRowTableData(column.id, invoice[column.id]);
+                            return (
+                              <TableCell
+                                key={index}
+                                align={column.align}
+                                onClick={() => handleClickInvoiceItem(invoice)}
+                              >
+                                {value}
+                              </TableCell>
+                            );
+                          })
+                        }
+                        <TableCell
+                          key={index}
+                          align={"center"}
                         >
-                          {invoice.is_assign ? 'Assigned' : 'Assign'}
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
+                          <Button
+                            color="primary"
+                            variant="contained"
+                            onClick={() => handleSelectedRow(invoice.id)}
+                            style={{ color: 'white' }}
+                            disabled={invoice.is_assign ? true : false}
+                          >
+                            {invoice.is_assign ? 'Assigned' : 'Assign'}
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
+                }
               </TableBody>
             </Table>
           </TableContainer>
@@ -231,10 +243,12 @@ const InvoicesList = ({ onReload, ...rest }) => {
         </div>
       </Modal>
       <Modal open={visibleModalInvoiceDetail}>
-        <ModalInvoiceDetail
-          invoice={invoiceDetail}
-          closeModal={handleInvisibleModalInvoiceDetail}
-        />
+        <div>
+          <ModalInvoiceDetail
+            invoice={invoiceDetail}
+            onCloseModal={handleInvisibleModalInvoiceDetail}
+          />
+        </div>
       </Modal>
     </>
   );

@@ -90,48 +90,48 @@ const ModalInvoiceDetail = (props) => {
             <div className={classes.detailHeader}>
                 <CloseIcon
                     className={classes.closeBtn}
-                    onClick={() => props.closeModal()}
+                    onClick={() => props.onCloseModal()}
                 />
             </div>
             <div className={classes.wrapperLeft}>
                 <h2 className={classes.titleText}>Invoice Detail</h2>
-                <p className={classes.detailRow}><span><b>Invoice ID:</b> :</span><span>{props.invoice.code}</span></p>
-                <p className={classes.detailRow}><span><b>Receiver_name</b>          :</span><span>{props.invoice.receiver_name}</span></p>
-                <p className={classes.detailRow}><span><b>Address</b>                :</span><span>{props.invoice.address}</span></p>
-                <p className={classes.detailRow}><span></span><b>Customer phone number:</b><span>{props.invoice.customer_phone_number}</span></p>
-                <p className={classes.detailRow}><span></span><b>Receiver phone number:</b><span>{props.invoice.receiver_phone_number}</span></p>
+                <p className={classes.detailRow}><span><b>Invoice ID:</b> </span><span>{props.invoice.code}</span></p>
+                <p className={classes.detailRow}><span><b>Receiver_name:</b> </span><span>{props.invoice.receiver_name}</span></p>
+                <p className={classes.detailRow}><span><b>Address:</b> </span><span>{props.invoice.address}</span></p>
+                <p className={classes.detailRow}><span></span><b>Customer phone number:</b> <span>{props.invoice.customer_phone_number}</span></p>
+                <p className={classes.detailRow}><span></span><b>Receiver phone number:</b> <span>{props.invoice.receiver_phone_number}</span></p>
             </div>
             <div className={classes.wrapperRight}>
                 <h2 className={classes.titleText}>Invoice Detail</h2>
                 <table className={classes.table}>
-                    {
-                        deliveringProcess.map((process, index) => {
-                            return (index === (deliveringProcess.length - 1))
-                                ?
-                                <tr className={classes.currentstatus}>
-                                    <td className={classes.dot}>&bull;</td>
-                                    <td className={classes.tableRow}>
-                                        <p>{process.Record.status}</p>
-                                        <p>Shipper phone number: {process.Record.shipper_phone}</p>
-                                        <p>Shipper phone number: {process.Record.shipper_phone}</p>
-                                        <p>Time: <Moment format="HH:mm DD-MM-YYYY">
-                                            {process.Record.created_at}
-                                        </Moment></p>
-                                    </td>
-                                </tr>
-
-                                : <tr >
-                                    <td className={classes.dot}>&bull;</td>
-                                    <td className={classes.tableRow}>
-                                        <p>{process.Record.status}</p>
-                                        <p>Shipper phone number: {process.Record.shipper_phone}</p>
-                                        <p>Time: <Moment format="HH:mm DD-MM-YYYY">
-                                            {process.Record.created_at}
-                                        </Moment></p>
-                                    </td>
-                                </tr>
-                        })
-                    }
+                    <tbody>
+                        {
+                            deliveringProcess.map((process, index) => {
+                                return (index === (deliveringProcess.length - 1))
+                                    ? <tr key={index} className={classes.currentstatus}>
+                                        <td className={classes.dot}>&bull;</td>
+                                        <td className={classes.tableRow}>
+                                            <p>{process.Record.status}</p>
+                                            <p>Shipper phone number: {process.Record.shipper_phone}</p>
+                                            <p>Shipper phone number: {process.Record.shipper_phone}</p>
+                                            <p>Time: <Moment format="HH:mm DD-MM-YYYY">
+                                                {process.Record.created_at}
+                                            </Moment></p>
+                                        </td>
+                                    </tr>
+                                    : <tr key={index}>
+                                        <td className={classes.dot}>&bull;</td>
+                                        <td className={classes.tableRow}>
+                                            <p>{process.Record.status}</p>
+                                            <p>Shipper phone number: {process.Record.shipper_phone}</p>
+                                            <p>Time: <Moment format="HH:mm DD-MM-YYYY">
+                                                {process.Record.created_at}
+                                            </Moment></p>
+                                        </td>
+                                    </tr>
+                            })
+                        }
+                    </tbody>
                 </table>
             </div>
 

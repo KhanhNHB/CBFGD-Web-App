@@ -76,10 +76,8 @@ const Results = ({ className, ...rest }) => {
   useEffect(() => {
     const getAllShippers = async () => {
       const response = await API.get(SHIPPER_ENDPOINT);
-      console.log(response.ok);
       if (response.ok) {
         const fetchData = await response.json();
-        console.log(fetchData);
         dispatch(actGetAllShipper(fetchData.data));
       }
     }
@@ -94,7 +92,7 @@ const Results = ({ className, ...rest }) => {
     >
       <PerfectScrollbar>
         <Box>
-          <Table minWidth={1500}>
+          <Table minwidth={1500}>
             <TableHead>
               <TableRow>
                 <TableCell>
@@ -185,7 +183,7 @@ const Results = ({ className, ...rest }) => {
 
 Results.propTypes = {
   className: PropTypes.string,
-  shippers: PropTypes.array.isRequired
+  shippers: PropTypes.array,
 };
 
 export default Results;

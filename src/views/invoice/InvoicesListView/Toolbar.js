@@ -40,7 +40,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Toolbar = ({ onHandleFileUpload, onHandleFileChange, className, ...rest }) => {
+const Toolbar = ({ onHandleFileUpload, onHandleFileChange, ...rest }) => {
   const classes = useStyles();
   const providers = useSelector(state => state.providers.providers);
   const [selectedProvider, setSelectedProvider] = useState('NONE');
@@ -90,7 +90,7 @@ const Toolbar = ({ onHandleFileUpload, onHandleFileChange, className, ...rest })
     dispatch(actChangeKeyword(keyword));
   }
 
-  let elementProviderMenuItem = [<MenuItem value={`NONE`}>NONE</MenuItem>];
+  let elementProviderMenuItem = [<MenuItem key={-1} value={`NONE`}>NONE</MenuItem>];
   if (providers.length > 0) {
     elementProviderMenuItem.push(providers.map((provider, index) => {
       return <MenuItem value={`${provider.name}`} key={index}>{provider.name}</MenuItem>
@@ -99,7 +99,7 @@ const Toolbar = ({ onHandleFileUpload, onHandleFileChange, className, ...rest })
 
   return (
     <div
-      className={clsx(classes.root, className)}
+      className={clsx(classes.root)}
       {...rest}
     >
       <Box
