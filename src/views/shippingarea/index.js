@@ -1,9 +1,9 @@
 import React, { useEffect } from 'react';
-import { Map, GoogleApiWrapper, Marker, Circle, InfoWindow } from 'google-maps-react';
+import { Map, GoogleApiWrapper, Marker, Circle } from 'google-maps-react';
 import API from '../../api/API';
 import { HUB_ENDPOINT, INVOICE_ENDPOINT } from '../../api/endpoint';
 import { useDispatch, useSelector } from 'react-redux';
-import { actGetListHub, actGetListInvoice } from '../../actions';
+import { actGetListHub, actGetListInvoice, actLoadInvoiceList } from '../../actions';
 
 export function MapContainer(props) {
   const dispatch = useDispatch();
@@ -13,34 +13,25 @@ export function MapContainer(props) {
     height: '80%',
   };
   const hubLocation = useSelector(state => state.hub.listHub);
-  const invoiceLocation = useSelector(state => state.invoice.listInvoice);
-  const userToken = useSelector(state => state.user.userToken);
-<<<<<<< HEAD
-=======
-  // const GOOGLEKEY = "AIzaSyAtGg0XWituHRy95vbyislioKh59n_PxHY";
+  const invoiceLocation = useSelector(state => state.invoice.invoiceList);
 
->>>>>>> 520cbf431497269a46c308c3ea5590a7d135009c
   useEffect(() => {
-    API.get(`${HUB_ENDPOINT}`, userToken)
+    API.get(`${HUB_ENDPOINT}`)
       .then(async response => {
         if (response.ok) {
           const fetchData = await response.json();
           dispatch(actGetListHub(fetchData.data));
         }
       });
-<<<<<<< HEAD
 
-    API.get(`${INVOICE_ENDPOINT}`, userToken)
+    API.get(`${INVOICE_ENDPOINT}`)
       .then(async response => {
         if (response.ok) {
           const fetchData = await response.json();
-          dispatch(actGetListInvoice(fetchData.data));
+          dispatch(actLoadInvoiceList(fetchData.data));
         }
       });
   }, []);
-=======
-  }, [dispatch, userToken]);
->>>>>>> 520cbf431497269a46c308c3ea5590a7d135009c
 
   const moveMarker = (marker) => {
     // ..
@@ -89,22 +80,13 @@ export function MapContainer(props) {
 
   const displayCircles = () => {
     return hubLocation.map((store, index) => {
-<<<<<<< HEAD
-      return circle = <Circle
+      return <Circle
         center={{ lat: store.latitude, lng: store.longitude }}
         radius={store.radius}
         strokeColor={"#FF0000"}
       />
     })
   }
-=======
-      console.log(store.latitude);
-      console.log(store.longitude);
-      console.log(store.radius);
-      return <Circle center={{ lat: parseFloat(store.latitude), lng: parseFloat(store.longitude) }} radius={parseFloat(store.radius)} strokeColor={"#FF0000"} />
-    });
-  };
->>>>>>> 520cbf431497269a46c308c3ea5590a7d135009c
 
   return (
     <>

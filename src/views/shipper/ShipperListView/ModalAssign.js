@@ -15,19 +15,27 @@ import { HUB_ENDPOINT, SHIPPER_ENDPOINT } from '../../../api/endpoint';
 
 const useStyles = makeStyles((theme) => ({
     root: {
-        maxHeight: 200
+        display: 'flex',
+        width: '80%',
+        flexDirection: 'column',
+        backgroundColor: '#FFFFFF',
+        padding: 20,
+        borderRadius: '5px',
     },
     container: {
         width: '100%',
         backgroundColor: 'white',
         position: 'relative',
-        overflow: 'auto',
-        maxHeight: '100%',
+        overflowY: 'auto',
     },
     formControl: {
         padding: 10,
         top: 10,
         maxHeight: '50%',
+    },
+    actions: {
+        display: 'flex',
+        justifyContent: 'space-between',
     }
 }));
 
@@ -70,42 +78,44 @@ const ModalAssign = ({
 
     return (
         <>
-            <List className={classes.container} subheader={<li />}>
-                <FormControl component="fieldset" className={classes.formControl}>
-                    <FormLabel component="legend">List Hub</FormLabel>
-                    <RadioGroup
-                        aria-label="List hubs"
-                        onChange={handleChange}
-                        value={selectedHub}
-                    >
-                        {hubs.map((hub, index) => {
-                            return <FormControlLabel
-                                key={index}
-                                value={+hub.id}
-                                control={<Radio />}
-                                label={hub.name}
-                            />
-                        })}
-                    </RadioGroup>
-                </FormControl>
-            </List>
-            <Divider />
-            <Button
-                color="primary"
-                variant="contained"
-                onClick={handleSubmit}
-                style={{ color: 'white', margin: 10 }}
-            >
-                Submit
-                 </Button>
-            <Button
-                color="primary"
-                variant="contained"
-                onClick={() => onInvisibleModel()}
-                style={{ color: 'white', margin: 10 }}
-            >
-                Close
-             </Button>
+            <div className={classes.root}>
+                <List className={classes.container} subheader={<li />}>
+                    <FormControl component="fieldset" className={classes.formControl}>
+                        <FormLabel component="legend">List Hub</FormLabel>
+                        <RadioGroup
+                            aria-label="List hubs"
+                            onChange={handleChange}
+                            value={selectedHub}
+                        >
+                            {hubs.map((hub, index) => {
+                                return <FormControlLabel
+                                    key={index}
+                                    value={+hub.id}
+                                    control={<Radio />}
+                                    label={hub.name}
+                                />
+                            })}
+                        </RadioGroup>
+                    </FormControl>
+                </List>
+                <Divider />
+                <div className={classes.actions}>
+                    <Button
+                        color="primary"
+                        variant="contained"
+                        onClick={handleSubmit}
+                        style={{ color: 'white', margin: 10 }}>
+                        Submit
+                    </Button>
+                    <Button
+                        color="primary"
+                        variant="contained"
+                        onClick={() => onInvisibleModel()}
+                        style={{ color: 'white', margin: 10 }}>
+                        Close
+                    </Button>
+                </div>
+            </div>
         </>
     );
 };

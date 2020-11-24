@@ -4,9 +4,8 @@ import {
 } from "@material-ui/core";
 import API from "../api/API";
 import { BLOCKCHAIN_INVOICES_ENDPOINT } from "../api/endpoint";
-import Moment from "react-moment";
 import CloseIcon from '@material-ui/icons/Close';
-
+import datetimeUtils from '../utils/datetimeUtils';
 
 const useStyles = makeStyles((theme) => ({
     container: {
@@ -48,6 +47,7 @@ const useStyles = makeStyles((theme) => ({
     closeBtn: {
         margin: "10px",
         cursor: 'pointer',
+        color: 'white'
     },
     tableRow: {
         borderBottom: "1px solid #e0e0e0",
@@ -112,11 +112,14 @@ const ModalInvoiceDetail = (props) => {
                                         <td className={classes.dot}>&bull;</td>
                                         <td className={classes.tableRow}>
                                             <p>{process.Record.status}</p>
-                                            <p>Shipper phone number: {process.Record.shipper_phone}</p>
-                                            <p>Shipper phone number: {process.Record.shipper_phone}</p>
-                                            <p>Time: <Moment format="HH:mm DD-MM-YYYY">
-                                                {process.Record.created_at}
-                                            </Moment></p>
+                                            <p>Time: {datetimeUtils.DisplayDateTimeFormat(process.Record.created_at)}</p>
+                                            {process.Record.shipper_phone
+                                                ? <>
+                                                    <p>Shipper phone number: {process.Record.shipper_phone}</p>
+                                                    <p>Shipper name: {process.Record.shipper_name}</p>
+                                                </>
+                                                : <p>Shipper: Not Assign</p>
+                                            }
                                         </td>
                                     </tr>
                                     : <tr key={index}>
@@ -124,9 +127,7 @@ const ModalInvoiceDetail = (props) => {
                                         <td className={classes.tableRow}>
                                             <p>{process.Record.status}</p>
                                             <p>Shipper phone number: {process.Record.shipper_phone}</p>
-                                            <p>Time: <Moment format="HH:mm DD-MM-YYYY">
-                                                {process.Record.created_at}
-                                            </Moment></p>
+                                            <p>Time: {datetimeUtils.DisplayDateTimeFormat(process.Record.created_at)}</p>
                                         </td>
                                     </tr>
                             })

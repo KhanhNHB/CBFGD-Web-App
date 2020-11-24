@@ -54,27 +54,25 @@ const useStyles = makeStyles((theme) => ({
     maxHeight: 440,
   },
   modal: {
-    width: '40%',
-    height: '20%',
-    position: 'absolute',
-    left: '50%',
-    top: '50%',
-    transform: 'translate(-50%, -50%)',
-    padding: '10px',
-    outline: 'none',
+    display: 'flex',
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
   }
 }));
 
-const InvoicesList = ({ onReload, ...rest }) => {
+const InvoicesList = ({ ...rest }) => {
   const classes = useStyles();
   let invoices = rest.invoices;
-  const keyword = useSelector(state => state.invoices.keyword);
+  const keyword = useSelector(state => state.invoice.keyword);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [visiableModal, setVisibleModal] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState(null);
   const [visibleModalInvoiceDetail, setVisibleModalInvoiceDetail] = useState(false);
   const [invoiceDetail, setInvoiceDetail] = useState({});
+
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
@@ -120,7 +118,6 @@ const InvoicesList = ({ onReload, ...rest }) => {
       return;
     }
 
-    onReload();
     setSelectedInvoice(null);
     handleInvisibleModal();
   };
@@ -183,26 +180,6 @@ const InvoicesList = ({ onReload, ...rest }) => {
                 </TableRow>
               </TableHead>
               <TableBody>
-<<<<<<< HEAD
-                {invoices.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((invoice) => {
-                  return (
-                    <TableRow hover role="checkbox" tabIndex={-1} key={invoice.id} onClick={() => handleClickInvoiceItem(invoice)}>
-                      {columns.map((column, index) => {
-                        const value = _hanleRowTableData(column.id, invoice[column.id]);
-                        return (
-                          <TableCell align={column.align} id={index}>
-                            {value}
-                          </TableCell>
-                        );
-                      })}
-                      <TableCell align={"center"}>
-                        <Button
-                          color="primary"
-                          variant="contained"
-                          onClick={() => handleSelectedRow(invoice.id)}
-                          style={{ color: 'white' }}
-                          disabled={invoice.is_assign ? true : false}
-=======
                 {
                   invoices.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((invoice, index) => {
                     return (
@@ -224,7 +201,6 @@ const InvoicesList = ({ onReload, ...rest }) => {
                         <TableCell
                           key={index}
                           align={"center"}
->>>>>>> 520cbf431497269a46c308c3ea5590a7d135009c
                         >
                           <Button
                             color="primary"
