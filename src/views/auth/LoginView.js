@@ -8,6 +8,7 @@ import {
   TextField,
   Typography,
   makeStyles,
+  CircularProgress,
 } from '@material-ui/core';
 import Page from '../../components/Page';
 import API from '../../api/API';
@@ -31,22 +32,24 @@ const LoginView = () => {
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const readCookie = () => {
-    const user = Cookies.get(USER_TOKEN);
-    if (user) {
-      navigate('/app/dashboard', { replace: true });
-    }
-  };
-
   useEffect(() => {
+    const readCookie = () => {
+      const user = Cookies.get(USER_TOKEN);
+      if (user) {
+        navigate('/app/dashboard', { replace: true });
+      }
+    };
+
     readCookie();
-  }, []);
+  }, [navigate]);
 
   const signIn = async (username, password) => {
+    setIsLoading(true);
     const response = await API.post(LOGIN_ENDPOINT, {
       phone: username,
       password: password,
@@ -55,9 +58,11 @@ const LoginView = () => {
     const json = await response.json();
 
     if (json.message) {
+      setIsLoading(false);
       alert(json.message);
       return;
     }
+    setIsLoading(false);
     Cookies.set(USER_TOKEN, json.data.access_token);
     dispatch(actSignIn(json.data.access_token));
     navigate('/app/dashboard', { replace: true });
@@ -98,6 +103,7 @@ const LoginView = () => {
           />
           <Box my={2}>
             <Button
+              disabled={isLoading}
               color="primary"
               fullWidth
               size="large"
@@ -105,8 +111,12 @@ const LoginView = () => {
               variant="contained"
               onClick={() => signIn(username, password)}
             >
-              Sign in now
-                  </Button>
+              {
+                isLoading
+                  ? <CircularProgress size={26} />
+                  : 'Sign in now'
+              }
+            </Button>
           </Box>
           <Typography
             color="textSecondary"
@@ -120,7 +130,7 @@ const LoginView = () => {
               variant="h6"
             >
               Sign up
-                  </Link>
+            </Link>
           </Typography>
         </Container>
       </Box>

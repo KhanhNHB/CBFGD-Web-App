@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
 import {
@@ -10,23 +10,96 @@ import {
   InputAdornment,
   SvgIcon,
   makeStyles,
-  Input
+  Input,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
 } from '@material-ui/core';
 import { Search as SearchIcon } from 'react-feather';
+import { useSelector, useDispatch } from 'react-redux';
+import API from '../../../api/API';
+import { actChangeKeyword, actLoadInvoices, actLoadProvider } from '../../../actions/index';
+import { INVOICE_ENDPOINT } from '../../../api/endpoint';
 
 const useStyles = makeStyles((theme) => ({
   root: {},
   importButton: {
     marginRight: theme.spacing(1)
-  }
+  },
+  content: {
+    display: 'flex',
+    alignItems: 'center',
+  },
+  searchBox: {
+    width: 500,
+  },
+  formControl: {
+    margin: theme.spacing(1),
+    minWidth: 120,
+  },
 }));
 
-const Toolbar = ({ onHandleFileUpload, onHandleFileChange, className, ...rest }) => {
+const Toolbar = ({ onHandleFileUpload, onHandleFileChange, ...rest }) => {
   const classes = useStyles();
+  const providers = useSelector(state => state.providers.providers);
+  const [selectedProvider, setSelectedProvider] = useState('NONE');
+  const dispatch = useDispatch();
+
+  const handleChangeProvider = (event) => {
+    setSelectedProvider(event.target.value);
+  };
+
+  useEffect(() => {
+    API.get('http://18.141.214.35:8090/providers')
+      .then(async response => {
+        if (response.ok) {
+          const fetchData = await response.json();
+          const providersData = fetchData.data;
+          if (providersData.length > 0) {
+            dispatch(actLoadProvider(providersData));
+          }
+        }
+      });
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (selectedProvider !== 'NONE') {
+      API.get(`http://18.141.214.35:8090/providers/${selectedProvider}`)
+        .then(async response => {
+          if (response.ok) {
+            const fetchData = await response.json();
+            const invoices = fetchData.data.invoices;
+            dispatch(actLoadInvoices(invoices));
+          }
+        });
+    } else {
+      API.get(INVOICE_ENDPOINT)
+        .then(async response => {
+          if (response.ok) {
+            const fetchData = await response.json();
+            const invoices = fetchData.data;
+            dispatch(actLoadInvoices(invoices));
+          }
+        })
+    }
+  }, [selectedProvider, dispatch]);
+
+  const onChangeKeyword = (event) => {
+    const keyword = event.target.value;
+    dispatch(actChangeKeyword(keyword));
+  }
+
+  let elementProviderMenuItem = [<MenuItem key={-1} value={`NONE`}>NONE</MenuItem>];
+  if (providers.length > 0) {
+    elementProviderMenuItem.push(providers.map((provider, index) => {
+      return <MenuItem value={`${provider.name}`} key={index}>{provider.name}</MenuItem>
+    }));
+  }
 
   return (
     <div
-      className={clsx(classes.root, className)}
+      className={clsx(classes.root)}
       {...rest}
     >
       <Box
@@ -53,8 +126,8 @@ const Toolbar = ({ onHandleFileUpload, onHandleFileChange, className, ...rest })
       </Box>
       <Box mt={3}>
         <Card>
-          <CardContent>
-            <Box maxWidth={500}>
+          <CardContent className={classes.content}>
+            <Box className={classes.searchBox}>
               <TextField
                 fullWidth
                 InputProps={{
@@ -71,8 +144,23 @@ const Toolbar = ({ onHandleFileUpload, onHandleFileChange, className, ...rest })
                 }}
                 placeholder="Search Invoice..."
                 variant="outlined"
+                onChange={(event) => onChangeKeyword(event)}
               />
             </Box>
+            <FormControl variant="outlined" className={classes.formControl}>
+              <InputLabel id="demo-simple-select-outlined-label">Provider</InputLabel>
+              <Select
+                labelId="demo-simple-select-outlined-label"
+                id="demo-simple-select-outlined"
+                label="Provider"
+                value={selectedProvider}
+                onChange={handleChangeProvider}
+              >
+                {
+                  elementProviderMenuItem
+                }
+              </Select>
+            </FormControl>
           </CardContent>
         </Card>
       </Box>
@@ -81,7 +169,7 @@ const Toolbar = ({ onHandleFileUpload, onHandleFileChange, className, ...rest })
 };
 
 Toolbar.propTypes = {
-  className: PropTypes.string
+  className: PropTypes.string,
 };
 
 export default Toolbar;

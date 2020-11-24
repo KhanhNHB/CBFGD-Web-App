@@ -23,6 +23,7 @@ import API from '../../../api/API';
 import { DELIVERIES_STATUS_ENDPOINT } from '../../../api/endpoint';
 import { INVOICE_STATUS, INVOICE_PRIORITY } from '../../../common';
 import ModalInvoiceDetail from '../../../components/ModalInvoiceDetail';
+import { useSelector } from 'react-redux';
 
 const columns = [
   { id: 'id', label: 'Id', minWidth: 200, align: 'center' },
@@ -60,11 +61,14 @@ const useStyles = makeStyles((theme) => ({
     top: '50%',
     transform: 'translate(-50%, -50%)',
     padding: '10px',
+    outline: 'none',
   }
 }));
 
-const InvoicesList = ({ onReload, className, invoices, ...rest }) => {
+const InvoicesList = ({ onReload, ...rest }) => {
   const classes = useStyles();
+  let invoices = rest.invoices;
+  const keyword = useSelector(state => state.invoices.keyword);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [visiableModal, setVisibleModal] = useState(false);
@@ -136,7 +140,7 @@ const InvoicesList = ({ onReload, className, invoices, ...rest }) => {
       case 'status':
         return value ? INVOICE_STATUS.ACTIVE : INVOICE_STATUS.DEACTIVE;
       case 'product_image':
-        return (<img alt="Product Image" style={{ height: 60, width: 60 }} src={value} />);
+        return (<img alt="Product" style={{ height: 60, width: 60 }} src={value} />);
       case 'created_at':
         return datetimeUtils.DisplayDateTimeFormat(value);
       default:
@@ -149,9 +153,16 @@ const InvoicesList = ({ onReload, className, invoices, ...rest }) => {
     handleVisibleModalInvoiceDetail();
   };
 
+  // Search if have keyword.
+  if (keyword) {
+    invoices = invoices.filter((invoice) => {
+      return invoice.code.toLowerCase().indexOf(keyword.toLowerCase()) !== -1;
+    });
+  }
+
   return (
     <>
-      <Card className={clsx(classes.root, className)} {...rest} >
+      <Card className={clsx(classes.root)} {...rest} >
         <Box>
           <TableContainer className={classes.container}>
             <Table stickyHeader aria-label="sticky table">
@@ -172,6 +183,7 @@ const InvoicesList = ({ onReload, className, invoices, ...rest }) => {
                 </TableRow>
               </TableHead>
               <TableBody>
+<<<<<<< HEAD
                 {invoices.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((invoice) => {
                   return (
                     <TableRow hover role="checkbox" tabIndex={-1} key={invoice.id} onClick={() => handleClickInvoiceItem(invoice)}>
@@ -190,13 +202,44 @@ const InvoicesList = ({ onReload, className, invoices, ...rest }) => {
                           onClick={() => handleSelectedRow(invoice.id)}
                           style={{ color: 'white' }}
                           disabled={invoice.is_assign ? true : false}
+=======
+                {
+                  invoices.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((invoice, index) => {
+                    return (
+                      <TableRow hover role="checkbox" tabIndex={-1} key={invoice.id}>
+                        {
+                          columns.map((column, index) => {
+                            const value = _hanleRowTableData(column.id, invoice[column.id]);
+                            return (
+                              <TableCell
+                                key={index}
+                                align={column.align}
+                                onClick={() => handleClickInvoiceItem(invoice)}
+                              >
+                                {value}
+                              </TableCell>
+                            );
+                          })
+                        }
+                        <TableCell
+                          key={index}
+                          align={"center"}
+>>>>>>> 520cbf431497269a46c308c3ea5590a7d135009c
                         >
-                          {invoice.is_assign ? 'Assigned' : 'Assign'}
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
+                          <Button
+                            color="primary"
+                            variant="contained"
+                            onClick={() => handleSelectedRow(invoice.id)}
+                            style={{ color: 'white' }}
+                            disabled={invoice.is_assign ? true : false}
+                          >
+                            {invoice.is_assign ? 'Assigned' : 'Assign'}
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
+                }
               </TableBody>
             </Table>
           </TableContainer>
@@ -221,12 +264,12 @@ const InvoicesList = ({ onReload, className, invoices, ...rest }) => {
         </div>
       </Modal>
       <Modal open={visibleModalInvoiceDetail}>
-        <ModalInvoiceDetail
-          invoice={invoiceDetail}
-          closeModal={handleInvisibleModalInvoiceDetail}
-          closeModal={handleInvisibleModalInvoiceDetail}
-          closeModal={handleInvisibleModalInvoiceDetail}
-        />
+        <div>
+          <ModalInvoiceDetail
+            invoice={invoiceDetail}
+            onCloseModal={handleInvisibleModalInvoiceDetail}
+          />
+        </div>
       </Modal>
     </>
   );

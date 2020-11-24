@@ -2,7 +2,7 @@ import { USER_TOKEN } from "../common";
 import Cookies from 'js-cookie';
 
 export default {
-    get: async (url, token) => {
+    get: async (url) => {
         return await fetch(url, {
             method: 'GET',
             headers: {

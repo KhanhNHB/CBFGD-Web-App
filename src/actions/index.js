@@ -28,9 +28,23 @@ export const actGetListHub = (listHubs) => {
     }
 };
 
-export const actGetListInvoice = (invoices) => {
+export const actLoadProvider = (providers) => {
     return {
-        type: types.INVOICES,
+        type: types.LOAD_PROVIDER,
+        providers,
+    }
+};
+
+export const actLoadInvoices = (invoices) => {
+    return {
+        type: types.LOAD_INVOICES,
         invoices,
     }
-}
+};
+
+export const actChangeKeyword = (keyword) => {
+    return {
+        type: types.CHANGE_KEYWORD,
+        keyword,
+    }
+};

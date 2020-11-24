@@ -15,6 +15,11 @@ export function MapContainer(props) {
   const hubLocation = useSelector(state => state.hub.listHub);
   const invoiceLocation = useSelector(state => state.invoice.listInvoice);
   const userToken = useSelector(state => state.user.userToken);
+<<<<<<< HEAD
+=======
+  // const GOOGLEKEY = "AIzaSyAtGg0XWituHRy95vbyislioKh59n_PxHY";
+
+>>>>>>> 520cbf431497269a46c308c3ea5590a7d135009c
   useEffect(() => {
     API.get(`${HUB_ENDPOINT}`, userToken)
       .then(async response => {
@@ -23,6 +28,7 @@ export function MapContainer(props) {
           dispatch(actGetListHub(fetchData.data));
         }
       });
+<<<<<<< HEAD
 
     API.get(`${INVOICE_ENDPOINT}`, userToken)
       .then(async response => {
@@ -32,6 +38,9 @@ export function MapContainer(props) {
         }
       });
   }, []);
+=======
+  }, [dispatch, userToken]);
+>>>>>>> 520cbf431497269a46c308c3ea5590a7d135009c
 
   const moveMarker = (marker) => {
     // ..
@@ -76,11 +85,11 @@ export function MapContainer(props) {
         id={invoice.id}
       />
     })
-  }
+  };
 
-  let circle;
   const displayCircles = () => {
     return hubLocation.map((store, index) => {
+<<<<<<< HEAD
       return circle = <Circle
         center={{ lat: store.latitude, lng: store.longitude }}
         radius={store.radius}
@@ -88,6 +97,14 @@ export function MapContainer(props) {
       />
     })
   }
+=======
+      console.log(store.latitude);
+      console.log(store.longitude);
+      console.log(store.radius);
+      return <Circle center={{ lat: parseFloat(store.latitude), lng: parseFloat(store.longitude) }} radius={parseFloat(store.radius)} strokeColor={"#FF0000"} />
+    });
+  };
+>>>>>>> 520cbf431497269a46c308c3ea5590a7d135009c
 
   return (
     <>
@@ -104,7 +121,8 @@ export function MapContainer(props) {
     </>
   );
 }
+
 export default GoogleApiWrapper({
   apiKey: 'AIzaSyAtGg0XWituHRy95vbyislioKh59n_PxHY'
-})(MapContainer)
+})(MapContainer);
 

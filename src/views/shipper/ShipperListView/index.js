@@ -1,7 +1,11 @@
+<<<<<<< HEAD
 import React, {
   useState,
   useEffect
 } from 'react';
+=======
+import React from 'react';
+>>>>>>> 520cbf431497269a46c308c3ea5590a7d135009c
 import {
   Box,
   Container,
