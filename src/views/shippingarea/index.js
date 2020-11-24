@@ -1,20 +1,25 @@
 import React, { useEffect } from 'react';
-import { Map, GoogleApiWrapper, Marker, Circle } from 'google-maps-react';
+import { Map, GoogleApiWrapper, Marker, Circle, InfoWindow } from 'google-maps-react';
 import API from '../../api/API';
-import { HUB_ENDPOINT } from '../../api/endpoint';
+import { HUB_ENDPOINT, INVOICE_ENDPOINT } from '../../api/endpoint';
 import { useDispatch, useSelector } from 'react-redux';
-import { actGetListHub } from '../../actions';
+import { actGetListHub, actGetListInvoice } from '../../actions';
 
 export function MapContainer(props) {
   const dispatch = useDispatch();
+
   const mapStyles = {
     width: '100%',
     height: '80%',
   };
   const hubLocation = useSelector(state => state.hub.listHub);
+  const invoiceLocation = useSelector(state => state.invoice.listInvoice);
   const userToken = useSelector(state => state.user.userToken);
+<<<<<<< HEAD
+=======
   // const GOOGLEKEY = "AIzaSyAtGg0XWituHRy95vbyislioKh59n_PxHY";
 
+>>>>>>> 520cbf431497269a46c308c3ea5590a7d135009c
   useEffect(() => {
     API.get(`${HUB_ENDPOINT}`, userToken)
       .then(async response => {
@@ -23,37 +28,97 @@ export function MapContainer(props) {
           dispatch(actGetListHub(fetchData.data));
         }
       });
+<<<<<<< HEAD
+
+    API.get(`${INVOICE_ENDPOINT}`, userToken)
+      .then(async response => {
+        if (response.ok) {
+          const fetchData = await response.json();
+          dispatch(actGetListInvoice(fetchData.data));
+        }
+      });
+  }, []);
+=======
   }, [dispatch, userToken]);
+>>>>>>> 520cbf431497269a46c308c3ea5590a7d135009c
+
+  const moveMarker = (marker) => {
+    // ..
+  }
 
   const displayHubMarkers = () => {
     return hubLocation.map((store, index) => {
-      return <Marker position={{
-        lat: store.latitude,
-        lng: store.longitude
-      }}
+      return (
+        <Marker
+          position={{
+            lat: store.latitude,
+            lng: store.longitude
+          }}
+          draggable={true}
+          onDragend={(e) => {
+            console.log(e);
+          }}
+        />
+      );
+    });
+  }
+
+  const displayInvoiceMarkers = () => {
+    const onMarkerClick = (props, marker, e) => {
+      console.log(props);
+    }
+    return invoiceLocation.map((invoice, index) => {
+      return <Marker
+        position={{
+          lat: invoice.latitude,
+          lng: invoice.longitude
+        }}
+        icon={{
+          url: "https://res.cloudinary.com/dvehkdedj/image/upload/v1605980191/gain-icon-point-2_wyxrpw.png",
+          width: 16,
+          height: 16,
+          scaledSize: new window.google.maps.Size(22, 22)
+        }}
+        label={invoice.id}
+        onClick={onMarkerClick}
+        name={invoice.address}
+        id={invoice.id}
       />
     })
   };
 
   const displayCircles = () => {
     return hubLocation.map((store, index) => {
+<<<<<<< HEAD
+      return circle = <Circle
+        center={{ lat: store.latitude, lng: store.longitude }}
+        radius={store.radius}
+        strokeColor={"#FF0000"}
+      />
+    })
+  }
+=======
       console.log(store.latitude);
       console.log(store.longitude);
       console.log(store.radius);
       return <Circle center={{ lat: parseFloat(store.latitude), lng: parseFloat(store.longitude) }} radius={parseFloat(store.radius)} strokeColor={"#FF0000"} />
     });
   };
+>>>>>>> 520cbf431497269a46c308c3ea5590a7d135009c
 
   return (
-    <Map
-      google={props.google}
-      zoom={12}
-      style={mapStyles}
-      initialCenter={{ lat: 10.8061536, lng: 106.6853458 }}
-    >
-      {displayHubMarkers()}
-      {displayCircles()}
-    </Map>
+    <>
+      <Map
+        google={props.google}
+        zoom={12}
+        style={mapStyles}
+        initialCenter={{ lat: 10.8061536, lng: 106.6853458 }}
+      >
+        {displayInvoiceMarkers()}
+        {displayHubMarkers()}
+        {displayCircles()}
+      </Map>
+    </>
   );
 }
 

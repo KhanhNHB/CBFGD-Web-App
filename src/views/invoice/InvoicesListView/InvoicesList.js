@@ -183,6 +183,26 @@ const InvoicesList = ({ onReload, ...rest }) => {
                 </TableRow>
               </TableHead>
               <TableBody>
+<<<<<<< HEAD
+                {invoices.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((invoice) => {
+                  return (
+                    <TableRow hover role="checkbox" tabIndex={-1} key={invoice.id} onClick={() => handleClickInvoiceItem(invoice)}>
+                      {columns.map((column, index) => {
+                        const value = _hanleRowTableData(column.id, invoice[column.id]);
+                        return (
+                          <TableCell align={column.align} id={index}>
+                            {value}
+                          </TableCell>
+                        );
+                      })}
+                      <TableCell align={"center"}>
+                        <Button
+                          color="primary"
+                          variant="contained"
+                          onClick={() => handleSelectedRow(invoice.id)}
+                          style={{ color: 'white' }}
+                          disabled={invoice.is_assign ? true : false}
+=======
                 {
                   invoices.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((invoice, index) => {
                     return (
@@ -204,6 +224,7 @@ const InvoicesList = ({ onReload, ...rest }) => {
                         <TableCell
                           key={index}
                           align={"center"}
+>>>>>>> 520cbf431497269a46c308c3ea5590a7d135009c
                         >
                           <Button
                             color="primary"

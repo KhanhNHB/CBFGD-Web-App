@@ -83,6 +83,7 @@ const ModalAssign = ({
                     <RadioGroup
                         aria-label="List shipper"
                         onChange={handleChange}
+                        value={selectedShipper}
                     >
                         {shippers.map((shipper, index) => (
                             <FormControlLabel
