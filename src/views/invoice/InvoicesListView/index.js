@@ -44,33 +44,11 @@ const useStyles = makeStyles((theme) => ({
 
 const Invoices = () => {
   const classes = useStyles();
-  const [fileSelected, setFileSelected] = useState(null);
-  const invoices = useSelector(state => state.invoices.invoices);
-  const [loadingModal, setLoadingModal] = useState(false);
   const dispatch = useDispatch();
 
-  const fetchInvoice = async () => {
-    const response = await fetch(INVOICE_ENDPOINT, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + Cookies.get(USER_TOKEN)
-      },
-    });
-
-    if (response.status !== 200) {
-      return;
-    }
-
-    const json = await response.json();
-    const result = json.data;
-
-    const onSuccess = (data) => {
-      dispatch(actLoadInvoices(data));
-    };
-
-    onSuccess(result);
-  };
+  const [fileSelected, setFileSelected] = useState(null);
+  const invoices = useSelector(state => state.invoice.invoices);
+  const [loadingModal, setLoadingModal] = useState(false);
 
   const onHandleFileUpload = async () => {
     if (!fileSelected) {
@@ -94,44 +72,12 @@ const Invoices = () => {
     }
 
     setLoadingModal(false);
-    fetchInvoice();
   };
 
   const onFileChange = (e) => {
     const file = e.target.files[0];
     setFileSelected({ fileSelected: file });
   }
-
-  const onReload = async () => {
-    fetchInvoice();
-  };
-
-  useEffect(() => {
-    const fetchInvoice = async () => {
-      const response = await fetch(INVOICE_ENDPOINT, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + Cookies.get(USER_TOKEN)
-        },
-      });
-
-      if (response.status !== 200) {
-        return;
-      }
-
-      const json = await response.json();
-      const result = json.data;
-
-      const onSuccess = (data) => {
-        dispatch(actLoadInvoices(data));
-      };
-
-      onSuccess(result);
-    };
-
-    fetchInvoice();
-  }, [dispatch]);
 
   return (
     <Page
@@ -141,7 +87,7 @@ const Invoices = () => {
         <Toolbar onHandleFileUpload={onHandleFileUpload} onHandleFileChange={onFileChange} />
         <Box mt={3}>
           <Grid container spacing={3}>
-            <InvoicesList invoices={invoices} onReload={onReload} />
+            <InvoicesList invoices={invoices} />
           </Grid>
         </Box>
       </Container>

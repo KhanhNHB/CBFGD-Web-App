@@ -16,6 +16,7 @@ import { SHIPPER_ENDPOINT } from '../../../api/endpoint';
 const useStyles = makeStyles((theme) => ({
     root: {
         display: 'flex',
+        width: '80%',
         flexDirection: 'column',
         backgroundColor: '#FFFFFF',
         padding: 20,

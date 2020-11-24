@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import clsx from 'clsx';
 import PropTypes from 'prop-types';
 import datetimeUtils from '../../../utils/datetimeUtils';
-import formatPrice from '../../../utils/formatPrice';
 import {
   Box,
   Card,
@@ -22,14 +21,15 @@ import ModalAssign from './ModalAssign';
 import { STATUS } from '../../../common/index';
 import { HUB_ENDPOINT } from '../../../api/endpoint';
 import API from '../../../api/API';
+import ModalShipperDetail from '../../../components/ModalShipperDetail';
 
 const columns = [
-  { id: 'id', label: 'Id', minWidth: 100, align: 'center' },
+  // { id: 'id', label: 'Id', minWidth: 100, align: 'center' },
   { id: 'avatar', label: 'Avatar', minWidth: 200, align: 'center' },
   { id: 'last_name', label: 'Last name', minWidth: 200, align: 'center' },
   { id: 'first_name', label: 'First name', minWidth: 500, align: 'center' },
   { id: 'phone', label: 'Phone', minWidth: 200, align: 'center' },
-  { id: 'created_at', label: 'Created at', minWidth: 200, align: 'center' },
+  // { id: 'created_at', label: 'Created at', minWidth: 200, align: 'center' },
   { id: 'status', label: 'status', minWidth: 120, align: 'center' },
 ];
 
@@ -42,13 +42,11 @@ const useStyles = makeStyles((theme) => ({
     maxHeight: 440,
   },
   modal: {
-    width: '40%',
-    height: '20%',
-    position: 'absolute',
-    left: '50%',
-    top: '50%',
-    transform: 'translate(-50%, -50%)',
-    padding: '10px',
+    display: 'flex',
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
   }
 }));
 
@@ -59,7 +57,8 @@ const ShipperList = ({ onReload, className, shippers, ...rest }) => {
   const [visiableModal, setVisibleModal] = useState(false);
   const [selectedShipper, setSelectedShipper] = useState(null);
   const [visibleModalShipperDetail, setVisibleModalShipperDetail] = useState(false);
-  const [shipperDetail, setShipperDetail] = useState({});
+  const [shipper, setShipper] = useState({});
+
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
@@ -131,7 +130,7 @@ const ShipperList = ({ onReload, className, shippers, ...rest }) => {
   };
 
   const handleClickShipperItem = (shipper) => {
-    setShipperDetail(shipper);
+    setShipper(shipper);
     handleVisibleModalShipperDetail();
   };
 
@@ -206,14 +205,14 @@ const ShipperList = ({ onReload, className, shippers, ...rest }) => {
           />
         </div>
       </Modal>
-      {/* <Modal open={visibleModalShipperDetail}>
-        <ModalShipperDetail
-          shipper={shipperDetail}
-          closeModal={handleInvisibleModalShipperDetail}
-          closeModal={handleInvisibleModalShipperDetail}
-          closeModal={handleInvisibleModalShipperDetail}
-        />
-      </Modal> */}
+      <Modal open={visibleModalShipperDetail}>
+        <div>
+          <ModalShipperDetail
+            shipper={shipper}
+            onCloseModal={handleInvisibleModalShipperDetail}
+          />
+        </div>
+      </Modal>
     </>
   );
 };

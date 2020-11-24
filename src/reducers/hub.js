@@ -4,7 +4,7 @@ let initialState = {
     listHub: [],
 }
 
-const hubs = (state = initialState, action) => {
+const hub = (state = initialState, action) => {
     switch (action.type) {
         case types.LIST_HUB:
             state.listHub = action.listHubs;
@@ -12,4 +12,4 @@ const hubs = (state = initialState, action) => {
         default: return { ...state };
     }
 }
-export default hubs;
+export default hub;

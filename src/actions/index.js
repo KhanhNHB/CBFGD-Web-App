@@ -48,3 +48,10 @@ export const actChangeKeyword = (keyword) => {
         keyword,
     }
 };
+
+export const actLoadInvoiceList = (invoiceList) => {
+    return {
+        type: types.LOAD_INVOICE_LIST,
+        invoiceList,
+    }
+};
