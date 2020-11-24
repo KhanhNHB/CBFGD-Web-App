@@ -2,7 +2,7 @@ import { USER_TOKEN } from "../common";
 import Cookies from 'js-cookie';
 
 export default {
-    get: async (url,token) => {
+    get: async (url, token) => {
         return await fetch(url, {
             method: 'GET',
             headers: {
@@ -15,6 +15,17 @@ export default {
     post: async (url, body) => {
         return await fetch(url, {
             method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + Cookies.get(USER_TOKEN)
+            },
+            body: JSON.stringify(body),
+        })
+    },
+    patch: async (url, body) => {
+        return await fetch(url, {
+            method: 'PATCH',
             headers: {
                 Accept: 'application/json',
                 'Content-Type': 'application/json',

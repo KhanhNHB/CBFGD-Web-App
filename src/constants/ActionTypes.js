@@ -3,3 +3,4 @@ export const GET_ALL_SHIPPERS = 'GET_ALL_SHIPPERS';
 export const CREATE_SUCCESSFULLY = 'CREATE_SUCCESSFULLY';
 export const CREATE_FAILURE = 'CREATE_FAILURE';
 export const LIST_HUB = 'LIST_HUB';
+export const INVOICES = 'INVOICES';

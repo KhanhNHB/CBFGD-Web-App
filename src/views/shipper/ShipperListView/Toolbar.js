@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
 import {
@@ -9,35 +9,20 @@ import {
   TextField,
   InputAdornment,
   SvgIcon,
-  makeStyles
+  makeStyles,
+  Input
 } from '@material-ui/core';
 import { Search as SearchIcon } from 'react-feather';
-import ModalShipperAdd from '../../../components/ModalShipperAdd';
-import Modal from 'react-modal';
 
 const useStyles = makeStyles((theme) => ({
   root: {},
   importButton: {
     marginRight: theme.spacing(1)
-  },
-  exportButton: {
-    marginRight: theme.spacing(1)
-  },
-  modal: {
-    width: '60%',
-    height: '60%',
-    marginLeft: 350,
-    marginTop: 50,
   }
 }));
 
-const Toolbar = ({ className, ...rest }) => {
+const Toolbar = ({ onHandleFileUpload, onHandleFileChange, className, ...rest }) => {
   const classes = useStyles();
-  const [modalOpen, setModalOpen] = useState(false);
-
-  const openModalForm = () => {
-    setModalOpen(true);
-  }
 
   return (
     <div
@@ -48,30 +33,24 @@ const Toolbar = ({ className, ...rest }) => {
         display="flex"
         justifyContent="flex-end"
       >
-        <Button className={classes.importButton}>
-          Import
-        </Button>
-        <Button className={classes.exportButton}>
-          Export
+        <Input type="file" onChange={(e) => onHandleFileChange(e)} />
+        <Button
+          className={classes.importButton}
+          onClick={(e) => onHandleFileUpload(e)}
+          color="primary"
+          variant="contained"
+          style={{ color: 'white', marginLeft: 10 }}
+        >
+          Import Excel
         </Button>
         <Button
           color="primary"
           variant="contained"
-          onClick={openModalForm}
           style={{ color: 'white' }}
         >
-          Add Shipper
+          Add Invoice
         </Button>
       </Box>
-
-      <Modal
-        isOpen={modalOpen}
-      >
-        <div className={classes.modal}>
-          <ModalShipperAdd onCloseModal={() => setModalOpen(false)} />
-        </div>
-      </Modal>
-
       <Box mt={3}>
         <Card>
           <CardContent>
@@ -90,7 +69,7 @@ const Toolbar = ({ className, ...rest }) => {
                     </InputAdornment>
                   )
                 }}
-                placeholder="Search Shipper..."
+                placeholder="Search Invoice..."
                 variant="outlined"
               />
             </Box>

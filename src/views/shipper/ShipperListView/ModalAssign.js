@@ -11,7 +11,7 @@ import {
     List
 } from '@material-ui/core';
 import API from '../../../api/API';
-import { SHIPPER_ENDPOINT } from '../../../api/endpoint';
+import { HUB_ENDPOINT, SHIPPER_ENDPOINT } from '../../../api/endpoint';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -38,54 +38,54 @@ const ModalAssign = ({
 }) => {
     const classes = useStyles();
 
-    const [shippers, setShippers] = useState([]);
-    const [selectedShipper, setSelectedShipper] = useState(null);
+    const [hubs, setHubs] = useState([]);
+    const [selectedHub, setSelectedHub] = useState(null);
 
-    const fetchShipper = async () => {
-        const response = await API.get(SHIPPER_ENDPOINT);
+    const fetchHub = async () => {
+        const response = await API.get(HUB_ENDPOINT);
         const json = await response.json();
 
         if (!json.data.length) {
             return;
         }
 
-        setShippers(json.data);
+        setHubs(json.data);
     };
 
     useEffect(() => {
-        fetchShipper();
+        fetchHub();
     }, []);
 
     const handleChange = (event) => {
-        setSelectedShipper(event.target.value);
+        setSelectedHub(+event.target.value);
     };
 
     const handleSubmit = () => {
-        if (!selectedShipper) {
+        if (!selectedHub) {
             alert('Please select shipper!');
         }
-        onHandleAssign(selectedShipper);
-        setSelectedShipper(null);
+        onHandleAssign(selectedHub);
+        setSelectedHub(null);
     };
 
     return (
         <>
             <List className={classes.container} subheader={<li />}>
                 <FormControl component="fieldset" className={classes.formControl}>
-                    <FormLabel component="legend">List Shipper</FormLabel>
+                    <FormLabel component="legend">List Hub</FormLabel>
                     <RadioGroup
-                        aria-label="List shipper"
+                        aria-label="List hubs"
                         onChange={handleChange}
-                        value={selectedShipper}
+                        value={selectedHub}
                     >
-                        {shippers.map((shipper, index) => (
-                            <FormControlLabel
+                        {hubs.map((hub, index) => {
+                            return <FormControlLabel
                                 key={index}
-                                value={shipper.phone}
+                                value={+hub.id}
                                 control={<Radio />}
-                                label={shipper.last_name + " " + shipper.first_name}
+                                label={hub.name}
                             />
-                        ))}
+                        })}
                     </RadioGroup>
                 </FormControl>
             </List>

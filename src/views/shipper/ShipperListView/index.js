@@ -1,12 +1,19 @@
-import React, { useState } from 'react';
+import React, {
+  useState,
+  useEffect
+} from 'react';
 import {
   Box,
   Container,
-  makeStyles
+  Grid,
+  makeStyles,
 } from '@material-ui/core';
 import Page from '../../../components/Page';
-import Results from './Results';
 import Toolbar from './Toolbar';
+import { SHIPPER_ENDPOINT } from '../../../api/endpoint';
+import Cookies from 'js-cookie';
+import { USER_TOKEN } from '../../../common';
+import ShipperList from './ShipperList';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -14,21 +21,57 @@ const useStyles = makeStyles((theme) => ({
     minHeight: '100%',
     paddingBottom: theme.spacing(3),
     paddingTop: theme.spacing(3)
+  },
+  productCard: {
+    height: '100%'
   }
 }));
 
 const ShipperListView = () => {
   const classes = useStyles();
+  const [shippers, setShippers] = useState([]);
+
+  useEffect(() => {
+    fetchShipper();
+  }, []);
+
+  const fetchShipper = async () => {
+    const response = await fetch(SHIPPER_ENDPOINT, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + Cookies.get(USER_TOKEN)
+      },
+    });
+
+    if (response.status !== 200) {
+      return;
+    }
+
+    const json = await response.json();
+    const result = json.data;
+
+    const onSuccess = (data) => {
+      setShippers(data);
+    };
+
+    onSuccess(result);
+  }
+
+  const onReload = async () => {
+    fetchShipper();
+  };
 
   return (
     <Page
       className={classes.root}
-      title="Shippers"
-    >
+      title="Shippers">
       <Container maxWidth={false}>
         <Toolbar />
         <Box mt={3}>
-          <Results />
+          <Grid container spacing={3}>
+            <ShipperList shippers={shippers} onReload={onReload} />
+          </Grid>
         </Box>
       </Container>
     </Page>

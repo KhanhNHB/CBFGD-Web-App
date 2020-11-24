@@ -175,10 +175,10 @@ const InvoicesList = ({ onReload, className, invoices, ...rest }) => {
                 {invoices.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((invoice) => {
                   return (
                     <TableRow hover role="checkbox" tabIndex={-1} key={invoice.id} onClick={() => handleClickInvoiceItem(invoice)}>
-                      {columns.map((column) => {
+                      {columns.map((column, index) => {
                         const value = _hanleRowTableData(column.id, invoice[column.id]);
                         return (
-                          <TableCell align={column.align}>
+                          <TableCell align={column.align} id={index}>
                             {value}
                           </TableCell>
                         );
