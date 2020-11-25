@@ -24,12 +24,10 @@ import API from '../../../api/API';
 import ModalShipperDetail from '../../../components/ModalShipperDetail';
 
 const columns = [
-  // { id: 'id', label: 'Id', minWidth: 100, align: 'center' },
   { id: 'avatar', label: 'Avatar', minWidth: 200, align: 'center' },
   { id: 'last_name', label: 'Last name', minWidth: 200, align: 'center' },
   { id: 'first_name', label: 'First name', minWidth: 500, align: 'center' },
   { id: 'phone', label: 'Phone', minWidth: 200, align: 'center' },
-  // { id: 'created_at', label: 'Created at', minWidth: 200, align: 'center' },
   { id: 'status', label: 'status', minWidth: 120, align: 'center' },
 ];
 
@@ -93,9 +91,7 @@ const ShipperList = ({ onReload, className, shippers, ...rest }) => {
     const data = {
       shipper_phone: selectedShipper
     };
-
-    const response = await API.patch(HUB_ENDPOINT + "/" + hub_id + "/assign_shipper", data);
-
+    await API.patch(HUB_ENDPOINT + "/" + hub_id + "/assign_shipper", data);
     onReload();
     setSelectedShipper(null);
     handleInvisibleModal();
@@ -157,13 +153,17 @@ const ShipperList = ({ onReload, className, shippers, ...rest }) => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {shippers.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((shipper) => {
+                {shippers.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((shipper, index) => {
                   return (
-                    <TableRow hover role="checkbox" tabIndex={-1} key={shipper.phone} onClick={() => handleClickShipperItem(shipper)}>
+                    <TableRow hover role="checkbox" tabIndex={-1} key={shipper.phone}>
                       {columns.map((column, index) => {
                         const value = _hanleRowTableData(column.id, shipper[column.id]);
                         return (
-                          <TableCell align={column.align} id={index}>
+                          <TableCell
+                            align={column.align}
+                            id={index}
+                            onClick={() => handleClickShipperItem(shipper)}
+                          >
                             {value}
                           </TableCell>
                         );

@@ -3,7 +3,7 @@ import { Map, GoogleApiWrapper, Marker, Circle } from 'google-maps-react';
 import API from '../../api/API';
 import { HUB_ENDPOINT, INVOICE_ENDPOINT } from '../../api/endpoint';
 import { useDispatch, useSelector } from 'react-redux';
-import { actGetListHub, actGetListInvoice, actLoadInvoiceList } from '../../actions';
+import { actGetListHub, actLoadInvoiceList } from '../../actions';
 
 export function MapContainer(props) {
   const dispatch = useDispatch();
@@ -31,11 +31,11 @@ export function MapContainer(props) {
           dispatch(actLoadInvoiceList(fetchData.data));
         }
       });
-  }, []);
+  }, [dispatch]);
 
-  const moveMarker = (marker) => {
-    // ..
-  }
+  // const moveMarker = (marker) => {
+  //   // ..
+  // }
 
   const displayHubMarkers = () => {
     return hubLocation.map((store, index) => {
@@ -107,4 +107,3 @@ export function MapContainer(props) {
 export default GoogleApiWrapper({
   apiKey: 'AIzaSyAtGg0XWituHRy95vbyislioKh59n_PxHY'
 })(MapContainer);
-

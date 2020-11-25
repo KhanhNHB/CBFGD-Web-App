@@ -20,7 +20,7 @@ import { Search as SearchIcon } from 'react-feather';
 import { useSelector, useDispatch } from 'react-redux';
 import API from '../../../api/API';
 import { actChangeKeyword, actLoadInvoices, actLoadProvider } from '../../../actions/index';
-import { INVOICE_ENDPOINT } from '../../../api/endpoint';
+import { INVOICE_ENDPOINT, PROVIDER_ENDPOINT } from '../../../api/endpoint';
 
 const useStyles = makeStyles((theme) => ({
   root: {},
@@ -51,7 +51,7 @@ const Toolbar = ({ onHandleFileUpload, onHandleFileChange, ...rest }) => {
   };
 
   useEffect(() => {
-    API.get('http://18.141.214.35:8090/providers')
+    API.get(PROVIDER_ENDPOINT)
       .then(async response => {
         if (response.ok) {
           const fetchData = await response.json();
@@ -65,7 +65,7 @@ const Toolbar = ({ onHandleFileUpload, onHandleFileChange, ...rest }) => {
 
   useEffect(() => {
     if (selectedProvider !== 'NONE') {
-      API.get(`http://18.141.214.35:8090/providers/${selectedProvider}`)
+      API.get(`${PROVIDER_ENDPOINT}/${selectedProvider}`)
         .then(async response => {
           if (response.ok) {
             const fetchData = await response.json();
@@ -98,10 +98,7 @@ const Toolbar = ({ onHandleFileUpload, onHandleFileChange, ...rest }) => {
   }
 
   return (
-    <div
-      className={clsx(classes.root)}
-      {...rest}
-    >
+    <div className={clsx(classes.root)} {...rest}>
       <Box
         display="flex"
         justifyContent="flex-end"
@@ -156,9 +153,7 @@ const Toolbar = ({ onHandleFileUpload, onHandleFileChange, ...rest }) => {
                 value={selectedProvider}
                 onChange={handleChangeProvider}
               >
-                {
-                  elementProviderMenuItem
-                }
+                {elementProviderMenuItem}
               </Select>
             </FormControl>
           </CardContent>

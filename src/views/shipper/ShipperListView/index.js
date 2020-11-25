@@ -11,9 +11,8 @@ import {
 import Page from '../../../components/Page';
 import Toolbar from './Toolbar';
 import { SHIPPER_ENDPOINT } from '../../../api/endpoint';
-import Cookies from 'js-cookie';
-import { USER_TOKEN } from '../../../common';
 import ShipperList from './ShipperList';
+import API from '../../../api/API';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -36,14 +35,7 @@ const ShipperListView = () => {
   }, []);
 
   const fetchShipper = async () => {
-    const response = await fetch(SHIPPER_ENDPOINT, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + Cookies.get(USER_TOKEN)
-      },
-    });
-
+    const response = await API.get(SHIPPER_ENDPOINT);
     if (response.status !== 200) {
       return;
     }

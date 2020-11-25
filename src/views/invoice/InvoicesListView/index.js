@@ -1,7 +1,4 @@
-import React, {
-  useState,
-  useEffect
-} from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Container,
@@ -19,8 +16,7 @@ import {
 } from '../../../api/endpoint';
 import Cookies from 'js-cookie';
 import { USER_TOKEN } from '../../../common';
-import { useSelector, useDispatch } from 'react-redux';
-import { actLoadInvoices } from '../../../actions';
+import { useSelector } from 'react-redux';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -44,7 +40,6 @@ const useStyles = makeStyles((theme) => ({
 
 const Invoices = () => {
   const classes = useStyles();
-  const dispatch = useDispatch();
 
   const [fileSelected, setFileSelected] = useState(null);
   const invoices = useSelector(state => state.invoice.invoices);
@@ -91,10 +86,7 @@ const Invoices = () => {
           </Grid>
         </Box>
       </Container>
-      <Modal
-        open={loadingModal}
-        className={classes.loadingModal}
-      >
+      <Modal open={loadingModal} className={classes.loadingModal}>
         <CircularProgress />
       </Modal>
     </Page>

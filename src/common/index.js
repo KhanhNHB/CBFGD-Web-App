@@ -41,3 +41,9 @@ export const DELIVERY_STATUS = {
     // hoàn trả- sau 3 lần cancelled
     RETURN_REFUND: 'REFUND',
 }
+
+export const GENDER_ITEMS = [
+    { id: 'Male', title: 'Male' },
+    { id: 'Female', title: 'Female' },
+    { id: '', title: 'Other' },
+]

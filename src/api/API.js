@@ -23,6 +23,17 @@ export default {
             body: JSON.stringify(body),
         })
     },
+    put: async (url, body) => {
+        return await fetch(url, {
+            method: 'PUT',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + Cookies.get(USER_TOKEN)
+            },
+            body: JSON.stringify(body),
+        })
+    },
     patch: async (url, body) => {
         return await fetch(url, {
             method: 'PATCH',

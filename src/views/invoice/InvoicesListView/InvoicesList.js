@@ -180,42 +180,38 @@ const InvoicesList = ({ ...rest }) => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {
-                  invoices.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((invoice, index) => {
-                    return (
-                      <TableRow hover role="checkbox" tabIndex={-1} key={invoice.id}>
-                        {
-                          columns.map((column, index) => {
-                            const value = _hanleRowTableData(column.id, invoice[column.id]);
-                            return (
-                              <TableCell
-                                key={index}
-                                align={column.align}
-                                onClick={() => handleClickInvoiceItem(invoice)}
-                              >
-                                {value}
-                              </TableCell>
-                            );
-                          })
-                        }
-                        <TableCell
-                          key={index}
-                          align={"center"}
-                        >
-                          <Button
-                            color="primary"
-                            variant="contained"
-                            onClick={() => handleSelectedRow(invoice.id)}
-                            style={{ color: 'white' }}
-                            disabled={invoice.is_assign ? true : false}
+                {invoices.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((invoice, index) => {
+                  return (
+                    <TableRow hover role="checkbox" tabIndex={-1} key={invoice.id}>
+                      {columns.map((column, index) => {
+                        const value = _hanleRowTableData(column.id, invoice[column.id]);
+                        return (
+                          <TableCell
+                            key={index}
+                            align={column.align}
+                            onClick={() => handleClickInvoiceItem(invoice)}
                           >
-                            {invoice.is_assign ? 'Assigned' : 'Assign'}
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })
-                }
+                            {value}
+                          </TableCell>
+                        );
+                      })}
+                      <TableCell
+                        key={index}
+                        align={"center"}
+                      >
+                        <Button
+                          color="primary"
+                          variant="contained"
+                          onClick={() => handleSelectedRow(invoice.id)}
+                          style={{ color: 'white' }}
+                          disabled={invoice.is_assign ? true : false}
+                        >
+                          {invoice.is_assign ? 'Assigned' : 'Assign'}
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           </TableContainer>
