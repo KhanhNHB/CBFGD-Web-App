@@ -11,7 +11,7 @@ import {
     List
 } from '@material-ui/core';
 import API from '../../../api/API';
-import { HUB_ENDPOINT, SHIPPER_ENDPOINT } from '../../../api/endpoint';
+import { HUB_ENDPOINT } from '../../../api/endpoint';
 
 const useStyles = makeStyles((theme) => ({
     root: {

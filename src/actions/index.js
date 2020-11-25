@@ -55,3 +55,10 @@ export const actLoadInvoiceList = (invoiceList) => {
         invoiceList,
     }
 };
+
+export const actLoadProfile = (profile) => {
+    return {
+        type: types.LOAD_PROFILE,
+        profile
+    }
+}

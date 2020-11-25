@@ -1,192 +1,104 @@
-import React, { useState } from 'react';
+import React from 'react';
 import clsx from 'clsx';
 import PropTypes from 'prop-types';
 import {
-  Box,
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  Divider,
-  Grid,
-  TextField,
   makeStyles
 } from '@material-ui/core';
+import { Formik } from 'formik';
+import { Form } from './Form';
+import * as Yup from 'yup';
+import API from '../../../api/API';
+import { ADMIN_ENDPOINT } from '../../../api/endpoint';
+import Cookies from 'js-cookie';
+import { USER_TOKEN } from '../../../common';
+import { useNavigate } from 'react-router-dom';
 
-const states = [
-  {
-    value: 'alabama',
-    label: 'Alabama'
-  },
-  {
-    value: 'new-york',
-    label: 'New York'
-  },
-  {
-    value: 'san-francisco',
-    label: 'San Francisco'
+const useStyles = makeStyles((theme) => ({
+  root: {
+    '& .MuiTextField-root': {
+      margin: theme.spacing(1)
+    }
   }
-];
-
-const useStyles = makeStyles(() => ({
-  root: {}
 }));
 
-const ProfileDetails = ({ className, ...rest }) => {
+const formSchema = Yup.object().shape({
+  first_name: Yup.string().required("First name is not empty"),
+  last_name: Yup.string().required("Last name is not empty"),
+  email: Yup.string().email("Email is incorrect"),
+  phone: Yup.number().required("Phone is not empty"),
+  DOB: Yup.date()
+});
+
+const ProfileDetails = ({ user, className }) => {
   const classes = useStyles();
-  const [values, setValues] = useState({
-    firstName: 'Katarina',
-    lastName: 'Smith',
-    email: 'demo@devias.io',
-    phone: '',
-    state: 'Alabama',
-    country: 'USA'
+  const navigate = useNavigate();
+
+  Object.keys(user).map(key => {
+    if (!user[key] || user[key] === undefined) {
+      user[key] = '';
+    }
+    return user[key];
   });
 
-  const handleChange = (event) => {
-    setValues({
-      ...values,
-      [event.target.name]: event.target.value
-    });
-  };
+  const handleUpdate = async (data) => {
+    const isChanged = JSON.stringify(user) !== JSON.stringify(data);
+    if (!isChanged) return;
+
+    const dataBody = {
+      name: (data.last_name).trim() + " " + data.first_name,
+      gender: data.gender === 'Other' ? '' : data.gender,
+      email: data.email,
+      address: data.address,
+      phone: +data.phone,
+      DOB: data.DOB
+    };
+
+    const response = await API.put(ADMIN_ENDPOINT + `/${user.phone}`, dataBody);
+
+    const updatedData = await response.json();
+    const messageError = updatedData.message;
+    if (messageError) {
+      if (updatedData.message.includes('Duplicate')) {
+        alert('Phone is existed. Please try again.');
+      } else {
+        alert(updatedData.message);
+      }
+      return;
+    }
+
+    Cookies.remove(USER_TOKEN);
+    navigate('/', { replace: true });
+  }
 
   return (
-    <form
-      autoComplete="off"
-      noValidate
-      className={clsx(classes.root, className)}
-      {...rest}
-    >
-      <Card>
-        <CardHeader
-          subheader="The information can be edited"
-          title="Profile"
-        />
-        <Divider />
-        <CardContent>
-          <Grid
-            container
-            spacing={3}
-          >
-            <Grid
-              item
-              md={6}
-              xs={12}
-            >
-              <TextField
-                fullWidth
-                helperText="Please specify the first name"
-                label="First name"
-                name="firstName"
-                onChange={handleChange}
-                required
-                value={values.firstName}
-                variant="outlined"
-              />
-            </Grid>
-            <Grid
-              item
-              md={6}
-              xs={12}
-            >
-              <TextField
-                fullWidth
-                label="Last name"
-                name="lastName"
-                onChange={handleChange}
-                required
-                value={values.lastName}
-                variant="outlined"
-              />
-            </Grid>
-            <Grid
-              item
-              md={6}
-              xs={12}
-            >
-              <TextField
-                fullWidth
-                label="Email Address"
-                name="email"
-                onChange={handleChange}
-                required
-                value={values.email}
-                variant="outlined"
-              />
-            </Grid>
-            <Grid
-              item
-              md={6}
-              xs={12}
-            >
-              <TextField
-                fullWidth
-                label="Phone Number"
-                name="phone"
-                onChange={handleChange}
-                type="number"
-                value={values.phone}
-                variant="outlined"
-              />
-            </Grid>
-            <Grid
-              item
-              md={6}
-              xs={12}
-            >
-              <TextField
-                fullWidth
-                label="Country"
-                name="country"
-                onChange={handleChange}
-                required
-                value={values.country}
-                variant="outlined"
-              />
-            </Grid>
-            <Grid
-              item
-              md={6}
-              xs={12}
-            >
-              <TextField
-                fullWidth
-                label="Select State"
-                name="state"
-                onChange={handleChange}
-                required
-                select
-                SelectProps={{ native: true }}
-                value={values.state}
-                variant="outlined"
-              >
-                {states.map((option) => (
-                  <option
-                    key={option.value}
-                    value={option.value}
-                  >
-                    {option.label}
-                  </option>
-                ))}
-              </TextField>
-            </Grid>
-          </Grid>
-        </CardContent>
-        <Divider />
-        <Box
-          display="flex"
-          justifyContent="flex-end"
-          p={2}
-        >
-          <Button
-            color="primary"
-            variant="contained"
-          >
-            Save details
-          </Button>
-        </Box>
-      </Card>
-    </form>
+    <div className={clsx(classes.root, className)}>
+      <Formik
+        validationSchema={formSchema}
+        initialValues={user}
+        onSubmit={(data) => handleUpdate(data)}
+        enableReinitialize
+      >
+        {({
+          values,
+          errors,
+          handleSubmit,
+          handleChange,
+          handleBlur,
+          touched,
+        }) => {
+          return (
+            <Form
+              values={values}
+              errors={errors}
+              touched={touched}
+              handleSubmit={handleSubmit}
+              handleBlur={handleBlur}
+              handleChange={handleChange}
+            />
+          );
+        }}
+      </Formik>
+    </div>
   );
 };
 

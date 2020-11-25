@@ -110,6 +110,7 @@ const LoginView = () => {
               type="submit"
               variant="contained"
               onClick={() => signIn(username, password)}
+              style={{ color: "white" }}
             >
               {
                 isLoading
