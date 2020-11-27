@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
 import {
   Box,
-  Button,
   Card,
   CardContent,
   TextField,
@@ -12,8 +11,6 @@ import {
   makeStyles,
 } from '@material-ui/core';
 import { Search as SearchIcon } from 'react-feather';
-import ModalShipperAdd from '../../../components/ModalShipperAdd';
-
 
 const useStyles = makeStyles((theme) => ({
   root: {},
@@ -33,11 +30,7 @@ const Toolbar = ({ onHandleFileUpload, onHandleFileChange, className, ...rest })
   const classes = useStyles();
 
   return (
-    <div
-      className={clsx(classes.root, className)}
-      {...rest}
-    >
-
+    <div className={clsx(classes.root, className)} {...rest}>
       <Box mt={3}>
         <Card>
           <CardContent>

@@ -17,7 +17,6 @@ import { SHIPPER_ENDPOINT } from '../api/endpoint';
 import { useDispatch } from 'react-redux';
 import { actCreateShipper, actGetAllShipper } from '../actions';
 import { GENDER_ITEMS } from '../common';
-import datetimeUtils from '../utils/datetimeUtils';
 import CloseIcon from '@material-ui/icons/Close';
 const useStyles = makeStyles((theme) => ({
     container: {
@@ -88,7 +87,6 @@ const ModalShipperAdd = (props, { values,
             props.onCloseModal();
             dispatch(actGetAllShipper(fetchData.data));
         }
-
     }
 
     return (
