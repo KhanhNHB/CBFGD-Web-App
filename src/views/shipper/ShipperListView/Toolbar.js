@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
 import {
@@ -10,14 +10,22 @@ import {
   InputAdornment,
   SvgIcon,
   makeStyles,
-  Input
 } from '@material-ui/core';
 import { Search as SearchIcon } from 'react-feather';
+import ModalShipperAdd from '../../../components/ModalShipperAdd';
+
 
 const useStyles = makeStyles((theme) => ({
   root: {},
   importButton: {
     marginRight: theme.spacing(1)
+  },
+  modal: {
+    display: 'flex',
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
   }
 }));
 
@@ -29,28 +37,7 @@ const Toolbar = ({ onHandleFileUpload, onHandleFileChange, className, ...rest })
       className={clsx(classes.root, className)}
       {...rest}
     >
-      <Box
-        display="flex"
-        justifyContent="flex-end"
-      >
-        <Input type="file" onChange={(e) => onHandleFileChange(e)} />
-        <Button
-          className={classes.importButton}
-          onClick={(e) => onHandleFileUpload(e)}
-          color="primary"
-          variant="contained"
-          style={{ color: 'white', marginLeft: 10 }}
-        >
-          Import Excel
-        </Button>
-        <Button
-          color="primary"
-          variant="contained"
-          style={{ color: 'white' }}
-        >
-          Add Invoice
-        </Button>
-      </Box>
+
       <Box mt={3}>
         <Card>
           <CardContent>
