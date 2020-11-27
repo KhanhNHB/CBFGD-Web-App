@@ -22,6 +22,7 @@ import { STATUS } from '../../../common/index';
 import { HUB_ENDPOINT } from '../../../api/endpoint';
 import API from '../../../api/API';
 import ModalShipperDetail from '../../../components/ModalShipperDetail';
+import ModalShipperAdd from '../../../components/ModalShipperAdd';
 
 const columns = [
   { id: 'avatar', label: 'Avatar', minWidth: 200, align: 'center' },
@@ -56,7 +57,14 @@ const ShipperList = ({ onReload, className, shippers, ...rest }) => {
   const [selectedShipper, setSelectedShipper] = useState(null);
   const [visibleModalShipperDetail, setVisibleModalShipperDetail] = useState(false);
   const [shipper, setShipper] = useState({});
-
+  const [modalOpenAdd, setModalOpenAdd] = useState(false);
+  const openModalFormAdd = () => {
+    setModalOpenAdd(true);
+    console.log("aaaaaaaaaaaaaa");
+  }
+  const onCloseModalAdd = () => {
+    setModalOpenAdd(false);
+  }
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
@@ -132,8 +140,23 @@ const ShipperList = ({ onReload, className, shippers, ...rest }) => {
 
   return (
     <>
+      <Box
+        display="flex"
+        justifyContent="flex-end"
+      >
+        <Button
+          color="primary"
+          variant="contained"
+          style={{ color: 'white' }}
+          onClick={openModalFormAdd}
+        >
+          Add Shipper
+        </Button>
+      </Box>
       <Card className={clsx(classes.root, className)} {...rest} >
+
         <Box>
+
           <TableContainer className={classes.container}>
             <Table stickyHeader aria-label="sticky table">
               <TableHead>
@@ -211,6 +234,11 @@ const ShipperList = ({ onReload, className, shippers, ...rest }) => {
             shipper={shipper}
             onCloseModal={handleInvisibleModalShipperDetail}
           />
+        </div>
+      </Modal>
+      <Modal open={modalOpenAdd}>
+        <div className={classes.modal}>
+          <ModalShipperAdd onCloseModal={onCloseModalAdd} />
         </div>
       </Modal>
     </>

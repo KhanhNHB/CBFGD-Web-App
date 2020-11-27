@@ -34,7 +34,7 @@ const routes = [
     children: [
       { path: '/', element: <MainLayout /> },
       { path: 'register', element: <RegisterView /> },
-      { path: '/', element: <Navigate to="/app/dashboard" /> },
+      { path: '/', element: <Navigate to="/app/invoices-list" /> },
     ]
   }
 ];

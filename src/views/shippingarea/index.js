@@ -1,20 +1,30 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Map, GoogleApiWrapper, Marker, Circle } from 'google-maps-react';
 import API from '../../api/API';
 import { HUB_ENDPOINT, INVOICE_ENDPOINT } from '../../api/endpoint';
 import { useDispatch, useSelector } from 'react-redux';
 import { actGetListHub, actLoadInvoiceList } from '../../actions';
+import { Box, Button, Container, makeStyles, Modal } from '@material-ui/core';
+import ModalHubAdd from '../../components/ModalHubAdd';
 
 export function MapContainer(props) {
   const dispatch = useDispatch();
 
   const mapStyles = {
     width: '100%',
-    height: '80%',
+    height: '100%',
   };
+
   const hubLocation = useSelector(state => state.hub.listHub);
   const invoiceLocation = useSelector(state => state.invoice.invoiceList);
+  const [openHub, setOpenHub] = useState(false);
 
+  const handleOpenHub = () => {
+    setOpenHub(true);
+  }
+  const handleCloseHub = () => {
+    setOpenHub(false);
+  }
   useEffect(() => {
     API.get(`${HUB_ENDPOINT}`)
       .then(async response => {
@@ -33,9 +43,6 @@ export function MapContainer(props) {
       });
   }, [dispatch]);
 
-  // const moveMarker = (marker) => {
-  //   // ..
-  // }
 
   const displayHubMarkers = () => {
     return hubLocation.map((store, index) => {
@@ -66,9 +73,9 @@ export function MapContainer(props) {
         }}
         icon={{
           url: "https://res.cloudinary.com/dvehkdedj/image/upload/v1605980191/gain-icon-point-2_wyxrpw.png",
-          width: 16,
-          height: 16,
-          scaledSize: new window.google.maps.Size(22, 22)
+          width: 5,
+          height: 5,
+          scaledSize: new window.google.maps.Size(15, 15)
         }}
         label={invoice.id}
         onClick={onMarkerClick}
@@ -89,7 +96,9 @@ export function MapContainer(props) {
   }
 
   return (
+
     <>
+
       <Map
         google={props.google}
         zoom={12}
@@ -100,7 +109,32 @@ export function MapContainer(props) {
         {displayHubMarkers()}
         {displayCircles()}
       </Map>
+      <div>
+        <Container>
+          <Box
+            display="flex"
+            justifyContent="flex-end"
+            style={{ float: "left", marginLeft: '10%', marginTop: 10 }}
+          >
+            <Button
+              color="primary"
+              variant="contained"
+              style={{ color: 'white', height: 45, width: 100 }}
+              onClick={handleOpenHub}
+            >
+              Add Hub
+        </Button>
+          </Box>
+        </Container>
+        <Modal open={openHub}>
+          <ModalHubAdd onCLoseHub={handleCloseHub} />
+        </Modal>
+      </div>
     </>
+
+
+
+
   );
 }
 

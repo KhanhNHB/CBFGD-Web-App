@@ -16,7 +16,8 @@ import {
   ShoppingBag as ShoppingBagIcon,
   User as UserIcon,
   UserPlus as UserPlusIcon,
-  Users as UsersIcon
+  Users as UsersIcon,
+  MapPin as MapIcon
 } from 'react-feather';
 import NavItem from './NavItem';
 
@@ -54,7 +55,7 @@ const items = [
   // },
   {
     href: '/app/shipping-area',
-    icon: UserPlusIcon,
+    icon: MapIcon,
     title: 'Shipping Area'
   },
   {
@@ -180,7 +181,7 @@ NavBar.propTypes = {
 };
 
 NavBar.defaultProps = {
-  onMobileClose: () => {},
+  onMobileClose: () => { },
   openMobile: false
 };
 

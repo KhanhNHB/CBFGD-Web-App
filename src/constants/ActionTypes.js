@@ -8,3 +8,4 @@ export const LOAD_PROVIDER = 'LOAD_PROVIDER';
 export const LOAD_INVOICES = 'LOAD_INVOICES';
 export const CHANGE_KEYWORD = 'CHANGE_KEYWORD';
 export const LOAD_PROFILE = 'LOAD_PROFILE';
+export const CREATE_HUB = 'CREATE_HUB';

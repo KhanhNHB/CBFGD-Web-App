@@ -27,7 +27,12 @@ export const actGetListHub = (listHubs) => {
         listHubs,
     }
 };
-
+export const actCreateHub = (hub) => {
+    return {
+        type: types.CREATE_HUB,
+        hub,
+    }
+};
 export const actLoadProvider = (providers) => {
     return {
         type: types.LOAD_PROVIDER,

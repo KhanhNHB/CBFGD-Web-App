@@ -5,7 +5,7 @@ import hub from './hub';
 import providers from './providers';
 import invoice from './invoice';
 import profile from './profile';
-
+import CreateHub from './createhub';
 const appReducers = combineReducers({
         user,
         shippers,
@@ -13,5 +13,6 @@ const appReducers = combineReducers({
         providers,
         invoice,
         profile,
+        CreateHub
 });
 export default appReducers;
