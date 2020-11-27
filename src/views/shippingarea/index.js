@@ -4,7 +4,7 @@ import API from '../../api/API';
 import { HUB_ENDPOINT, INVOICE_ENDPOINT } from '../../api/endpoint';
 import { useDispatch, useSelector } from 'react-redux';
 import { actGetListHub, actLoadInvoiceList } from '../../actions';
-import { Box, Button, Container, makeStyles, Modal } from '@material-ui/core';
+import { Box, Button, Container, Modal } from '@material-ui/core';
 import ModalHubAdd from '../../components/ModalHubAdd';
 
 export function MapContainer(props) {
@@ -96,9 +96,7 @@ export function MapContainer(props) {
   }
 
   return (
-
     <>
-
       <Map
         google={props.google}
         zoom={12}
@@ -131,10 +129,6 @@ export function MapContainer(props) {
         </Modal>
       </div>
     </>
-
-
-
-
   );
 }
 
