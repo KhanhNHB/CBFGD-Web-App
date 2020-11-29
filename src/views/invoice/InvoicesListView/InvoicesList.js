@@ -173,7 +173,7 @@ const InvoicesList = ({ ...rest }) => {
       }
       setPage(+newPage);
     }
-
+    setPage(+newPage);
   };
 
   const handleSelectedRow = (invoiceId) => {
@@ -253,19 +253,20 @@ const InvoicesList = ({ ...rest }) => {
 
   return (
     <>
-      {data.invoices && data.invoices.length
-        ?
-        <>
-          <Card className={clsx(classes.root)} {...rest} >
-            <Box>
-              <TableContainer className={classes.container}>
-                <Table aria-label="sticky table">
-                  <EnhancedTableHead
-                    classes={classes}
-                    order={order}
-                    orderBy={orderBy}
-                    onRequestSort={handleRequestSort}
-                  />
+
+      <Card className={clsx(classes.root)} {...rest} >
+        <Box>
+          <TableContainer className={classes.container}>
+            <Table aria-label="sticky table">
+              <EnhancedTableHead
+                classes={classes}
+                order={order}
+                orderBy={orderBy}
+                onRequestSort={handleRequestSort}
+              />
+              {data.invoices && data.invoices.length
+                ?
+                <>
                   <TableBody>
                     {stableSort(data.invoices, getComparator(order, orderBy)).map((invoice, index) => {
                       return (
@@ -298,38 +299,42 @@ const InvoicesList = ({ ...rest }) => {
                       );
                     })}
                   </TableBody>
-                </Table>
-              </TableContainer>
-            </Box>
-            <TablePagination
-              rowsPerPageOptions={[0]}
-              component="div"
-              count={data.meta.totalItems}
-              rowsPerPage={rowsPerPage}
-              page={page}
-              onChangePage={handleChangePage}
-            />
-          </Card>
-          <Modal open={visiableModal}>
-            <div className={classes.modal}>
-              <ModalAssign
-                onInvisibleModel={handleInvisibleModal}
-                onVisibleModal={handleVisibleModal}
-                onHandleAssign={handleAssignInvoice}
-              />
-            </div>
-          </Modal>
-          <Modal open={visibleModalInvoiceDetail}>
-            <div>
-              <ModalInvoiceDetail
-                invoice={invoiceDetail}
-                onCloseModal={handleInvisibleModalInvoiceDetail}
-              />
-            </div>
-          </Modal>
-        </>
-        : null
-      }
+                </>
+                : null
+              }
+            </Table>
+          </TableContainer>
+        </Box>
+        {data.invoices && data.invoices.length
+          ?
+          <TablePagination
+            rowsPerPageOptions={[0]}
+            component="div"
+            count={data.meta.totalItems}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onChangePage={handleChangePage}
+          />
+          : null
+        }
+      </Card>
+      <Modal open={visiableModal}>
+        <div className={classes.modal}>
+          <ModalAssign
+            onInvisibleModel={handleInvisibleModal}
+            onVisibleModal={handleVisibleModal}
+            onHandleAssign={handleAssignInvoice}
+          />
+        </div>
+      </Modal>
+      <Modal open={visibleModalInvoiceDetail}>
+        <div>
+          <ModalInvoiceDetail
+            invoice={invoiceDetail}
+            onCloseModal={handleInvisibleModalInvoiceDetail}
+          />
+        </div>
+      </Modal>
     </>
   );
 };
