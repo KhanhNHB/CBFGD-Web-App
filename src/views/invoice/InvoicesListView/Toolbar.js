@@ -19,7 +19,7 @@ import {
 import { Search as SearchIcon } from 'react-feather';
 import { useSelector, useDispatch } from 'react-redux';
 import API from '../../../api/API';
-import { actChangeKeyword, actLoadInvoices, actLoadProvider } from '../../../actions/index';
+import { actChangeKeyword, actLoadInvoices, actLoadProvider, actLoadProviderName } from '../../../actions/index';
 import { INVOICE_ENDPOINT, PROVIDER_ENDPOINT } from '../../../api/endpoint';
 
 const useStyles = makeStyles((theme) => ({
@@ -46,8 +46,13 @@ const Toolbar = ({ onHandleFileUpload, onHandleFileChange, ...rest }) => {
   const [selectedProvider, setSelectedProvider] = useState('NONE');
   const dispatch = useDispatch();
 
+  useEffect(() => {
+    dispatch(actLoadProviderName(selectedProvider));
+  }, []);
+
   const handleChangeProvider = (event) => {
     setSelectedProvider(event.target.value);
+    dispatch(actLoadProviderName(event.target.value));
   };
 
   useEffect(() => {
@@ -65,23 +70,23 @@ const Toolbar = ({ onHandleFileUpload, onHandleFileChange, ...rest }) => {
 
   useEffect(() => {
     if (selectedProvider !== 'NONE') {
-      API.get(`${PROVIDER_ENDPOINT}/${selectedProvider}`)
+      API.get(INVOICE_ENDPOINT + `/providers/${selectedProvider}?page=1&limit=50`)
         .then(async response => {
           if (response.ok) {
             const fetchData = await response.json();
-            const invoices = fetchData.data.invoices;
-            dispatch(actLoadInvoices(invoices));
+            const data = { invoices: fetchData.data.items, meta: fetchData.data.meta };
+            dispatch(actLoadInvoices(data));
           }
         });
     } else {
-      API.get(INVOICE_ENDPOINT)
+      API.get(INVOICE_ENDPOINT + '?page=1&limit=50')
         .then(async response => {
           if (response.ok) {
             const fetchData = await response.json();
-            const invoices = fetchData.data;
-            dispatch(actLoadInvoices(invoices));
+            const data = { invoices: fetchData.data.items, meta: fetchData.data.meta };
+            dispatch(actLoadInvoices(data));
           }
-        })
+        });
     }
   }, [selectedProvider, dispatch]);
 

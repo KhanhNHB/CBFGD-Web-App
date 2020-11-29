@@ -42,7 +42,7 @@ const Invoices = () => {
   const classes = useStyles();
 
   const [fileSelected, setFileSelected] = useState(null);
-  const invoices = useSelector(state => state.invoice.invoices);
+  const data = useSelector(state => state.invoice.invoices);
   const [loadingModal, setLoadingModal] = useState(false);
 
   const onHandleFileUpload = async () => {
@@ -82,7 +82,7 @@ const Invoices = () => {
         <Toolbar onHandleFileUpload={onHandleFileUpload} onHandleFileChange={onFileChange} />
         <Box mt={3}>
           <Grid container spacing={3}>
-            <InvoicesList invoices={invoices} />
+            <InvoicesList data={data} />
           </Grid>
         </Box>
       </Container>
