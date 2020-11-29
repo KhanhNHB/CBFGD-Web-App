@@ -40,6 +40,13 @@ export const actLoadProvider = (providers) => {
     }
 };
 
+export const actLoadProviderName = (provider_name) => {
+    return {
+        type: types.LOAD_PROVIDER_NAME,
+        provider_name,
+    }
+};
+
 export const actLoadInvoices = (invoices) => {
     return {
         type: types.LOAD_INVOICES,

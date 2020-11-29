@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import clsx from 'clsx';
 import PropTypes from 'prop-types';
 import datetimeUtils from '../../../utils/datetimeUtils';
@@ -14,16 +14,18 @@ import {
   TableRow,
   makeStyles,
   Button,
-  Modal
+  Modal,
+  TableSortLabel,
 } from '@material-ui/core';
-
 import TableContainer from '@material-ui/core/TableContainer';
 import ModalAssign from './ModalAssign';
 import API from '../../../api/API';
+import { INVOICE_ENDPOINT } from '../../../api/endpoint';
 import { DELIVERIES_STATUS_ENDPOINT } from '../../../api/endpoint';
 import { INVOICE_STATUS, INVOICE_PRIORITY } from '../../../common';
 import ModalInvoiceDetail from '../../../components/ModalInvoiceDetail';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { actLoadInvoices } from '../../../actions/index';
 
 const columns = [
   { id: 'id', label: 'Id', minWidth: 200, align: 'center' },
@@ -45,6 +47,71 @@ const columns = [
   { id: 'created_at', label: 'Created At', minWidth: 200, align: 'center' },
 ];
 
+function descendingComparator(a, b, orderBy) {
+  if (b[orderBy] < a[orderBy]) {
+    return -1;
+  }
+  if (b[orderBy] > a[orderBy]) {
+    return 1;
+  }
+  return 0;
+}
+
+function getComparator(order, orderBy) {
+  return order === 'desc'
+    ? (a, b) => descendingComparator(a, b, orderBy)
+    : (a, b) => -descendingComparator(a, b, orderBy);
+}
+
+function stableSort(array, comparator) {
+  const stabilizedThis = array.map((el, index) => [el, index]);
+  stabilizedThis.sort((a, b) => {
+    const order = comparator(a[0], b[0]);
+    if (order !== 0) return order;
+    return a[1] - b[1];
+  });
+  return stabilizedThis.map((el) => el[0]);
+}
+
+const EnhancedTableHead = (props) => {
+  const { order, orderBy, onRequestSort } = props;
+  const createSortHandler = (property) => (event) => {
+    onRequestSort(event, property);
+  };
+
+  return (
+    <TableHead>
+      <TableRow>
+        {columns.map((headCell) => (
+          <TableCell
+            key={headCell.id}
+            padding={headCell.disablePadding ? 'none' : 'default'}
+            sortDirection={orderBy === headCell.id ? order : false}
+            align={headCell.align}
+            style={{ minWidth: headCell.minWidth }}
+          >
+            <TableSortLabel
+              active={orderBy === headCell.id}
+              direction={orderBy === headCell.id ? order : 'asc'}
+              onClick={createSortHandler(headCell.id)}
+            >
+              {headCell.label}
+            </TableSortLabel>
+          </TableCell>
+        ))}
+        <TableCell align={"center"} style={{ minWidth: 200 }}>Status</TableCell>
+      </TableRow>
+    </TableHead>
+  );
+}
+
+EnhancedTableHead.propTypes = {
+  classes: PropTypes.object.isRequired,
+  order: PropTypes.oneOf(['asc', 'desc']).isRequired,
+  orderBy: PropTypes.string.isRequired,
+  onRequestSort: PropTypes.func.isRequired,
+};
+
 const useStyles = makeStyles((theme) => ({
   root: {},
   avatar: {
@@ -64,22 +131,49 @@ const useStyles = makeStyles((theme) => ({
 
 const InvoicesList = ({ ...rest }) => {
   const classes = useStyles();
-  let invoices = rest.invoices;
+  const dispatch = useDispatch();
+  let data = rest.data;
+  let totalPage = 0;
+  const provider_name = useSelector(state => state.providers.provider_name);
   const keyword = useSelector(state => state.invoice.keyword);
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [page, setPage] = useState(totalPage);
+  const rowsPerPage = 50;
   const [visiableModal, setVisibleModal] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState(null);
   const [visibleModalInvoiceDetail, setVisibleModalInvoiceDetail] = useState(false);
   const [invoiceDetail, setInvoiceDetail] = useState({});
+  const [order, setOrder] = useState('asc');
+  const [orderBy, setOrderBy] = useState('id');
+  useEffect(() => {
+    if (data.invoices) {
+      totalPage = +data.meta.totalPages;
+    }
+  }, []);
 
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
+  const handleRequestSort = (event, property) => {
+    const isAsc = orderBy === property && order === 'asc';
+    setOrder(isAsc ? 'desc' : 'asc');
+    setOrderBy(property);
   };
 
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(+event.target.value);
-    setPage(0);
+  const handleChangePage = async (event, newPage) => {
+    if (provider_name !== 'NONE') {
+      const response = await API.get(INVOICE_ENDPOINT + `/providers/${provider_name}?page=${newPage + 1}&limit=50`);
+      if (response.ok) {
+        const fetchData = await response.json();
+        const dataByProvider = { invoices: fetchData.data.items, meta: fetchData.data.meta };
+        dispatch(actLoadInvoices(data));
+      }
+    } else {
+      const response = await API.get(INVOICE_ENDPOINT + `?page=${newPage + 1}&limit=50`);
+      if (response.ok) {
+        const fetchData = await response.json();
+        const data = { invoices: fetchData.data.items, meta: fetchData.data.meta };
+        dispatch(actLoadInvoices(data));
+      }
+      setPage(+newPage);
+    }
+
   };
 
   const handleSelectedRow = (invoiceId) => {
@@ -152,97 +246,90 @@ const InvoicesList = ({ ...rest }) => {
 
   // Search if have keyword.
   if (keyword) {
-    invoices = invoices.filter((invoice) => {
+    data.invoices = data.invoices.filter((invoice) => {
       return invoice.code.toLowerCase().indexOf(keyword.toLowerCase()) !== -1;
     });
   }
 
   return (
     <>
-      <Card className={clsx(classes.root)} {...rest} >
-        <Box>
-          <TableContainer className={classes.container}>
-            <Table stickyHeader aria-label="sticky table">
-              <TableHead>
-                <TableRow>
-                  {columns.map((column) => (
-                    <TableCell
-                      key={column.id}
-                      align={column.align}
-                      style={{ minWidth: column.minWidth }}
-                    >
-                      {column.label}
-                    </TableCell>
-                  ))}
-                  <TableCell align={"center"} style={{ minWidth: 200 }}>
-                    Status
-                </TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {invoices.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((invoice, index) => {
-                  return (
-                    <TableRow hover role="checkbox" tabIndex={-1} key={invoice.id}>
-                      {columns.map((column, index) => {
-                        const value = _hanleRowTableData(column.id, invoice[column.id]);
-                        return (
-                          <TableCell
-                            key={index}
-                            align={column.align}
-                            onClick={() => handleClickInvoiceItem(invoice)}
-                          >
-                            {value}
+      {data.invoices && data.invoices.length
+        ?
+        <>
+          <Card className={clsx(classes.root)} {...rest} >
+            <Box>
+              <TableContainer className={classes.container}>
+                <Table aria-label="sticky table">
+                  <EnhancedTableHead
+                    classes={classes}
+                    order={order}
+                    orderBy={orderBy}
+                    onRequestSort={handleRequestSort}
+                  />
+                  <TableBody>
+                    {stableSort(data.invoices, getComparator(order, orderBy)).map((invoice, index) => {
+                      return (
+                        <TableRow hover role="checkbox" tabIndex={-1} key={invoice.id}>
+                          {columns.map((column, index) => {
+                            const value = _hanleRowTableData(column.id, invoice[column.id]);
+                            return (
+                              <TableCell
+                                key={index}
+                                align={column.align}
+                                style={{ minWidth: column.minWidth }}
+                                onClick={() => handleClickInvoiceItem(invoice)}
+                              >
+                                {value}
+                              </TableCell>
+                            );
+                          })}
+                          <TableCell key={index} align={"center"} >
+                            <Button
+                              color="primary"
+                              variant="contained"
+                              onClick={() => handleSelectedRow(invoice.id)}
+                              style={{ color: 'white' }}
+                              disabled={invoice.is_assign ? true : false}
+                            >
+                              {invoice.is_assign ? 'Assigned' : 'Assign'}
+                            </Button>
                           </TableCell>
-                        );
-                      })}
-                      <TableCell
-                        key={index}
-                        align={"center"}
-                      >
-                        <Button
-                          color="primary"
-                          variant="contained"
-                          onClick={() => handleSelectedRow(invoice.id)}
-                          style={{ color: 'white' }}
-                          disabled={invoice.is_assign ? true : false}
-                        >
-                          {invoice.is_assign ? 'Assigned' : 'Assign'}
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </Box>
-        <TablePagination
-          rowsPerPageOptions={[10, 25, 100]}
-          component="div"
-          count={invoices.length}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onChangePage={handleChangePage}
-          onChangeRowsPerPage={handleChangeRowsPerPage}
-        />
-      </Card>
-      <Modal open={visiableModal}>
-        <div className={classes.modal}>
-          <ModalAssign
-            onInvisibleModel={handleInvisibleModal}
-            onVisibleModal={handleVisibleModal}
-            onHandleAssign={handleAssignInvoice}
-          />
-        </div>
-      </Modal>
-      <Modal open={visibleModalInvoiceDetail}>
-        <div>
-          <ModalInvoiceDetail
-            invoice={invoiceDetail}
-            onCloseModal={handleInvisibleModalInvoiceDetail}
-          />
-        </div>
-      </Modal>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Box>
+            <TablePagination
+              rowsPerPageOptions={[0]}
+              component="div"
+              count={data.meta.totalItems}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              onChangePage={handleChangePage}
+            />
+          </Card>
+          <Modal open={visiableModal}>
+            <div className={classes.modal}>
+              <ModalAssign
+                onInvisibleModel={handleInvisibleModal}
+                onVisibleModal={handleVisibleModal}
+                onHandleAssign={handleAssignInvoice}
+              />
+            </div>
+          </Modal>
+          <Modal open={visibleModalInvoiceDetail}>
+            <div>
+              <ModalInvoiceDetail
+                invoice={invoiceDetail}
+                onCloseModal={handleInvisibleModalInvoiceDetail}
+              />
+            </div>
+          </Modal>
+        </>
+        : null
+      }
     </>
   );
 };

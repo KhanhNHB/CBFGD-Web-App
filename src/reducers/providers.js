@@ -9,6 +9,9 @@ const prividers = (state = initialState, action) => {
         case types.LOAD_PROVIDER:
             state.providers = action.providers;
             return { ...state };
+        case types.LOAD_PROVIDER_NAME:
+            state.provider_name = action.provider_name;
+            return { ...state };
         default: return { ...state };
     }
 }
