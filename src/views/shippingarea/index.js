@@ -4,7 +4,7 @@ import API from '../../api/API';
 import { HUB_ENDPOINT, INVOICE_ENDPOINT } from '../../api/endpoint';
 import { useDispatch, useSelector } from 'react-redux';
 import { actGetListHub, actLoadInvoiceList } from '../../actions';
-import { Box, Button, Container, Modal } from '@material-ui/core';
+import { Box, Button, colors, Container, Modal } from '@material-ui/core';
 import ModalHubAdd from '../../components/ModalHubAdd';
 
 export function MapContainer(props) {
@@ -18,13 +18,17 @@ export function MapContainer(props) {
   const hubLocation = useSelector(state => state.hub.listHub);
   const invoiceLocation = useSelector(state => state.invoice.invoiceList);
   const [openHub, setOpenHub] = useState(false);
+  const [name, setName] = useState('');
+  const [radius, setRadius] = useState('');
 
   const handleOpenHub = () => {
     setOpenHub(true);
   }
+
   const handleCloseHub = () => {
     setOpenHub(false);
   }
+
   useEffect(() => {
     API.get(`${HUB_ENDPOINT}`)
       .then(async response => {
@@ -34,7 +38,7 @@ export function MapContainer(props) {
         }
       });
 
-    API.get(`${INVOICE_ENDPOINT}`)
+    API.get(`${INVOICE_ENDPOINT}/status/available`)
       .then(async response => {
         if (response.ok) {
           const fetchData = await response.json();
@@ -44,19 +48,29 @@ export function MapContainer(props) {
   }, [dispatch]);
 
 
+  const onMarkerClick = (evt) => {
+    // alert('Address: ' + evt.title + '\n' + 'Radius: ' + evt.radius);
+    setName(evt.title);
+    setRadius(evt.radius);
+    handleOpenHub(true);
+  };
+
   const displayHubMarkers = () => {
     return hubLocation.map((store, index) => {
-      return (
-        <Marker
-          position={{
-            lat: store.latitude,
-            lng: store.longitude
-          }}
-          draggable={true}
-          onDragend={(e) => {
-            console.log(e);
-          }}
-        />
+      return (<Marker
+        key={index}
+        position={{
+          lat: store.latitude,
+          lng: store.longitude,
+        }}
+        title={store.name}
+        radius={store.radius}
+        label={((store.name).length > 20) ? (((store.name).substring(0, 20 - 3)) + '...') : store.name}
+        style={{ color: 'white' }}
+        onClick={onMarkerClick}
+        {...props}
+      >
+      </Marker >
       );
     });
   }
@@ -67,6 +81,7 @@ export function MapContainer(props) {
     }
     return invoiceLocation.map((invoice, index) => {
       return <Marker
+        key={index}
         position={{
           lat: invoice.latitude,
           lng: invoice.longitude
@@ -77,17 +92,17 @@ export function MapContainer(props) {
           height: 5,
           scaledSize: new window.google.maps.Size(15, 15)
         }}
-        label={invoice.id}
         onClick={onMarkerClick}
         name={invoice.address}
         id={invoice.id}
       />
-    })
+    });
   };
 
   const displayCircles = () => {
     return hubLocation.map((store, index) => {
       return <Circle
+        key={index}
         center={{ lat: store.latitude, lng: store.longitude }}
         radius={store.radius}
         strokeColor={"#FF0000"}
@@ -117,7 +132,7 @@ export function MapContainer(props) {
             <Button
               color="primary"
               variant="contained"
-              style={{ color: 'white', height: 45, width: 100 }}
+              style={{ color: 'white', height: 45, width: 100, marginLeft: 120 }}
               onClick={handleOpenHub}
             >
               Add Hub
@@ -125,7 +140,7 @@ export function MapContainer(props) {
           </Box>
         </Container>
         <Modal open={openHub}>
-          <ModalHubAdd onCLoseHub={handleCloseHub} />
+          <ModalHubAdd onCLoseHub={handleCloseHub} name={name} radius={radius} />
         </Modal>
       </div>
     </>

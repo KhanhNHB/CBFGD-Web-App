@@ -253,7 +253,6 @@ const InvoicesList = ({ ...rest }) => {
 
   return (
     <>
-
       <Card className={clsx(classes.root)} {...rest} >
         <Box>
           <TableContainer className={classes.container}>

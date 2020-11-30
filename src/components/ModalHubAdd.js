@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     Button,
     Divider,
@@ -11,7 +11,8 @@ import API from '../api/API';
 import { HUB_ENDPOINT } from '../api/endpoint';
 import { useDispatch } from 'react-redux';
 import CloseIcon from '@material-ui/icons/Close';
-import { actCreateHub } from '../actions';
+import { actCreateHub, actGetListHub } from '../actions';
+
 const useStyles = makeStyles((theme) => ({
     container: {
         width: "50%",
@@ -55,21 +56,36 @@ const ModalShipperAdd = (props, { values,
     handleChange,
 }) => {
     const dispatch = useDispatch();
-    const [name, setName] = useState('');
-    const [radius, setRadius] = useState('');
+    const [name, setName] = useState(props.name ? props.name : '');
+    const [radius, setRadius] = useState(props.radius ? props.radius : '');
+    const [disabled, setDisabled] = useState(true);
+
+    useEffect(() => {
+        if (name && radius) {
+            setDisabled(false);
+        }
+    }, [name, radius]);
 
     const classes = useStyles();
     const handleAddHub = async () => {
+
         const response = await API.post(HUB_ENDPOINT, {
             name: name,
-            phone: radius,
+            radius: radius.toString(),
         });
+
         const fetchData = await response.json();
         if (!fetchData.message) {
             dispatch(actCreateHub(fetchData.data));
+            const response = await API.get(`${HUB_ENDPOINT}`);
+            if (response.ok) {
+                const fetchHub = await response.json();
+                dispatch(actGetListHub(fetchHub.data));
+            }
+            setName('');
+            setRadius('');
             props.onCLoseHub();
         }
-
     }
 
     return (
@@ -86,7 +102,7 @@ const ModalShipperAdd = (props, { values,
                         <Grid item xs={12} sm={6}>
                             <TextField
                                 fullWidth
-                                placeholder="Name (*)"
+                                placeholder="Address of Hub (*)"
                                 name="name"
                                 value={name}
                                 onChange={e => setName(e.target.value)}
@@ -96,7 +112,7 @@ const ModalShipperAdd = (props, { values,
                         <Grid item xs={12} sm={6}>
                             <TextField
                                 fullWidth
-                                placeholder="Add Radius of Hub (*)"
+                                placeholder="Radius of Hub (*)"
                                 name="phone"
                                 value={radius}
                                 onChange={e => setRadius(e.target.value)}
@@ -113,9 +129,11 @@ const ModalShipperAdd = (props, { values,
                                     color="primary"
                                     variant="contained"
                                     onClick={handleAddHub}
+                                    style={{ color: 'white' }}
+                                    disabled={disabled}
                                 >
                                     Save Hub
-                        </Button>
+                                </Button>
                             </Grid>
                         </Grid>
                     </Grid>
