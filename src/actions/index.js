@@ -73,4 +73,4 @@ export const actLoadProfile = (profile) => {
         type: types.LOAD_PROFILE,
         profile
     }
-}
+};

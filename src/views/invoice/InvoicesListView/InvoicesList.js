@@ -144,11 +144,13 @@ const InvoicesList = ({ ...rest }) => {
   const [invoiceDetail, setInvoiceDetail] = useState({});
   const [order, setOrder] = useState('asc');
   const [orderBy, setOrderBy] = useState('id');
+
   useEffect(() => {
     if (data.invoices) {
       totalPage = +data.meta.totalPages;
+      setPage(0);
     }
-  }, []);
+  }, [data]);
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -245,8 +247,9 @@ const InvoicesList = ({ ...rest }) => {
   };
 
   // Search if have keyword.
+  let filterData = data.invoices;
   if (keyword) {
-    data.invoices = data.invoices.filter((invoice) => {
+    filterData = filterData.filter((invoice) => {
       return invoice.code.toLowerCase().indexOf(keyword.toLowerCase()) !== -1;
     });
   }
@@ -263,11 +266,11 @@ const InvoicesList = ({ ...rest }) => {
                 orderBy={orderBy}
                 onRequestSort={handleRequestSort}
               />
-              {data.invoices && data.invoices.length
+              {filterData && filterData.length
                 ?
                 <>
                   <TableBody>
-                    {stableSort(data.invoices, getComparator(order, orderBy)).map((invoice, index) => {
+                    {stableSort(filterData, getComparator(order, orderBy)).map((invoice, index) => {
                       return (
                         <TableRow hover role="checkbox" tabIndex={-1} key={invoice.id}>
                           {columns.map((column, index) => {
@@ -304,7 +307,7 @@ const InvoicesList = ({ ...rest }) => {
             </Table>
           </TableContainer>
         </Box>
-        {data.invoices && data.invoices.length
+        {filterData && filterData.length
           ?
           <TablePagination
             rowsPerPageOptions={[0]}

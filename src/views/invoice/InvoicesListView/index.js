@@ -12,11 +12,13 @@ import Toolbar from './Toolbar';
 import InvoicesList from './InvoicesList';
 import axios from 'axios';
 import {
-  INVOICE_ENDPOINT
+  INVOICE_ENDPOINT, PROVIDER_ENDPOINT
 } from '../../../api/endpoint';
 import Cookies from 'js-cookie';
 import { USER_TOKEN } from '../../../common';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import API from '../../../api/API';
+import { actLoadInvoices, actLoadProvider } from '../../../actions';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -40,10 +42,11 @@ const useStyles = makeStyles((theme) => ({
 
 const Invoices = () => {
   const classes = useStyles();
-
   const [fileSelected, setFileSelected] = useState(null);
   const data = useSelector(state => state.invoice.invoices);
   const [loadingModal, setLoadingModal] = useState(false);
+  const selectedProvider = useSelector(state => state.providers.provider_name);
+  const dispatch = useDispatch();
 
   const onHandleFileUpload = async () => {
     if (!fileSelected) {
@@ -62,7 +65,25 @@ const Invoices = () => {
     });
 
     if (response.status !== 201) {
-      setLoadingModal(false);
+      API.get(PROVIDER_ENDPOINT)
+        .then(async response => {
+          if (response.ok) {
+            const fetchData = await response.json();
+            const providersData = fetchData.data;
+            if (providersData.length > 0) {
+              dispatch(actLoadProvider(providersData));
+              API.get(INVOICE_ENDPOINT + `/providers/${selectedProvider}?page=1&limit=50`)
+                .then(async response => {
+                  if (response.ok) {
+                    const fetchData = await response.json();
+                    const data = { invoices: fetchData.data.items, meta: fetchData.data.meta };
+                    dispatch(actLoadInvoices(data));
+                  }
+                  setLoadingModal(false);
+                });
+            }
+          }
+        });
       return;
     }
 
