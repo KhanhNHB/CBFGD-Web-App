@@ -82,6 +82,7 @@ const ModalShipperAdd = (props, { values,
         const response = await API.post(HUB_ENDPOINT, {
             name: name,
             radius: radius.toString(),
+            status: statusHub,
         });
 
         const fetchData = await response.json();
