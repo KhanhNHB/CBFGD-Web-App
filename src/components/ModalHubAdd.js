@@ -68,9 +68,9 @@ const ModalShipperAdd = (props, { values,
 }) => {
     const classes = useStyles();
     const dispatch = useDispatch();
+    const [id, setId] = useState(props.id ? props.id : '');
     const [name, setName] = useState(props.name ? props.name : '');
     const [radius, setRadius] = useState(props.radius ? props.radius : '');
-    const [statusHub, setStatusHub] = useState(props.status);
     const [disabled, setDisabled] = useState(true);
     const [status, setStatus] = useState('Available');
 
@@ -89,9 +89,10 @@ const ModalShipperAdd = (props, { values,
 
     const handleAddHub = async () => {
         const response = await API.post(HUB_ENDPOINT, {
+            id: id,
             name: name,
             radius: radius.toString(),
-            status: statusHub,
+            status: status,
         });
 
         const fetchData = await response.json();
@@ -104,6 +105,7 @@ const ModalShipperAdd = (props, { values,
             }
             setName('');
             setRadius('');
+            setId('');
             props.onCLoseHub();
         }
     };

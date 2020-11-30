@@ -21,7 +21,7 @@ export function MapContainer(props) {
   const [name, setName] = useState('');
   const [radius, setRadius] = useState('');
   const [status, setStatus] = useState('Available');
-
+  const [id, setId] = useState('');
   const handleOpenHub = () => {
     setOpenHub(true);
   }
@@ -29,6 +29,7 @@ export function MapContainer(props) {
   const handleOpenAddHub = () => {
     setName('');
     setRadius('');
+    setId('');
     setStatus('Available');
     handleOpenHub(true);
   }
@@ -57,7 +58,7 @@ export function MapContainer(props) {
 
 
   const onMarkerClick = (evt) => {
-    // alert('Address: ' + evt.title + '\n' + 'Radius: ' + evt.radius);
+    setId(evt.id);
     setName(evt.title);
     setRadius(evt.radius);
     setStatus(evt.status);
@@ -73,6 +74,7 @@ export function MapContainer(props) {
           lng: store.longitude,
         }}
         title={store.name}
+        id={store.id}
         radius={store.radius}
         status={store.status}
         label={((store.name).length > 20) ? (((store.name).substring(0, 20 - 3)) + '...') : store.name}
@@ -155,6 +157,7 @@ export function MapContainer(props) {
             name={name}
             radius={radius}
             status={status}
+            id={id}
           />
         </Modal>
       </div>
