@@ -2,6 +2,7 @@ import * as types from '../constants/ActionTypes';
 
 let initialState = {
     providers: [],
+    provider_name: 'NONE'
 }
 
 const prividers = (state = initialState, action) => {

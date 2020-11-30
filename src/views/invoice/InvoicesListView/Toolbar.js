@@ -15,6 +15,8 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
+  Modal,
+  CircularProgress,
 } from '@material-ui/core';
 import { Search as SearchIcon } from 'react-feather';
 import { useSelector, useDispatch } from 'react-redux';
@@ -38,12 +40,21 @@ const useStyles = makeStyles((theme) => ({
     margin: theme.spacing(1),
     minWidth: 120,
   },
+  loadingModal: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    '& .MuiCircularProgress-root': {
+      outline: 'none'
+    }
+  },
 }));
 
 const Toolbar = ({ onHandleFileUpload, onHandleFileChange, ...rest }) => {
   const classes = useStyles();
   const providers = useSelector(state => state.providers.providers);
-  const [selectedProvider, setSelectedProvider] = useState('NONE');
+  const selectedProvider = useSelector(state => state.providers.provider_name);
+  const [loadingModal, setLoadingModal] = useState(false);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -51,7 +62,6 @@ const Toolbar = ({ onHandleFileUpload, onHandleFileChange, ...rest }) => {
   }, []);
 
   const handleChangeProvider = (event) => {
-    setSelectedProvider(event.target.value);
     dispatch(actLoadProviderName(event.target.value));
   };
 
@@ -70,6 +80,7 @@ const Toolbar = ({ onHandleFileUpload, onHandleFileChange, ...rest }) => {
 
   useEffect(() => {
     if (selectedProvider !== 'NONE') {
+      setLoadingModal(true);
       API.get(INVOICE_ENDPOINT + `/providers/${selectedProvider}?page=1&limit=50`)
         .then(async response => {
           if (response.ok) {
@@ -77,8 +88,10 @@ const Toolbar = ({ onHandleFileUpload, onHandleFileChange, ...rest }) => {
             const data = { invoices: fetchData.data.items, meta: fetchData.data.meta };
             dispatch(actLoadInvoices(data));
           }
+          setLoadingModal(false);
         });
     } else {
+      setLoadingModal(true);
       API.get(INVOICE_ENDPOINT + '?page=1&limit=50')
         .then(async response => {
           if (response.ok) {
@@ -86,6 +99,7 @@ const Toolbar = ({ onHandleFileUpload, onHandleFileChange, ...rest }) => {
             const data = { invoices: fetchData.data.items, meta: fetchData.data.meta };
             dispatch(actLoadInvoices(data));
           }
+          setLoadingModal(false);
         });
     }
   }, [selectedProvider, dispatch]);
@@ -164,6 +178,9 @@ const Toolbar = ({ onHandleFileUpload, onHandleFileChange, ...rest }) => {
           </CardContent>
         </Card>
       </Box>
+      <Modal open={loadingModal} className={classes.loadingModal}>
+        <CircularProgress />
+      </Modal>
     </div>
   );
 };
