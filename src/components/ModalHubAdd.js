@@ -6,6 +6,10 @@ import {
     TextField,
     Grid,
     makeStyles,
+    FormControl,
+    InputLabel,
+    Select,
+    MenuItem,
 } from '@material-ui/core';
 import API from '../api/API';
 import { HUB_ENDPOINT } from '../api/endpoint';
@@ -68,13 +72,18 @@ const ModalShipperAdd = (props, { values,
     const [radius, setRadius] = useState(props.radius ? props.radius : '');
     const [statusHub, setStatusHub] = useState(props.status);
     const [disabled, setDisabled] = useState(true);
+    const [status, setStatus] = useState('Available');
 
-
-    console.log(statusHub);
+    const handleChangeStatus = (event) => {
+        setStatus(event.target.value);
+    };
 
     useEffect(() => {
         if (name && radius) {
             setDisabled(false);
+        }
+        if (!name || !radius) {
+            setDisabled(true);
         }
     }, [name, radius, status]);
 
@@ -97,7 +106,14 @@ const ModalShipperAdd = (props, { values,
             setRadius('');
             props.onCLoseHub();
         }
-    }
+    };
+
+    const handleChangeRadius = (e) => {
+        var pattern = /^(?!(0))[0-9]+$|^$/g;
+        if (pattern.test(e.target.value)) {
+            setRadius(e.target.value);
+        }
+    };
 
     return (
         <div className={classes.container}>
@@ -124,21 +140,26 @@ const ModalShipperAdd = (props, { values,
                             <TextField
                                 fullWidth
                                 placeholder="Radius of Hub (*)"
-                                name="phone"
+                                name="radius"
                                 value={radius}
-                                onChange={e => setRadius(e.target.value)}
+                                onChange={e => handleChangeRadius(e)}
                                 variant="outlined"
                             />
                         </Grid>
                         <Grid item xs={12} sm={6}>
-                            <Autocomplete
-                                id="combo-box-demo"
-                                options={status}
-                                value={statusHub}
-                                getOptionLabel={(option) => option.title}
-                                style={{ width: 300 }}
-                                renderInput={(params) => <TextField {...params} variant="outlined" />}
-                            />
+                            <FormControl variant="outlined" className={classes.formControl}>
+                                <InputLabel id="demo-simple-select-outlined-label">Status</InputLabel>
+                                <Select
+                                    labelId="demo-simple-select-outlined-label"
+                                    id="demo-simple-select-outlined"
+                                    value={status}
+                                    onChange={handleChangeStatus}
+                                    label="Status"
+                                >
+                                    <MenuItem value={`Available`}>Available</MenuItem>
+                                    <MenuItem value={`Terminal`}>Terminal</MenuItem>
+                                </Select>
+                            </FormControl>
                         </Grid>
                         <Divider />
                         <Grid container

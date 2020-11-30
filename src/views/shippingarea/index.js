@@ -20,10 +20,17 @@ export function MapContainer(props) {
   const [openHub, setOpenHub] = useState(false);
   const [name, setName] = useState('');
   const [radius, setRadius] = useState('');
-  const [status, setStatus] = useState('');
+  const [status, setStatus] = useState('Available');
 
   const handleOpenHub = () => {
     setOpenHub(true);
+  }
+
+  const handleOpenAddHub = () => {
+    setName('');
+    setRadius('');
+    setStatus('Available');
+    handleOpenHub(true);
   }
 
   const handleCloseHub = () => {
@@ -136,14 +143,19 @@ export function MapContainer(props) {
               color="primary"
               variant="contained"
               style={{ color: 'white', height: 45, width: 100, marginLeft: 120 }}
-              onClick={handleOpenHub}
+              onClick={handleOpenAddHub}
             >
               Add Hub
         </Button>
           </Box>
         </Container>
         <Modal open={openHub}>
-          <ModalHubAdd onCLoseHub={handleCloseHub} name={name} radius={radius} status={status} />
+          <ModalHubAdd
+            onCLoseHub={handleCloseHub}
+            name={name}
+            radius={radius}
+            status={status}
+          />
         </Modal>
       </div>
     </>
