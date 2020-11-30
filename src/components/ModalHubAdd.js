@@ -12,11 +12,12 @@ import { HUB_ENDPOINT } from '../api/endpoint';
 import { useDispatch } from 'react-redux';
 import CloseIcon from '@material-ui/icons/Close';
 import { actCreateHub, actGetListHub } from '../actions';
+import Autocomplete from '@material-ui/lab/Autocomplete';
 
 const useStyles = makeStyles((theme) => ({
     container: {
         width: "50%",
-        height: "50%",
+        height: "70%",
         position: "absolute",
         marginTop: "10%",
         left: "50%",
@@ -48,6 +49,12 @@ const useStyles = makeStyles((theme) => ({
         borderBottomLeftRadius: "5px",
     },
 }));
+
+const status = [
+    { title: 'Available' },
+    { title: 'Terminal' },
+];
+
 const ModalShipperAdd = (props, { values,
     errors,
     touched,
@@ -55,20 +62,23 @@ const ModalShipperAdd = (props, { values,
     handleBlur,
     handleChange,
 }) => {
+    const classes = useStyles();
     const dispatch = useDispatch();
     const [name, setName] = useState(props.name ? props.name : '');
     const [radius, setRadius] = useState(props.radius ? props.radius : '');
+    const [statusHub, setStatusHub] = useState(props.status);
     const [disabled, setDisabled] = useState(true);
+
+
+    console.log(statusHub);
 
     useEffect(() => {
         if (name && radius) {
             setDisabled(false);
         }
-    }, [name, radius]);
+    }, [name, radius, status]);
 
-    const classes = useStyles();
     const handleAddHub = async () => {
-
         const response = await API.post(HUB_ENDPOINT, {
             name: name,
             radius: radius.toString(),
@@ -119,6 +129,16 @@ const ModalShipperAdd = (props, { values,
                                 variant="outlined"
                             />
                         </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <Autocomplete
+                                id="combo-box-demo"
+                                options={status}
+                                value={statusHub}
+                                getOptionLabel={(option) => option.title}
+                                style={{ width: 300 }}
+                                renderInput={(params) => <TextField {...params} variant="outlined" />}
+                            />
+                        </Grid>
                         <Divider />
                         <Grid container
                             direction="row"
@@ -142,6 +162,5 @@ const ModalShipperAdd = (props, { values,
         </div>
     );
 };
-
 
 export default ModalShipperAdd;

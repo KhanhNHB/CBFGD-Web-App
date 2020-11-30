@@ -4,7 +4,7 @@ import API from '../../api/API';
 import { HUB_ENDPOINT, INVOICE_ENDPOINT } from '../../api/endpoint';
 import { useDispatch, useSelector } from 'react-redux';
 import { actGetListHub, actLoadInvoiceList } from '../../actions';
-import { Box, Button, colors, Container, Modal } from '@material-ui/core';
+import { Box, Button, Container, Modal } from '@material-ui/core';
 import ModalHubAdd from '../../components/ModalHubAdd';
 
 export function MapContainer(props) {
@@ -20,6 +20,7 @@ export function MapContainer(props) {
   const [openHub, setOpenHub] = useState(false);
   const [name, setName] = useState('');
   const [radius, setRadius] = useState('');
+  const [status, setStatus] = useState('');
 
   const handleOpenHub = () => {
     setOpenHub(true);
@@ -52,6 +53,7 @@ export function MapContainer(props) {
     // alert('Address: ' + evt.title + '\n' + 'Radius: ' + evt.radius);
     setName(evt.title);
     setRadius(evt.radius);
+    setStatus(evt.status);
     handleOpenHub(true);
   };
 
@@ -65,6 +67,7 @@ export function MapContainer(props) {
         }}
         title={store.name}
         radius={store.radius}
+        status={store.status}
         label={((store.name).length > 20) ? (((store.name).substring(0, 20 - 3)) + '...') : store.name}
         style={{ color: 'white' }}
         onClick={onMarkerClick}
@@ -140,7 +143,7 @@ export function MapContainer(props) {
           </Box>
         </Container>
         <Modal open={openHub}>
-          <ModalHubAdd onCLoseHub={handleCloseHub} name={name} radius={radius} />
+          <ModalHubAdd onCLoseHub={handleCloseHub} name={name} radius={radius} status={status} />
         </Modal>
       </div>
     </>
