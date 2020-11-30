@@ -12,13 +12,13 @@ import Toolbar from './Toolbar';
 import InvoicesList from './InvoicesList';
 import axios from 'axios';
 import {
-  INVOICE_ENDPOINT, PROVIDER_ENDPOINT
+  INVOICE_ENDPOINT
 } from '../../../api/endpoint';
 import Cookies from 'js-cookie';
 import { USER_TOKEN } from '../../../common';
 import { useDispatch, useSelector } from 'react-redux';
 import API from '../../../api/API';
-import { actLoadInvoices, actLoadProvider } from '../../../actions';
+import { actLoadInvoices } from '../../../actions';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -63,30 +63,25 @@ const Invoices = () => {
         'Authorization': 'Bearer ' + Cookies.get(USER_TOKEN),
       },
     });
+    setFileSelected(null);
 
-    if (response.status !== 201) {
-      API.get(PROVIDER_ENDPOINT)
-        .then(async response => {
-          if (response.ok) {
-            const fetchData = await response.json();
-            const providersData = fetchData.data;
-            if (providersData.length > 0) {
-              dispatch(actLoadProvider(providersData));
-              API.get(INVOICE_ENDPOINT + `/providers/${selectedProvider}?page=1&limit=50`)
-                .then(async response => {
-                  if (response.ok) {
-                    const fetchData = await response.json();
-                    const data = { invoices: fetchData.data.items, meta: fetchData.data.meta };
-                    dispatch(actLoadInvoices(data));
-                  }
-                  setLoadingModal(false);
-                });
-            }
-          }
-        });
-      return;
+    if (response.status === 201) {
+      if (selectedProvider === 'NONE') {
+        const responseInvoice = await API.get(INVOICE_ENDPOINT + '?page=1&limit=50');
+        if (responseInvoice.ok) {
+          const fetchInvoice = await responseInvoice.json();
+          const dataInvoice = { invoices: fetchInvoice.data.items, meta: fetchInvoice.data.meta };
+          dispatch(actLoadInvoices(dataInvoice));
+        }
+      } else {
+        const responseProvider = await API.get(INVOICE_ENDPOINT + `/providers/${selectedProvider}?page=1&limit=50`);
+        if (responseProvider.ok) {
+          const fetchProvider = await responseProvider.json();
+          const dataProvider = { invoices: fetchProvider.data.items, meta: fetchProvider.data.meta };
+          dispatch(actLoadInvoices(dataProvider));
+        }
+      }
     }
-
     setLoadingModal(false);
   };
 
