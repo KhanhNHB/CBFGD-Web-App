@@ -15,8 +15,6 @@ import {
 } from '@material-ui/core';
 import API from '../api/API';
 import { SHIPPER_ENDPOINT } from '../api/endpoint';
-import { useDispatch } from 'react-redux';
-import { actLoadShipper } from '../actions';
 import { GENDER_ITEMS } from '../common';
 import CloseIcon from '@material-ui/icons/Close';
 import { Formik } from 'formik';
@@ -72,7 +70,6 @@ const useStyles = makeStyles((theme) => ({
 
 const ModalShipperAdd = (props) => {
     const classes = useStyles();
-    const dispatch = useDispatch();
 
     const shipper = {
         first_name: "",
