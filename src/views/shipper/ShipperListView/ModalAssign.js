@@ -9,7 +9,6 @@ import {
     FormControlLabel,
     Radio,
     List,
-    CircularProgress
 } from '@material-ui/core';
 import API from '../../../api/API';
 import { HUB_ENDPOINT } from '../../../api/endpoint';

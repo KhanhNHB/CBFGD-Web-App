@@ -141,7 +141,6 @@ const useStyles = makeStyles((theme) => ({
 const InvoicesList = ({ data }) => {
   const classes = useStyles();
   const dispatch = useDispatch();
-  const [data, setData] = useState(rest.data);
   let totalPage = 0;
   const provider_name = useSelector(state => state.providers.provider_name);
   const keyword = useSelector(state => state.invoice.keyword);
@@ -161,12 +160,6 @@ const InvoicesList = ({ data }) => {
       setPage(0);
     }
   }, [data]);
-
-  useEffect(() => {
-    if (rest.data) {
-      setData(rest.data);
-    }
-  }, [rest.data]);
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -235,7 +228,7 @@ const InvoicesList = ({ data }) => {
       return;
     }
 
-    let cloneRestData = rest.data;
+    let cloneRestData = data;
     for (let i = 0; i < cloneRestData.invoices.length; i++) {
       const element = cloneRestData.invoices[i];
       if (element.id === selectedInvoice) {
@@ -243,7 +236,7 @@ const InvoicesList = ({ data }) => {
         break;
       }
     }
-    rest.data = cloneRestData;
+    data = cloneRestData;
     setSelectedInvoice(null);
     handleInvisibleModal();
   };
