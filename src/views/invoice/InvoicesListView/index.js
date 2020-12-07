@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   Container,
@@ -15,10 +15,10 @@ import {
   INVOICE_ENDPOINT
 } from '../../../api/endpoint';
 import Cookies from 'js-cookie';
-import { USER_TOKEN } from '../../../common';
-import { useDispatch, useSelector } from 'react-redux';
 import API from '../../../api/API';
+import { USER_TOKEN } from '../../../common';
 import { actLoadInvoices } from '../../../actions';
+import { useDispatch, useSelector } from 'react-redux';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -42,11 +42,11 @@ const useStyles = makeStyles((theme) => ({
 
 const Invoices = () => {
   const classes = useStyles();
-  const [fileSelected, setFileSelected] = useState(null);
-  const data = useSelector(state => state.invoice.invoices);
-  const [loadingModal, setLoadingModal] = useState(false);
-  const selectedProvider = useSelector(state => state.providers.provider_name);
   const dispatch = useDispatch();
+  const data = useSelector(state => state.invoice.invoices);
+  const selectedProvider = useSelector(state => state.providers.provider_name);
+  const [fileSelected, setFileSelected] = useState(null);
+  const [loadingModal, setLoadingModal] = useState(false);
 
   const onHandleFileUpload = async () => {
     if (!fileSelected) {
@@ -98,7 +98,7 @@ const Invoices = () => {
         <Toolbar onHandleFileUpload={onHandleFileUpload} onHandleFileChange={onFileChange} />
         <Box mt={3}>
           <Grid container spacing={3}>
-            <InvoicesList data={data} />
+            {data && <InvoicesList data={data} />}
           </Grid>
         </Box>
       </Container>

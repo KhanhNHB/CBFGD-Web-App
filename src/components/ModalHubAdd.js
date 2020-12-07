@@ -16,7 +16,6 @@ import { HUB_ENDPOINT } from '../api/endpoint';
 import { useDispatch } from 'react-redux';
 import CloseIcon from '@material-ui/icons/Close';
 import { actCreateHub, actGetListHub } from '../actions';
-import Autocomplete from '@material-ui/lab/Autocomplete';
 
 const useStyles = makeStyles((theme) => ({
     container: {
@@ -54,18 +53,7 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-const status = [
-    { title: 'Available' },
-    { title: 'Terminal' },
-];
-
-const ModalShipperAdd = (props, { values,
-    errors,
-    touched,
-    handleSubmit,
-    handleBlur,
-    handleChange,
-}) => {
+const ModalShipperAdd = (props) => {
     const classes = useStyles();
     const dispatch = useDispatch();
     const [id, setId] = useState(props.id ? props.id : '');
@@ -88,8 +76,30 @@ const ModalShipperAdd = (props, { values,
     }, [name, radius, status]);
 
     const handleAddHub = async () => {
-        const response = await API.post(HUB_ENDPOINT, {
-            id: id,
+        if (!id) {
+            const responseHub = await API.post(HUB_ENDPOINT, {
+                name: name,
+                radius: radius.toString(),
+                status: status,
+            });
+
+            const fetchHubData = await responseHub.json();
+            if (!fetchHubData.message) {
+                dispatch(actCreateHub(fetchHubData.data));
+                const response = await API.get(`${HUB_ENDPOINT}`);
+                if (response.ok) {
+                    const fetchHub = await response.json();
+                    dispatch(actGetListHub(fetchHub.data));
+                }
+                setName('');
+                setRadius('');
+                setId('');
+                props.onCLoseHub();
+            }
+            return;
+        }
+
+        const response = await API.put(`${HUB_ENDPOINT}/${id}`, {
             name: name,
             radius: radius.toString(),
             status: status,

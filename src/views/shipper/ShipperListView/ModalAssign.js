@@ -8,7 +8,8 @@ import {
     RadioGroup,
     FormControlLabel,
     Radio,
-    List
+    List,
+    CircularProgress
 } from '@material-ui/core';
 import API from '../../../api/API';
 import { HUB_ENDPOINT } from '../../../api/endpoint';
@@ -42,21 +43,20 @@ const useStyles = makeStyles((theme) => ({
 const ModalAssign = ({
     onInvisibleModel,
     onVisibleModal,
-    onHandleAssign
+    onHandleAssign,
+    onCurrentHub
 }) => {
     const classes = useStyles();
 
     const [hubs, setHubs] = useState([]);
-    const [selectedHub, setSelectedHub] = useState(null);
+    const [selectedHub, setSelectedHub] = useState(onCurrentHub);
 
     const fetchHub = async () => {
         const response = await API.get(HUB_ENDPOINT);
         const json = await response.json();
-
         if (!json.data.length) {
             return;
         }
-
         setHubs(json.data);
     };
 
@@ -70,7 +70,12 @@ const ModalAssign = ({
 
     const handleSubmit = () => {
         if (!selectedHub) {
-            alert('Please select shipper!');
+            alert('Choice hub to submit, Please try again!');
+            return;
+        }
+        if (selectedHub === onCurrentHub) {
+            alert('It is current hub. Please try again!');
+            return;
         }
         onHandleAssign(selectedHub);
         setSelectedHub(null);
@@ -106,14 +111,14 @@ const ModalAssign = ({
                         onClick={handleSubmit}
                         style={{ color: 'white', margin: 10 }}>
                         Submit
-                    </Button>
+                                </Button>
                     <Button
                         color="primary"
                         variant="contained"
                         onClick={() => onInvisibleModel()}
                         style={{ color: 'white', margin: 10 }}>
                         Close
-                    </Button>
+                                </Button>
                 </div>
             </div>
         </>

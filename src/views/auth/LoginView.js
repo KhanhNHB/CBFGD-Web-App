@@ -16,7 +16,7 @@ import { LOGIN_ENDPOINT } from '../../api/endpoint';
 import { useDispatch } from 'react-redux';
 import { actSignIn } from '../../actions';
 import Cookies from 'js-cookie';
-import { USER_TOKEN } from '../../common';
+import { ACCESS_TOKEN_FABRIC, USER_TOKEN } from '../../common';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -64,6 +64,7 @@ const LoginView = () => {
     }
     setIsLoading(false);
     Cookies.set(USER_TOKEN, json.data.access_token);
+    Cookies.set(ACCESS_TOKEN_FABRIC, json.data.user.access_token_fabric);
     dispatch(actSignIn(json.data.access_token));
     navigate('/app/dashboard', { replace: true });
   }

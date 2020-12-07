@@ -4,6 +4,7 @@ export const GENDER = {
 }
 
 export const USER_TOKEN = 'USER_TOKEN';
+export const ACCESS_TOKEN_FABRIC = 'ACCESS_TOKEN_FABRIC';
 
 export const ROLE = {
     CUSTOMER: 'Customer',

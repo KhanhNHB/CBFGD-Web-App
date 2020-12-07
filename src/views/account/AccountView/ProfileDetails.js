@@ -10,7 +10,7 @@ import * as Yup from 'yup';
 import API from '../../../api/API';
 import { ADMIN_ENDPOINT } from '../../../api/endpoint';
 import Cookies from 'js-cookie';
-import { USER_TOKEN } from '../../../common';
+import { ACCESS_TOKEN_FABRIC, USER_TOKEN } from '../../../common';
 import { useNavigate } from 'react-router-dom';
 
 const useStyles = makeStyles((theme) => ({
@@ -25,7 +25,7 @@ const formSchema = Yup.object().shape({
   first_name: Yup.string().required("First name is not empty"),
   last_name: Yup.string().required("Last name is not empty"),
   email: Yup.string().email("Email is incorrect"),
-  phone: Yup.number().required("Phone is not empty"),
+  phone: Yup.number().required("Phone is not empty").min(7).max(11),
   DOB: Yup.date()
 });
 
@@ -67,6 +67,7 @@ const ProfileDetails = ({ user, className }) => {
     }
 
     Cookies.remove(USER_TOKEN);
+    Cookies.remove(ACCESS_TOKEN_FABRIC);
     navigate('/', { replace: true });
   }
 
