@@ -1,17 +1,9 @@
 version: '3.7'
 services:
-    front_end:
-        container_name: front_end
-        image: cbfgd-web-app
+    front-end:
+        container_name: front-end
         build:
             context: .
-        volumes:
-            - .:/usr/src/app
-            - /usr/src/app/node_modules
-        stdin_open: true
+            target: production
         ports:
-            - 3000:3000
-        networks:
-            - webnet
-networks:
-    webnet:
+        - '3000:80'
