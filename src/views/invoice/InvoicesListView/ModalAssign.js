@@ -8,7 +8,7 @@ import {
     RadioGroup,
     FormControlLabel,
     Radio,
-    List
+    List,
 } from '@material-ui/core';
 import API from '../../../api/API';
 import { SHIPPER_ENDPOINT } from '../../../api/endpoint';
@@ -36,7 +36,7 @@ const useStyles = makeStyles((theme) => ({
     actions: {
         display: 'flex',
         justifyContent: 'space-between',
-    }
+    },
 }));
 
 const ModalAssign = ({
@@ -45,7 +45,6 @@ const ModalAssign = ({
     onHandleAssign
 }) => {
     const classes = useStyles();
-
     const [shippers, setShippers] = useState([]);
     const [selectedShipper, setSelectedShipper] = useState(null);
 
@@ -73,7 +72,6 @@ const ModalAssign = ({
             alert('Please select shipper!');
         }
         onHandleAssign(selectedShipper);
-        setSelectedShipper(null);
     };
 
     return (
