@@ -53,9 +53,9 @@ const ShipperListView = () => {
           const shippersData = fetchData.data;
           if (shippersData.length > 0) {
             dispatch(actLoadShipper(shippersData));
-            setLoadingModal(false);
           }
         }
+        setLoadingModal(false);
       });
   }, [dispatch]);
 
