@@ -1,15 +1,19 @@
-FROM node:13-alpine
+# build environment
+FROM node:13.12.0-alpine as build
+WORKDIR /app
+ENV PATH /app/node_modules/.bin:$PATH
+COPY package.json ./
+COPY package-lock.json ./
+RUN npm ci --silent
+RUN npm install react-scripts@3.4.1 -g --silent
+COPY . ./
+RUN npm run build
 
-RUN mkdir -p /usr/src/app
-WORKDIR /usr/src/app
+# production environment
+FROM nginx:1.17-alpine AS production
+COPY --from=build /app/build /usr/share/nginx/html
+# new
+COPY nginx/nginx.conf /etc/nginx/conf.d/default.conf
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
 
-COPY package.json /usr/src/app/
-
-RUN npm install
-
-ADD src /usr/src/app/src
-ADD public /usr/src/app/public
-
-RUN npm build
-
-CMD [ "npm", "start" ]
