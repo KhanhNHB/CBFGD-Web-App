@@ -74,3 +74,10 @@ export const actLoadProfile = (profile) => {
         profile
     }
 };
+
+export const actLoadShipper = (shippers) => {
+    return {
+        type: types.LOAD_SHIPPER,
+        shippers,
+    }
+};

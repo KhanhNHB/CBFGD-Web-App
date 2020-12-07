@@ -4,15 +4,17 @@ import React, {
 } from 'react';
 import {
   Box,
+  CircularProgress,
   Container,
   Grid,
   makeStyles,
 } from '@material-ui/core';
 import Page from '../../../components/Page';
-import Toolbar from './Toolbar';
 import { SHIPPER_ENDPOINT } from '../../../api/endpoint';
 import ShipperList from './ShipperList';
 import API from '../../../api/API';
+import { useSelector, useDispatch } from 'react-redux';
+import { actLoadShipper } from '../../../actions/index';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -27,42 +29,47 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const ShipperListView = () => {
+  const dispatch = useDispatch();
   const classes = useStyles();
-  const [shippers, setShippers] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const shippers = useSelector(state => state.shipper.shippers);
 
   useEffect(() => {
-    fetchShipper();
-  }, []);
+    setLoading(true);
 
-  const fetchShipper = async () => {
-    const response = await API.get(SHIPPER_ENDPOINT);
-    if (response.status !== 200) {
-      return;
-    }
-
-    const json = await response.json();
-    const result = json.data;
-
-    const onSuccess = (data) => {
-      setShippers(data);
-    };
-
-    onSuccess(result);
-  }
-
-  const onReload = async () => {
-    fetchShipper();
-  };
+    API.get(SHIPPER_ENDPOINT)
+      .then(async response => {
+        if (response.ok) {
+          const fetchData = await response.json();
+          const shippersData = fetchData.data;
+          if (shippersData.length > 0) {
+            dispatch(actLoadShipper(shippersData));
+            setLoading(false);
+          }
+        }
+      });
+  }, [dispatch]);
 
   return (
     <Page
       className={classes.root}
       title="Shippers">
       <Container maxWidth={false}>
-        <Toolbar />
         <Box mt={3}>
           <Grid container spacing={3}>
-            <ShipperList shippers={shippers} onReload={onReload} />
+            {loading
+              ? (
+                <div style={{
+                  flex: 1,
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center'
+                }}>
+                  <CircularProgress />
+                </div>
+              )
+              : <ShipperList shippers={shippers} />}
           </Grid>
         </Box>
       </Container>

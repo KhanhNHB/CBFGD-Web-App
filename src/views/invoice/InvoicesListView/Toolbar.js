@@ -59,7 +59,7 @@ const Toolbar = ({ onHandleFileUpload, onHandleFileChange, ...rest }) => {
 
   useEffect(() => {
     dispatch(actLoadProviderName(selectedProvider));
-  }, []);
+  }, [dispatch, selectedProvider]);
 
   const handleChangeProvider = (event) => {
     dispatch(actLoadProviderName(event.target.value));
@@ -178,9 +178,6 @@ const Toolbar = ({ onHandleFileUpload, onHandleFileChange, ...rest }) => {
           </CardContent>
         </Card>
       </Box>
-      <Modal open={loadingModal} className={classes.loadingModal}>
-        <CircularProgress />
-      </Modal>
     </div>
   );
 };

@@ -41,7 +41,6 @@ const useStyles = makeStyles((theme) => ({
 
 const ModalAssign = ({
     onInvisibleModel,
-    onVisibleModal,
     onHandleAssign
 }) => {
     const classes = useStyles();
@@ -52,11 +51,9 @@ const ModalAssign = ({
     const fetchShipper = async () => {
         const response = await API.get(SHIPPER_ENDPOINT);
         const json = await response.json();
-
         if (!json.data.length) {
             return;
         }
-
         setShippers(json.data);
     };
 

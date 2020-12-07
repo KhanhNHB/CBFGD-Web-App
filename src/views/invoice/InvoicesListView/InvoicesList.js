@@ -129,10 +129,9 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const InvoicesList = ({ ...rest }) => {
+const InvoicesList = ({ data }) => {
   const classes = useStyles();
   const dispatch = useDispatch();
-  let data = rest.data;
   let totalPage = 0;
   const provider_name = useSelector(state => state.providers.provider_name);
   const keyword = useSelector(state => state.invoice.keyword);
@@ -164,7 +163,7 @@ const InvoicesList = ({ ...rest }) => {
       if (response.ok) {
         const fetchData = await response.json();
         const dataByProvider = { invoices: fetchData.data.items, meta: fetchData.data.meta };
-        dispatch(actLoadInvoices(data));
+        dispatch(actLoadInvoices(dataByProvider));
       }
     } else {
       const response = await API.get(INVOICE_ENDPOINT + `?page=${newPage + 1}&limit=50`);
@@ -256,7 +255,7 @@ const InvoicesList = ({ ...rest }) => {
 
   return (
     <>
-      <Card className={clsx(classes.root)} {...rest} >
+      <Card className={clsx(classes.root)}>
         <Box>
           <TableContainer className={classes.container}>
             <Table aria-label="sticky table">

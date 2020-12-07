@@ -17,6 +17,9 @@ const invoice = (state = initialState, action) => {
         case types.LOAD_INVOICE_LIST:
             state.invoiceList = action.invoiceList;
             return { ...state };
+        case types.LOAD_INVOICES_AVAILABLE:
+            state.invoiceList = action.invoiceList;
+            return { ...state };
         default: return { ...state };
     }
 }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
     Button,
     Divider,
@@ -10,22 +10,37 @@ import {
     FormLabel,
     RadioGroup,
     FormControlLabel,
-    Radio
+    Radio,
+    Box
 } from '@material-ui/core';
 import API from '../api/API';
 import { SHIPPER_ENDPOINT } from '../api/endpoint';
 import { useDispatch } from 'react-redux';
-import { actCreateShipper, actGetAllShipper } from '../actions';
+import { actLoadShipper } from '../actions';
 import { GENDER_ITEMS } from '../common';
 import CloseIcon from '@material-ui/icons/Close';
+import { Formik } from 'formik';
+import * as Yup from 'yup';
+import datetimeUtils from '../utils/datetimeUtils';
+
+const formSchema = Yup.object().shape({
+    first_name: Yup.string().required("First name is not empty"),
+    last_name: Yup.string().required("First name is not empty"),
+    phone: Yup.string().required("Phone is not empty").min(7),
+    identify_number: Yup.string().required("Identify number is not empty").min(8),
+    license_number: Yup.string().required("License number is not empty").min(8),
+    DOB: Yup.date()
+});
+
 const useStyles = makeStyles((theme) => ({
     container: {
-        width: "50%",
-        height: "55%",
+        width: "80%",
+        height: "70%",
         position: "absolute",
         marginTop: "10%",
         left: "50%",
         top: "20%",
+        overflowY: 'auto',
         transform: "translate(-50%, -50%)",
         padding: "10px",
     },
@@ -35,11 +50,12 @@ const useStyles = makeStyles((theme) => ({
         color: 'white'
     },
     detailHeader: {
-        backgroundColor: "#00bdb6",
         display: "flex",
+        flex: 1,
+        justifyContent: 'space-between',
+        backgroundColor: "#00bdb6",
         borderTopLeftRadius: "5px",
         borderTopRightRadius: "5px",
-        flexDirection: "row-reverse",
     },
     wrapperLeft: {
         backgroundColor: "white",
@@ -53,177 +69,238 @@ const useStyles = makeStyles((theme) => ({
         borderBottomLeftRadius: "5px",
     },
 }));
-const ModalShipperAdd = (props, { values,
-    errors,
-    touched,
-    handleSubmit,
-    handleBlur,
-    handleChange,
-}) => {
-    const dispatch = useDispatch();
-    const [name, setName] = useState('');
-    const [password, setPassword] = useState('');
-    const [phone, setPhone] = useState('');
-    const [DOB, setDOB] = useState('');
-    const [address, setAddress] = useState('');
-    const [gender, setGender] = useState('');
-    const [identify_number, setIdentify_number] = useState('');
-    const [license_number, setLicense_number] = useState('');
+
+const ModalShipperAdd = (props) => {
     const classes = useStyles();
-    const handleCreateShipper = async () => {
-        const response = await API.post(SHIPPER_ENDPOINT, {
-            name: name,
-            phone: phone,
-            password: password,
-            DOB: DOB,
-            address: address,
-            gender: gender,
-            identify_number: identify_number,
-            license_number: license_number,
-        });
+    const dispatch = useDispatch();
+
+    const shipper = {
+        first_name: "",
+        last_name: "",
+        phone: "",
+        password: "",
+        gender: "",
+        DOB: "",
+        address: "",
+        identify_number: "",
+        license_number: ""
+    };
+
+    const handleCreateShipper = async (data) => {
+        const isChanged = JSON.stringify(shipper) !== JSON.stringify(data);
+        if (!isChanged) return;
+
+        const dataBody = {
+            first_name: data.first_name,
+            last_name: data.last_name,
+            phone: "0" + data.phone,
+            password: data.password,
+            gender: data.gender,
+            DOB: data.DOB,
+            address: data.address,
+            identify_number: data.identify_number,
+            license_number: data.license_number
+        };
+        const response = await API.post(SHIPPER_ENDPOINT, dataBody);
         const fetchData = await response.json();
-        if (!fetchData.message) {
-            dispatch(actCreateShipper(fetchData.data));
-            props.onCloseModal();
-            dispatch(actGetAllShipper(fetchData.data));
+
+        if (fetchData.message) {
+            alert(fetchData.message);
+            return;
         }
+        props.onCloseModal();
     }
 
     return (
         <div className={classes.container}>
-            <div className={classes.detailHeader}>
-                <CloseIcon
-                    className={classes.closeBtn}
-                    onClick={() => props.onCloseModal()}
-                />
-            </div>
-            <div className={classes.wrapperLeft}>
-                <Container maxWidth="md">
-                    <Grid container spacing={3}>
-                        <Grid item xs={12} sm={6}>
-                            <TextField
-                                fullWidth
-                                placeholder="Name (*)"
-                                name="name"
-                                value={name}
-                                onChange={e => setName(e.target.value)}
-                                variant="outlined"
-                            />
-                        </Grid>
-                        <Grid item xs={12} sm={6}>
-                            <TextField
-                                fullWidth
-                                placeholder="Phone Number (*)"
-                                name="phone"
-                                value={phone}
-                                onChange={e => setPhone(e.target.value)}
-                                variant="outlined"
-                            />
-                        </Grid>
-                        <Grid item xs={12} sm={6}>
-                            <TextField
-                                fullWidth
-                                placeholder="Password (*)"
-                                name="password"
-                                value={password}
-                                onChange={e => setPassword(e.target.value)}
-                                variant="outlined"
-                            />
-                        </Grid>
-                        <Grid item xs={12} sm={6}>
-                            <FormControl style={{ marginLeft: 15 }}>
-                                <FormLabel>Gender</FormLabel>
-                                <RadioGroup
-                                    row
-                                    aria-label="Gender"
-                                    name="gender"
-                                    value={gender}
-                                    onChange={e => setGender(e.target.value)}
-                                >
-                                    {
-                                        GENDER_ITEMS.map(item => (
-                                            <FormControlLabel key={item.id} value={item.id} control={<Radio />} label={item.title} />
-                                        ))
-                                    }
-                                </RadioGroup>
-                            </FormControl>
-                        </Grid>
-                        <Grid item xs={12} sm={6}>
-                            <TextField
-                                id="date"
-                                fullWidth
-                                placeholder="Date of Birth (*)"
-                                name="DOB"
-                                type="date"
-                                // value={datetimeUtils.DisplayDateFormat(DOB)}
-                                value={DOB}
-                                onChange={e => setDOB(e.target.value)}
-                                variant="outlined"
-                            // InputLabelProps={{
-                            //     shrink: true,
-                            // }}
-                            />
-                        </Grid>
-                        <Grid item xs={12} sm={6}>
-                            <TextField
-                                fullWidth
-                                placeholder="Address (*)"
-                                name="address"
-                                value={address}
-                                onChange={e => setAddress(e.target.value)}
-                                variant="outlined"
-                            />
-                        </Grid>
-                        <Grid item xs={12} sm={6}>
-                            <TextField
-                                fullWidth
-                                placeholder="Identify Number (*)"
-                                name="identify_number"
-                                value={identify_number}
-                                onChange={e => setIdentify_number(e.target.value)}
-                                variant="outlined"
-                            />
-                        </Grid>
-                        <Grid item xs={12} sm={6}>
-                            <TextField
-                                fullWidth
-                                placeholder="License Number (*)"
-                                name="license_number"
-                                value={license_number}
-                                onChange={e => setLicense_number(e.target.value)}
-                                variant="outlined"
-                            />
-                        </Grid>
-                        <Divider />
-                        <Grid container
-                            direction="row"
-                            justify="flex-end"
-                            alignItems="flex-end">
-                            <Grid xs={6} sm={3}>
-                                <Button
-                                    color="primary"
-                                    variant="contained"
-                                    onClick={handleCreateShipper}
-                                >
-                                    Save Shipper
-                        </Button>
-                            </Grid>
-                            {/* <Grid xs={6} sm={3}>
-                            <Button
-                                color="primary"
-                                variant="contained"
-                                onClick={props.onCloseModal}
-                            >
-                                Close
-                            </Button>
-                        </Grid> */}
-                        </Grid>
-                    </Grid>
-                </Container>
-            </div>
+            <Formik
+                validationSchema={formSchema}
+                initialValues={shipper}
+                onSubmit={(data) => handleCreateShipper(data)}
+                enableReinitialize
+            >
+                {({
+                    values,
+                    errors,
+                    handleSubmit,
+                    handleChange,
+                    handleBlur,
+                    touched,
+                }) => {
+                    console.log(values.DOB);
+                    return (
+                        <form onSubmit={handleSubmit} autoComplete="off">
+                            <div className={classes.detailHeader}>
+                                <div style={{
+                                    margin: "10px",
+                                    color: 'white'
+                                }}>
+                                    <h3>Create shipper</h3>
+                                </div>
+                                <CloseIcon
+                                    className={classes.closeBtn}
+                                    onClick={() => props.onCloseModal()}
+                                />
+                            </div>
+                            <div className={classes.wrapperLeft}>
+                                <Container maxWidth="md">
+                                    <Grid container spacing={3}>
+                                        <Grid item xs={12} sm={6}>
+                                            <TextField
+                                                fullWidth
+                                                label="First Name (*)"
+                                                name="first_name"
+                                                placeholder="Input shipper first name"
+                                                onChange={handleChange}
+                                                onBlur={handleBlur}
+                                                value={values.first_name}
+                                                variant="outlined"
+                                                helperText={errors.first_name}
+                                                error={(errors.first_name && touched.first_name) ? true : false}
+                                            />
+                                        </Grid>
+                                        <Grid item xs={12} sm={6}>
+                                            <TextField
+                                                fullWidth
+                                                label="Last Name (*)"
+                                                name="last_name"
+                                                placeholder="Input shipper last name"
+                                                onChange={handleChange}
+                                                onBlur={handleBlur}
+                                                value={values.last_name}
+                                                variant="outlined"
+                                                helperText={errors.last_name}
+                                                error={(errors.last_name && touched.last_name) ? true : false}
+                                            />
+                                        </Grid>
+                                        <Grid item xs={12} sm={6}>
+                                            <TextField
+                                                fullWidth
+                                                label="Phone Number (*)"
+                                                name="phone"
+                                                placeholder="Input shipper phone"
+                                                onChange={handleChange}
+                                                onBlur={handleBlur}
+                                                type="number"
+                                                value={values.phone}
+                                                variant="outlined"
+                                                helperText={errors.phone}
+                                                error={(errors.phone && touched.phone) ? true : false}
+                                            />
+                                        </Grid>
+                                        <Grid item xs={12} sm={6}>
+                                            <TextField
+                                                fullWidth
+                                                placeholder="Password (*)"
+                                                name="password"
+                                                value={values.password}
+                                                onChange={handleChange}
+                                                onBlur={handleBlur}
+                                                variant="outlined"
+                                                type="password"
+                                                helperText={errors.password}
+                                                error={(errors.password && touched.password) ? true : false}
+                                            />
+                                        </Grid>
+                                        <Grid item xs={12} sm={6}>
+                                            <FormControl style={{ marginLeft: 15 }}>
+                                                <FormLabel>Gender</FormLabel>
+                                                <RadioGroup
+                                                    row
+                                                    aria-label="gender"
+                                                    name="gender"
+                                                    value={values.gender}
+                                                    onChange={handleChange}
+                                                    onBlur={handleBlur}
+                                                >
+                                                    {
+                                                        GENDER_ITEMS.map(item => (
+                                                            <FormControlLabel key={item.id} value={item.id} control={<Radio />} label={item.title} />
+                                                        ))
+                                                    }
+                                                </RadioGroup>
+                                            </FormControl>
+                                        </Grid>
+                                        <Grid item xs={12} sm={6}>
+                                            <TextField
+                                                id="date"
+                                                fullWidth
+                                                className={classes.textField}
+                                                label="Birthday"
+                                                type="date"
+                                                name="DOB"
+                                                onChange={handleChange}
+                                                onBlur={handleBlur}
+                                                value={datetimeUtils.DisplayDatePicker(values.DOB)}
+                                                variant="outlined"
+                                                helperText={errors.DOB}
+                                                error={(errors.DOB && touched.DOB) ? true : false}
+                                                InputLabelProps={{
+                                                    shrink: true,
+                                                }}
+                                            />
+                                        </Grid>
+                                        <Grid item xs={12} sm={6}>
+                                            <TextField
+                                                fullWidth
+                                                label="Address"
+                                                name="address"
+                                                placeholder="Input shipper address"
+                                                onChange={handleChange}
+                                                onBlur={handleBlur}
+                                                value={values.address}
+                                                variant="outlined"
+                                                helperText={errors.address}
+                                            />
+                                        </Grid>
+                                        <Grid item xs={12} sm={6}>
+                                            <TextField
+                                                fullWidth
+                                                label="Identify Number (*)"
+                                                name="identify_number"
+                                                placeholder="Input shipper identify number"
+                                                onChange={handleChange}
+                                                onBlur={handleBlur}
+                                                value={values.identify_number}
+                                                variant="outlined"
+                                                helperText={errors.identify_number}
+                                                error={(errors.identify_number && touched.identify_number) ? true : false}
+                                            />
+                                        </Grid>
+                                        <Grid item xs={12} sm={6}>
+                                            <TextField
+                                                fullWidth
+                                                label="License Number (*)"
+                                                name="license_number"
+                                                placeholder="Input shipper license number"
+                                                onChange={handleChange}
+                                                onBlur={handleBlur}
+                                                value={values.license_number}
+                                                variant="outlined"
+                                                helperText={errors.license_number}
+                                                error={(errors.license_number && touched.license_number) ? true : false}
+                                            />
+                                        </Grid>
+                                        <Divider />
+                                        <Box display="flex" justifyContent="flex-end" p={2}>
+                                            <Button
+                                                color="primary"
+                                                variant="contained"
+                                                style={{ color: 'white' }}
+                                                type="submit"
+                                            >
+                                                Save
+                                            </Button>
+                                        </Box>
+                                    </Grid>
+                                </Container>
+                            </div>
+                        </form>
+                    );
+                }}
+            </Formik>
         </div>
     );
 };
-
 
 export default ModalShipperAdd;

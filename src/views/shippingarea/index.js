@@ -3,7 +3,7 @@ import { Map, GoogleApiWrapper, Marker, Circle } from 'google-maps-react';
 import API from '../../api/API';
 import { HUB_ENDPOINT, INVOICE_ENDPOINT } from '../../api/endpoint';
 import { useDispatch, useSelector } from 'react-redux';
-import { actGetListHub, actLoadInvoiceList } from '../../actions';
+import { actGetListHub, actLoadInvoices } from '../../actions';
 import { Box, Button, Container, Modal } from '@material-ui/core';
 import ModalHubAdd from '../../components/ModalHubAdd';
 
@@ -16,12 +16,13 @@ export function MapContainer(props) {
   };
 
   const hubLocation = useSelector(state => state.hub.listHub);
-  const invoiceLocation = useSelector(state => state.invoice.invoiceList);
+  const invoiceLocation = useSelector(state => state.invoice.invoices);
   const [openHub, setOpenHub] = useState(false);
   const [name, setName] = useState('');
   const [radius, setRadius] = useState('');
   const [status, setStatus] = useState('Available');
   const [id, setId] = useState('');
+
   const handleOpenHub = () => {
     setOpenHub(true);
   }
@@ -51,7 +52,7 @@ export function MapContainer(props) {
       .then(async response => {
         if (response.ok) {
           const fetchData = await response.json();
-          dispatch(actLoadInvoiceList(fetchData.data));
+          dispatch(actLoadInvoices(fetchData.data));
         }
       });
   }, [dispatch]);
@@ -66,49 +67,53 @@ export function MapContainer(props) {
   };
 
   const displayHubMarkers = () => {
-    return hubLocation.map((store, index) => {
-      return (<Marker
-        key={index}
-        position={{
-          lat: store.latitude,
-          lng: store.longitude,
-        }}
-        title={store.name}
-        id={store.id}
-        radius={store.radius}
-        status={store.status}
-        label={((store.name).length > 20) ? (((store.name).substring(0, 20 - 3)) + '...') : store.name}
-        style={{ color: 'white' }}
-        onClick={onMarkerClick}
-        {...props}
-      >
-      </Marker >
-      );
-    });
+    if (hubLocation && hubLocation.length) {
+      return hubLocation.map((store, index) => {
+        return (<Marker
+          key={index}
+          position={{
+            lat: store.latitude,
+            lng: store.longitude,
+          }}
+          title={store.name}
+          id={store.id}
+          radius={store.radius}
+          status={store.status}
+          label={((store.name).length > 20) ? (((store.name).substring(0, 20 - 3)) + '...') : store.name}
+          style={{ color: 'white' }}
+          onClick={onMarkerClick}
+          {...props}
+        >
+        </Marker >
+        );
+      });
+    }
   }
 
   const displayInvoiceMarkers = () => {
     const onMarkerClick = (props, marker, e) => {
       console.log(props);
     }
-    return invoiceLocation.map((invoice, index) => {
-      return <Marker
-        key={index}
-        position={{
-          lat: invoice.latitude,
-          lng: invoice.longitude
-        }}
-        icon={{
-          url: "https://res.cloudinary.com/dvehkdedj/image/upload/v1605980191/gain-icon-point-2_wyxrpw.png",
-          width: 5,
-          height: 5,
-          scaledSize: new window.google.maps.Size(15, 15)
-        }}
-        onClick={onMarkerClick}
-        name={invoice.address}
-        id={invoice.id}
-      />
-    });
+    if (invoiceLocation && invoiceLocation.length) {
+      return invoiceLocation.map((invoice, index) => {
+        return <Marker
+          key={index}
+          position={{
+            lat: invoice.latitude,
+            lng: invoice.longitude
+          }}
+          icon={{
+            url: "https://res.cloudinary.com/dvehkdedj/image/upload/v1605980191/gain-icon-point-2_wyxrpw.png",
+            width: 5,
+            height: 5,
+            scaledSize: new window.google.maps.Size(15, 15)
+          }}
+          onClick={onMarkerClick}
+          name={invoice.address}
+          id={invoice.id}
+        />
+      });
+    }
   };
 
   const displayCircles = () => {

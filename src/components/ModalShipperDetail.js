@@ -1,10 +1,17 @@
-import React, { useState } from 'react';
-import { Button, Container, Grid, makeStyles, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField } from '@material-ui/core';
+import React from 'react';
+import {
+    makeStyles,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow
+} from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
 import datetimeUtils from '../utils/datetimeUtils';
 import { withStyles } from '@material-ui/styles';
-import API from '../api/API';
-import { SHIPPER_ENDPOINT } from '../api/endpoint';
+
 const useStyles = makeStyles((theme) => ({
     container: {
         width: "100%",
@@ -73,56 +80,16 @@ const StyledTableRow = withStyles((theme) => ({
 const ModalShipperDetail = (props) => {
     const classes = useStyles();
     const { shipper } = props;
-    const [name, setName] = useState('');
-    const [gender, setGender] = useState('');
-    const [DOB, setDOB] = useState('');
-    const handleUpdateShipperInfor = async () => {
-        try {
-            await API.put(SHIPPER_ENDPOINT + "/" + shipper.phone);
-        } catch (error) {
-            console.log(error);
-        }
-    }
-    const shippername = shipper.last_name + " " + shipper.first_name;
-    const shippergender = shipper.gender;
-    const shipperDOB = shipper.DOB;
     return (
-        // <div className={classes.container}>
-        //     <div className={classes.detailHeader}>
-        //         <CloseIcon
-        //             className={classes.closeBtn}
-        //             onClick={() => props.onCloseModal()}
-        //         />
-        //     </div>
-        //     <div className={classes.wrapperLeft}>
-        //         <h2 className={classes.titleText}>Shipper Detail</h2>
-        //         <p className={classes.detailRow}><span><b>ID:</b> </span><span>{shipper.id}</span></p>
-        //         <p className={classes.detailRow}><span><b>Full Name:</b> </span><span>{shipper.last_name} {shipper.first_name}</span></p>
-        //         <p className={classes.detailRow}><span><b>Phone:</b> </span><span>{shipper.phone}</span></p>
-        //         <p className={classes.detailRow}><span><b>Email:</b> </span><span>{shipper.email}</span></p>
-        //         <p className={classes.detailRow}><span><b>Address:</b> </span><span>{shipper.address}</span></p>
-        //         <p className={classes.detailRow}><span><b>Birthday:</b> </span><span>{shipper.DOB}</span></p>
-        //         <p className={classes.detailRow}><span><b>Gender:</b> </span><span>{shipper.gender}</span></p>
-        //         <p className={classes.detailRow}><span><b>Identify Number:</b> </span><span>{shipper.identify_number}</span></p>
-        //         <p className={classes.detailRow}><span><b>License Number:</b> </span><span>{shipper.license_number}</span></p>
-        //         <p className={classes.detailRow}><span><b>Status:</b> </span><span>{shipper.status}</span></p>
-        //         <p className={classes.detailRow}><span><b>Created At:</b> </span><span>{datetimeUtils.DisplayDateTimeFormat(shipper.created_at)}</span></p>
-        //         <p className={classes.detailRow}><span><b>Updated At:</b> </span><span>{datetimeUtils.DisplayDateTimeFormat(shipper.updated_at)}</span></p>
-        //     </div>
-        // </div>
         <div className={classes.container}>
             <div className={classes.detailHeader}>
-                <CloseIcon
-                    className={classes.closeBtn}
-                    onClick={() => props.onCloseModal()}
-                />
+                <CloseIcon className={classes.closeBtn} onClick={() => props.onCloseModal()} />
             </div>
             <div className={classes.wrapperLeft}>
                 <TableContainer>
                     <Table aria-label="customized table" >
-                        <TableHead>
+                        <TableHead title="Shipper Detail" style={{ color: 'white' }}>
                             <TableRow>
-
                                 <StyledTableCell align="center">ID</StyledTableCell>
                                 <StyledTableCell align="center">Full Name</StyledTableCell>
                                 <StyledTableCell align="center">Phone</StyledTableCell>
@@ -139,23 +106,23 @@ const ModalShipperDetail = (props) => {
                         </TableHead>
                         <TableBody>
                             <StyledTableRow>
-                                <StyledTableCell align="right">{shipper.id}</StyledTableCell>
-                                <StyledTableCell align="right"><TextField value={shippername}></TextField></StyledTableCell>
-                                <StyledTableCell align="right">{shipper.phone}</StyledTableCell>
-                                <StyledTableCell align="right">{shipper.email}</StyledTableCell>
-                                <StyledTableCell align="right">{shipper.address}</StyledTableCell>
-                                <StyledTableCell align="right"><TextField value={shipperDOB}></TextField></StyledTableCell>
-                                <StyledTableCell align="right"><TextField value={shippergender}></TextField></StyledTableCell>
-                                <StyledTableCell align="right">{shipper.identify_number}</StyledTableCell>
-                                <StyledTableCell align="right">{shipper.license_number}</StyledTableCell>
-                                <StyledTableCell align="right">{shipper.status}</StyledTableCell>
-                                <StyledTableCell align="right">{datetimeUtils.DisplayDateTimeFormat(shipper.created_at)}</StyledTableCell>
-                                <StyledTableCell align="right">{datetimeUtils.DisplayDateTimeFormat(shipper.updated_at)}</StyledTableCell>
+                                <StyledTableCell align="center">{shipper.id}</StyledTableCell>
+                                <StyledTableCell align="center">{shipper.last_name + " " + shipper.first_name}</StyledTableCell>
+                                <StyledTableCell align="center">{shipper.phone}</StyledTableCell>
+                                <StyledTableCell align="center">{shipper.email}</StyledTableCell>
+                                <StyledTableCell align="center">{shipper.address}</StyledTableCell>
+                                <StyledTableCell align="center">{shipper.DOB}</StyledTableCell>
+                                <StyledTableCell align="center">{shipper.gender}</StyledTableCell>
+                                <StyledTableCell align="center">{shipper.identify_number}</StyledTableCell>
+                                <StyledTableCell align="center">{shipper.license_number}</StyledTableCell>
+                                <StyledTableCell align="center">{shipper.status}</StyledTableCell>
+                                <StyledTableCell align="center">{datetimeUtils.DisplayDateTimeFormat(shipper.created_at)}</StyledTableCell>
+                                <StyledTableCell align="center">{datetimeUtils.DisplayDateTimeFormat(shipper.updated_at)}</StyledTableCell>
                             </StyledTableRow>
                         </TableBody>
                     </Table>
                 </TableContainer>
-                <Container>
+                {/* <Container>
                     <Grid container
                         direction="row"
                         justify="flex-end"
@@ -170,7 +137,7 @@ const ModalShipperDetail = (props) => {
                         </Button>
                         </Grid>
                     </Grid>
-                </Container>
+                </Container> */}
             </div>
 
         </div>

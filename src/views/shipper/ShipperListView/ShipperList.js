@@ -13,24 +13,66 @@ import {
   TableRow,
   makeStyles,
   Button,
-  Modal
+  Modal,
+  TableSortLabel
 } from '@material-ui/core';
 
-import TableContainer from '@material-ui/core/TableContainer';
-import ModalAssign from './ModalAssign';
-import { STATUS } from '../../../common/index';
-import { HUB_ENDPOINT } from '../../../api/endpoint';
 import API from '../../../api/API';
-import ModalShipperDetail from '../../../components/ModalShipperDetail';
+import ModalAssign from './ModalAssign';
+import { useDispatch } from 'react-redux';
+import { STATUS } from '../../../common/index';
+import { actLoadShipper } from '../../../actions';
+import TableContainer from '@material-ui/core/TableContainer';
 import ModalShipperAdd from '../../../components/ModalShipperAdd';
+import { HUB_ENDPOINT, SHIPPER_ENDPOINT } from '../../../api/endpoint';
+import ModalShipperDetail from '../../../components/ModalShipperDetail';
 
 const columns = [
   { id: 'avatar', label: 'Avatar', minWidth: 200, align: 'center' },
   { id: 'last_name', label: 'Last name', minWidth: 200, align: 'center' },
   { id: 'first_name', label: 'First name', minWidth: 500, align: 'center' },
   { id: 'phone', label: 'Phone', minWidth: 200, align: 'center' },
-  { id: 'status', label: 'status', minWidth: 120, align: 'center' },
+  { id: 'status', label: 'Status', minWidth: 120, align: 'center' },
 ];
+
+const EnhancedTableHead = (props) => {
+  const { order, orderBy, onRequestSort } = props;
+  const createSortHandler = (property) => (event) => {
+    onRequestSort(event, property);
+  };
+
+  return (
+    <TableHead>
+      <TableRow>
+        {columns.map((headCell) => (
+          <TableCell
+            key={headCell.id}
+            padding={headCell.disablePadding ? 'none' : 'default'}
+            sortDirection={orderBy === headCell.id ? order : false}
+            align={headCell.align}
+            style={{ minWidth: headCell.minWidth }}
+          >
+            <TableSortLabel
+              active={orderBy === headCell.id}
+              direction={orderBy === headCell.id ? order : 'asc'}
+              onClick={createSortHandler(headCell.id)}
+            >
+              {headCell.label}
+            </TableSortLabel>
+          </TableCell>
+        ))}
+        <TableCell align={"center"} style={{ minWidth: 200 }}>Hub</TableCell>
+      </TableRow>
+    </TableHead>
+  );
+}
+
+EnhancedTableHead.propTypes = {
+  classes: PropTypes.object.isRequired,
+  orderBy: PropTypes.string.isRequired,
+  onRequestSort: PropTypes.func.isRequired,
+  order: PropTypes.oneOf(['asc', 'desc']).isRequired,
+};
 
 const useStyles = makeStyles((theme) => ({
   root: {},
@@ -49,33 +91,35 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const ShipperList = ({ onReload, className, shippers, ...rest }) => {
+const ShipperList = ({ className, shippers, ...rest }) => {
+  const rowsPerPage = 50;
   const classes = useStyles();
+  const dispatch = useDispatch();
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [order, setOrder] = useState('asc');
+  const [shipper, setShipper] = useState({});
+  const [orderBy, setOrderBy] = useState('id');
+  const [currentHub, setCurrentHub] = useState(null);
+  const [modalOpenAdd, setModalOpenAdd] = useState(false);
   const [visiableModal, setVisibleModal] = useState(false);
   const [selectedShipper, setSelectedShipper] = useState(null);
   const [visibleModalShipperDetail, setVisibleModalShipperDetail] = useState(false);
-  const [shipper, setShipper] = useState({});
-  const [modalOpenAdd, setModalOpenAdd] = useState(false);
+
   const openModalFormAdd = () => {
     setModalOpenAdd(true);
-    console.log("aaaaaaaaaaaaaa");
   }
-  const onCloseModalAdd = () => {
+
+  const onCloseModalAdd = async () => {
     setModalOpenAdd(false);
   }
+
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
 
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(+event.target.value);
-    setPage(0);
-  };
-
-  const handleSelectedRow = (shipperPhone) => {
+  const handleSelectedRow = (shipperPhone, shipperHub) => {
     setSelectedShipper(shipperPhone);
+    setCurrentHub(shipperHub);
     setVisibleModal(true);
   }
 
@@ -100,7 +144,18 @@ const ShipperList = ({ onReload, className, shippers, ...rest }) => {
       shipper_phone: selectedShipper
     };
     await API.patch(HUB_ENDPOINT + "/" + hub_id + "/assign_shipper", data);
-    onReload();
+
+    API.get(SHIPPER_ENDPOINT)
+      .then(async response => {
+        if (response.ok) {
+          const fetchData = await response.json();
+          const shippersData = fetchData.data;
+          if (shippersData.length > 0) {
+            dispatch(actLoadShipper(shippersData));
+          }
+        }
+      });
+
     setSelectedShipper(null);
     handleInvisibleModal();
   };
@@ -138,12 +193,15 @@ const ShipperList = ({ onReload, className, shippers, ...rest }) => {
     handleVisibleModalShipperDetail();
   };
 
+  const handleRequestSort = (event, property) => {
+    const isAsc = orderBy === property && order === 'asc';
+    setOrder(isAsc ? 'desc' : 'asc');
+    setOrderBy(property);
+  };
+
   return (
     <>
-      <Box
-        display="flex"
-        justifyContent="flex-end"
-      >
+      <Box display="flex" justifyContent="flex-end">
         <Button
           color="primary"
           variant="contained"
@@ -154,27 +212,15 @@ const ShipperList = ({ onReload, className, shippers, ...rest }) => {
         </Button>
       </Box>
       <Card className={clsx(classes.root, className)} {...rest} >
-
         <Box>
-
           <TableContainer className={classes.container}>
             <Table stickyHeader aria-label="sticky table">
-              <TableHead>
-                <TableRow>
-                  {columns.map((column, index) => (
-                    <TableCell
-                      key={index}
-                      align={column.align}
-                      style={{ minWidth: column.minWidth }}
-                    >
-                      {column.label}
-                    </TableCell>
-                  ))}
-                  <TableCell align={"center"} style={{ minWidth: 200 }}>
-                    Status
-                </TableCell>
-                </TableRow>
-              </TableHead>
+              <EnhancedTableHead
+                classes={classes}
+                order={order}
+                orderBy={orderBy}
+                onRequestSort={handleRequestSort}
+              />
               <TableBody>
                 {shippers.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((shipper, index) => {
                   return (
@@ -185,6 +231,7 @@ const ShipperList = ({ onReload, className, shippers, ...rest }) => {
                           <TableCell
                             align={column.align}
                             id={index}
+                            key={index}
                             onClick={() => handleClickShipperItem(shipper)}
                           >
                             {value}
@@ -195,9 +242,8 @@ const ShipperList = ({ onReload, className, shippers, ...rest }) => {
                         <Button
                           color="primary"
                           variant="contained"
-                          onClick={() => handleSelectedRow(shipper.phone)}
+                          onClick={() => handleSelectedRow(shipper.phone, shipper.hub ? shipper.hub.id : null)}
                           style={{ color: 'white' }}
-                          disabled={shipper.hub ? true : false}
                         >
                           {shipper.hub ? 'Assigned' : 'Assign'}
                         </Button>
@@ -210,13 +256,12 @@ const ShipperList = ({ onReload, className, shippers, ...rest }) => {
           </TableContainer>
         </Box>
         <TablePagination
-          rowsPerPageOptions={[10, 25, 100]}
+          rowsPerPageOptions={[0]}
           component="div"
           count={shippers.length}
           rowsPerPage={rowsPerPage}
           page={page}
           onChangePage={handleChangePage}
-          onChangeRowsPerPage={handleChangeRowsPerPage}
         />
       </Card>
       <Modal open={visiableModal}>
@@ -225,6 +270,7 @@ const ShipperList = ({ onReload, className, shippers, ...rest }) => {
             onInvisibleModel={handleInvisibleModal}
             onVisibleModal={handleVisibleModal}
             onHandleAssign={handleAssignHub}
+            onCurrentHub={currentHub}
           />
         </div>
       </Modal>

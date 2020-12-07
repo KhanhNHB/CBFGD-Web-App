@@ -48,6 +48,16 @@ export default {
     },
     DisplayDatePicker: (datetime) => {
         const date = new Date(datetime);
-        return [date.getFullYear(), date.getMonth() + 1, date.getDate()].join('-');
+
+        let month = '' + (date.getMonth() + 1);
+        let day = '' + date.getDate();
+        let year = date.getFullYear();
+
+        if (month.length < 2)
+            month = '0' + month;
+        if (day.length < 2)
+            day = '0' + day;
+
+        return [year, month, day].join('-');
     },
 };

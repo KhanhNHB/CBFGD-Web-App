@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from "react";
 import {
+    CircularProgress,
     makeStyles,
 } from "@material-ui/core";
-import API from "../api/API";
-import { BLOCKCHAIN_INVOICES_ENDPOINT } from "../api/endpoint";
+import { BASE_URL_FABRIC } from "../api/endpoint";
 import CloseIcon from '@material-ui/icons/Close';
 import datetimeUtils from '../utils/datetimeUtils';
+import axios from 'axios';
+import Cookies from 'js-cookie';
+import { ACCESS_TOKEN_FABRIC } from "../common";
 
 const useStyles = makeStyles((theme) => ({
     container: {
@@ -72,19 +75,95 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
+// function getSteps() {
+//     return ['IN WAREHOUSE', 'DELIVERING', 'COMPETED'];
+// }
+
+// function getStepContent(step) {
+//     switch (step) {
+//         case 0:
+//             return 'Select campaign settings...';
+//         case 1:
+//             return 'What is an ad group anyways?';
+//         case 2:
+//             return 'This is the bit I really care about!';
+//         default:
+//             return 'Unknown step';
+//     }
+// }
+// const useQontoStepIconStyles = makeStyles({
+//     root: {
+//         color: '#eaeaf0',
+//         display: 'flex',
+//         height: 22,
+//         alignItems: 'center',
+//     },
+//     active: {
+//         color: '#39beb6',
+//     },
+//     circle: {
+//         width: 10,
+//         height: 10,
+//         borderRadius: '50%',
+//         backgroundColor: 'currentColor',
+//     },
+//     completed: {
+//         color: '#39beb6',
+//         zIndex: 1,
+//         fontSize: 18,
+//     },
+// });
+
+// function QontoStepIcon(props) {
+//     const classes = useQontoStepIconStyles();
+//     const { active, completed } = props;
+
+//     return (
+//         <div
+//             className={clsx(classes.root, {
+//                 [classes.active]: active,
+//             })}
+//         >
+//             {completed ? <Check className={classes.completed} /> : <div className={classes.circle} />}
+//         </div>
+//     );
+// }
+
+// QontoStepIcon.propTypes = {
+//     /**
+//      * Whether this step is active.
+//      */
+//     active: PropTypes.bool,
+//     /**
+//      * Mark the step as completed. Is passed to child components.
+//      */
+//     completed: PropTypes.bool,
+// };
+
 const ModalInvoiceDetail = (props) => {
     const classes = useStyles();
     const [deliveringProcess, setDeliveringProcess] = useState([]);
+    const [loading, setLoading] = useState(false);
+    // const [activeStep, setActiveStep] = useState(0);
+    // const steps = getSteps();
 
     useEffect(() => {
-        API.get(`${BLOCKCHAIN_INVOICES_ENDPOINT}${props.invoice.code}`)
-            .then(async response => {
-                if (response.ok) {
-                    const fetchData = await response.json();
-                    setDeliveringProcess(fetchData.data);
+        setLoading(true);
+        axios.get(`${BASE_URL_FABRIC}/channels/mychannel/chaincodes/fabinvoice?args=["${props.invoice.provider.name}${props.invoice.code}"]&fcn=getHistoryForAsset&peer=peer0.org1.example.com`, {
+            headers: {
+                'Authorization': 'Bearer ' + Cookies.get(ACCESS_TOKEN_FABRIC),
+            },
+        }).then(response => {
+            if (response.status === 200) {
+                if (!response.data && !response.data.length) {
+                    return;
                 }
-            });
-    }, [props.invoice.code]);
+                setDeliveringProcess(response.data);
+                setLoading(false);
+            }
+        });
+    }, [props.invoice.code, props.invoice.provider.name]);
+
     return (
         <div className={classes.container}>
             <div className={classes.detailHeader}>
@@ -102,41 +181,72 @@ const ModalInvoiceDetail = (props) => {
                 <p className={classes.detailRow}><span></span><b>Receiver phone number:</b> <span>{props.invoice.receiver_phone_number}</span></p>
             </div>
             <div className={classes.wrapperRight}>
-                <h2 className={classes.titleText}>Invoice Detail</h2>
-                <table className={classes.table}>
-                    <tbody>
-                        {
-                            deliveringProcess.map((process, index) => {
-                                return (index === (deliveringProcess.length - 1))
-                                    ? <tr key={index} className={classes.currentstatus}>
-                                        <td className={classes.dot}>&bull;</td>
-                                        <td className={classes.tableRow}>
-                                            <p>{process.Record.status}</p>
-                                            <p>Time: {datetimeUtils.DisplayDateTimeFormat(process.Record.created_at)}</p>
-                                            {process.Record.shipper_phone
-                                                ? <>
-                                                    <p>Shipper phone number: {process.Record.shipper_phone}</p>
-                                                    <p>Shipper name: {process.Record.shipper_name}</p>
-                                                </>
-                                                : <p>Shipper: Not Assign</p>
-                                            }
-                                        </td>
-                                    </tr>
-                                    : <tr key={index}>
-                                        <td className={classes.dot}>&bull;</td>
-                                        <td className={classes.tableRow}>
-                                            <p>{process.Record.status}</p>
-                                            <p>Shipper phone number: {process.Record.shipper_phone}</p>
-                                            <p>Time: {datetimeUtils.DisplayDateTimeFormat(process.Record.created_at)}</p>
-                                        </td>
-                                    </tr>
-                            })
-                        }
-                    </tbody>
-                </table>
+                {loading
+                    ? (
+                        <>
+                            <div style={{
+                                height: '100%',
+                                display: 'flex',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                            }}>
+                                <CircularProgress />
+                            </div>
+                        </>
+                    )
+                    : (
+                        <>
+                            <h2 className={classes.titleText}>Delivery Status Detail</h2>
+                            {/* <Stepper activeStep={activeStep} orientation="vertical">
+                                {steps.map((label, index) => (
+                                    <Step key={label}>
+                                        <StepLabel StepIconComponent={QontoStepIcon}>{label}</StepLabel>
+                                        <StepContent>
+                                            <Typography>{getStepContent(index)}</Typography>
+                                        </StepContent>
+                                    </Step>
+                                ))}
+                            </Stepper> */}
+                            <table className={classes.table}>
+                                <tbody>
+                                    {
+                                        deliveringProcess.map((process, index) => {
+                                            console.log(process);
+                                            return (index === (deliveringProcess.length - 1))
+                                                ? <tr key={index} className={classes.currentstatus}>
+                                                    <td className={classes.dot}>&bull;</td>
+                                                    <td className={classes.tableRow}>
+                                                        <p>Transaction Id: {process.TxId}</p>
+                                                        <p>{process.Value.status}</p>
+                                                        <p>Time: {datetimeUtils.DisplayDateTimeFormat(process.Timestamp)}</p>
+                                                        {process.Value.shipper_phone
+                                                            ? <>
+                                                                <p>Shipper phone number: {process.Value.shipper_phone}</p>
+                                                                <p>Shipper name: {process.Value.shipper_name}</p>
+                                                            </>
+                                                            : <p>Shipper: Not Assign</p>
+                                                        }
+                                                    </td>
+                                                </tr>
+                                                : <tr key={index}>
+                                                    <td className={classes.dot}>&bull;</td>
+                                                    <td className={classes.tableRow}>
+                                                        <p>{process.Value.status}</p>
+                                                        <p>Transaction Id: {process.TxId}</p>
+                                                        <p>Shipper phone number: {process.Value.shipper_phone}</p>
+                                                        <p>Time: {datetimeUtils.DisplayDateTimeFormat(process.Timestamp)}</p>
+                                                    </td>
+                                                </tr>
+                                        })
+                                    }
+                                </tbody>
+                            </table>
+                        </>
+                    )
+                }
             </div>
 
-        </div>
+        </div >
     );
 };
 export default ModalInvoiceDetail;

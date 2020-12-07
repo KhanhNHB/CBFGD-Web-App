@@ -63,7 +63,6 @@ const items = [
     icon: UserPlusIcon,
     title: 'Register'
   },
-
 ];
 
 const useStyles = makeStyles(() => ({
