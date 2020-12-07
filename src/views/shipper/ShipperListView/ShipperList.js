@@ -14,7 +14,8 @@ import {
   makeStyles,
   Button,
   Modal,
-  TableSortLabel
+  TableSortLabel,
+  CircularProgress
 } from '@material-ui/core';
 
 import API from '../../../api/API';
@@ -88,7 +89,15 @@ const useStyles = makeStyles((theme) => ({
     height: '100%',
     justifyContent: 'center',
     alignItems: 'center',
-  }
+  },
+  loadingModal: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    '& .MuiCircularProgress-root': {
+      outline: 'none'
+    },
+  },
 }));
 
 const ShipperList = ({ className, shippers, ...rest }) => {
@@ -104,6 +113,7 @@ const ShipperList = ({ className, shippers, ...rest }) => {
   const [visiableModal, setVisibleModal] = useState(false);
   const [selectedShipper, setSelectedShipper] = useState(null);
   const [visibleModalShipperDetail, setVisibleModalShipperDetail] = useState(false);
+  const [loadingModal, setLoadingModal] = useState(false);
 
   const openModalFormAdd = () => {
     setModalOpenAdd(true);
@@ -140,6 +150,7 @@ const ShipperList = ({ className, shippers, ...rest }) => {
   };
 
   const handleAssignHub = async (hub_id) => {
+    setLoadingModal(true);
     const data = {
       shipper_phone: selectedShipper
     };
@@ -154,6 +165,7 @@ const ShipperList = ({ className, shippers, ...rest }) => {
             dispatch(actLoadShipper(shippersData));
           }
         }
+        setLoadingModal(false);
       });
 
     setSelectedShipper(null);
@@ -286,6 +298,9 @@ const ShipperList = ({ className, shippers, ...rest }) => {
         <div className={classes.modal}>
           <ModalShipperAdd onCloseModal={onCloseModalAdd} />
         </div>
+      </Modal>
+      <Modal open={loadingModal} className={classes.loadingModal}>
+        <CircularProgress />
       </Modal>
     </>
   );

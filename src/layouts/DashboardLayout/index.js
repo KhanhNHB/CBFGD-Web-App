@@ -1,8 +1,14 @@
-import React, { useState } from 'react';
-import { Outlet } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Outlet, useNavigate } from 'react-router-dom';
 import { makeStyles } from '@material-ui/core';
 import NavBar from './NavBar';
 import TopBar from './TopBar';
+import { USER_TOKEN } from '../../common';
+import Cookies from 'js-cookie';
+import API from '../../api/API';
+import { useDispatch } from 'react-redux';
+import { actLoadProfile } from '../../actions';
+import { PROFILE_ENDPOINT } from '../../api/endpoint';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -36,6 +42,27 @@ const useStyles = makeStyles((theme) => ({
 const DashboardLayout = () => {
   const classes = useStyles();
   const [isMobileNavOpen, setMobileNavOpen] = useState(false);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    const readCookie = async () => {
+      const user = Cookies.get(USER_TOKEN);
+      if (!user) {
+        navigate('/', { replace: true });
+      } else {
+        const response = await API.post(`${PROFILE_ENDPOINT}`, {
+          "access_token": user
+        });
+
+        if (response.ok) {
+          const fetchData = await response.json();
+          dispatch(actLoadProfile(fetchData.data));
+        }
+      }
+    };
+    readCookie();
+  }, [navigate]);
 
   return (
     <div className={classes.root}>

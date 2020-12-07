@@ -8,6 +8,7 @@ import {
   Container,
   Grid,
   makeStyles,
+  Modal,
 } from '@material-ui/core';
 import Page from '../../../components/Page';
 import { SHIPPER_ENDPOINT } from '../../../api/endpoint';
@@ -25,19 +26,26 @@ const useStyles = makeStyles((theme) => ({
   },
   productCard: {
     height: '100%'
+  },
+  loadingModal: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    '& .MuiCircularProgress-root': {
+      outline: 'none'
+    }
   }
 }));
 
 const ShipperListView = () => {
   const dispatch = useDispatch();
   const classes = useStyles();
-  const [loading, setLoading] = useState(false);
+  const [loadingModal, setLoadingModal] = useState(false);
 
   const shippers = useSelector(state => state.shipper.shippers);
 
   useEffect(() => {
-    setLoading(true);
-
+    setLoadingModal(true);
     API.get(SHIPPER_ENDPOINT)
       .then(async response => {
         if (response.ok) {
@@ -45,7 +53,7 @@ const ShipperListView = () => {
           const shippersData = fetchData.data;
           if (shippersData.length > 0) {
             dispatch(actLoadShipper(shippersData));
-            setLoading(false);
+            setLoadingModal(false);
           }
         }
       });
@@ -58,21 +66,13 @@ const ShipperListView = () => {
       <Container maxWidth={false}>
         <Box mt={3}>
           <Grid container spacing={3}>
-            {loading
-              ? (
-                <div style={{
-                  flex: 1,
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center'
-                }}>
-                  <CircularProgress />
-                </div>
-              )
-              : <ShipperList shippers={shippers} />}
+            <ShipperList shippers={shippers} />
           </Grid>
         </Box>
       </Container>
+      <Modal open={loadingModal} className={classes.loadingModal}>
+        <CircularProgress />
+      </Modal>
     </Page>
   );
 };

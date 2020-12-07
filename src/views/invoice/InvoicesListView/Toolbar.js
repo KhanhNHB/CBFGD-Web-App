@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
 import {
@@ -15,6 +15,8 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
+  Modal,
+  CircularProgress,
 } from '@material-ui/core';
 import { Search as SearchIcon } from 'react-feather';
 import { useSelector, useDispatch } from 'react-redux';
@@ -44,7 +46,7 @@ const useStyles = makeStyles((theme) => ({
     alignItems: 'center',
     '& .MuiCircularProgress-root': {
       outline: 'none'
-    }
+    },
   },
 }));
 
@@ -52,6 +54,7 @@ const Toolbar = ({ onHandleFileUpload, onHandleFileChange, ...rest }) => {
   const classes = useStyles();
   const providers = useSelector(state => state.providers.providers);
   const selectedProvider = useSelector(state => state.providers.provider_name);
+  const [loadingModal, setLoadingModal] = useState(false);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -76,6 +79,7 @@ const Toolbar = ({ onHandleFileUpload, onHandleFileChange, ...rest }) => {
   }, [dispatch]);
 
   useEffect(() => {
+    setLoadingModal(true);
     if (selectedProvider !== 'NONE') {
       API.get(INVOICE_ENDPOINT + `/providers/${selectedProvider}?page=1&limit=50`)
         .then(async response => {
@@ -84,6 +88,7 @@ const Toolbar = ({ onHandleFileUpload, onHandleFileChange, ...rest }) => {
             const data = { invoices: fetchData.data.items, meta: fetchData.data.meta };
             dispatch(actLoadInvoices(data));
           }
+          setLoadingModal(false);
         });
     } else {
       API.get(INVOICE_ENDPOINT + '?page=1&limit=50')
@@ -93,6 +98,7 @@ const Toolbar = ({ onHandleFileUpload, onHandleFileChange, ...rest }) => {
             const data = { invoices: fetchData.data.items, meta: fetchData.data.meta };
             dispatch(actLoadInvoices(data));
           }
+          setLoadingModal(false);
         });
     }
   }, [selectedProvider, dispatch]);
@@ -124,13 +130,6 @@ const Toolbar = ({ onHandleFileUpload, onHandleFileChange, ...rest }) => {
           style={{ color: 'white', marginLeft: 10 }}
         >
           Import Excel
-        </Button>
-        <Button
-          color="primary"
-          variant="contained"
-          style={{ color: 'white' }}
-        >
-          Add Invoice
         </Button>
       </Box>
       <Box mt={3}>
@@ -171,6 +170,9 @@ const Toolbar = ({ onHandleFileUpload, onHandleFileChange, ...rest }) => {
           </CardContent>
         </Card>
       </Box>
+      <Modal open={loadingModal} className={classes.loadingModal}>
+        <CircularProgress />
+      </Modal>
     </div>
   );
 };

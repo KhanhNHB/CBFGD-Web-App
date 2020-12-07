@@ -1,20 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Button,
   Container,
-  Link,
   TextField,
-  Typography,
   makeStyles,
   CircularProgress,
 } from '@material-ui/core';
 import Page from '../../components/Page';
 import API from '../../api/API';
-import { LOGIN_ENDPOINT } from '../../api/endpoint';
+import { LOGIN_ENDPOINT, PROFILE_ENDPOINT } from '../../api/endpoint';
 import { useDispatch } from 'react-redux';
-import { actSignIn } from '../../actions';
+import { actLoadProfile, actSignIn } from '../../actions';
 import Cookies from 'js-cookie';
 import { ACCESS_TOKEN_FABRIC, USER_TOKEN } from '../../common';
 
@@ -29,27 +27,33 @@ const useStyles = makeStyles((theme) => ({
 
 const LoginView = () => {
   const classes = useStyles();
-
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   useEffect(() => {
-    const readCookie = () => {
+    const readCookie = async () => {
       const user = Cookies.get(USER_TOKEN);
       if (user) {
-        navigate('/app/dashboard', { replace: true });
+        const response = await API.post(`${PROFILE_ENDPOINT}`, {
+          "access_token": user
+        });
+
+        if (response.ok) {
+          const fetchData = await response.json();
+          dispatch(actLoadProfile(fetchData.data));
+          navigate('/app/invoices-list', { replace: true });
+        }
       }
     };
-
     readCookie();
   }, [navigate]);
 
   const signIn = async (username, password) => {
     setIsLoading(true);
+
     const response = await API.post(LOGIN_ENDPOINT, {
       phone: username,
       password: password,
@@ -62,11 +66,15 @@ const LoginView = () => {
       alert(json.message);
       return;
     }
+
     setIsLoading(false);
+
+    dispatch(actLoadProfile(json.data.user));
+
     Cookies.set(USER_TOKEN, json.data.access_token);
     Cookies.set(ACCESS_TOKEN_FABRIC, json.data.user.access_token_fabric);
     dispatch(actSignIn(json.data.access_token));
-    navigate('/app/dashboard', { replace: true });
+    navigate('/app/invoices-list', { replace: true });
   }
 
   return (
@@ -120,20 +128,6 @@ const LoginView = () => {
               }
             </Button>
           </Box>
-          <Typography
-            color="textSecondary"
-            variant="body1"
-          >
-            Don&apos;t have an account?
-                  {' '}
-            <Link
-              component={RouterLink}
-              to="/register"
-              variant="h6"
-            >
-              Sign up
-            </Link>
-          </Typography>
         </Container>
       </Box>
     </Page>

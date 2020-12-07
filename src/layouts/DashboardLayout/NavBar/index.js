@@ -1,8 +1,7 @@
 import React, { useEffect } from 'react';
-import { Link as RouterLink, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import {
-  Avatar,
   Box,
   Divider,
   Drawer,
@@ -12,26 +11,19 @@ import {
   makeStyles
 } from '@material-ui/core';
 import {
-  BarChart as BarChartIcon,
   ShoppingBag as ShoppingBagIcon,
   User as UserIcon,
-  UserPlus as UserPlusIcon,
   Users as UsersIcon,
   MapPin as MapIcon
 } from 'react-feather';
 import NavItem from './NavItem';
-
-const user = {
-  avatar: './images/logo_gds.jpg',
-  jobTitle: 'Senior Developer',
-  name: 'Katarina Smith'
-};
+import { useSelector } from 'react-redux';
 
 const items = [
   {
-    href: '/app/dashboard',
-    icon: BarChartIcon,
-    title: 'Dashboard'
+    href: '/app/invoices-list',
+    icon: ShoppingBagIcon,
+    title: 'Invoices'
   },
   {
     href: '/app/shipper',
@@ -39,29 +31,14 @@ const items = [
     title: 'Shipper'
   },
   {
-    href: '/app/invoices-list',
-    icon: ShoppingBagIcon,
-    title: 'Invoices'
-  },
-  {
     href: '/app/account',
     icon: UserIcon,
     title: 'Account'
   },
-  // {
-  //   href: '/login',
-  //   icon: LockIcon,
-  //   title: 'Login'
-  // },
   {
     href: '/app/shipping-area',
     icon: MapIcon,
     title: 'Shipping Area'
-  },
-  {
-    href: '/register',
-    icon: UserPlusIcon,
-    title: 'Register'
   },
 ];
 
@@ -84,6 +61,7 @@ const useStyles = makeStyles(() => ({
 const NavBar = ({ onMobileClose, openMobile }) => {
   const classes = useStyles();
   const location = useLocation();
+  const profile = useSelector(state => state.profile.profile);
 
   useEffect(() => {
     if (openMobile && onMobileClose) {
@@ -104,24 +82,14 @@ const NavBar = ({ onMobileClose, openMobile }) => {
         flexDirection="column"
         p={2}
       >
-        <Avatar
-          className={classes.avatar}
-          component={RouterLink}
-          src={user.avatar}
-          to="/app/account"
-        />
         <Typography
           className={classes.name}
           color="textPrimary"
           variant="h5"
         >
-          {user.name}
-        </Typography>
-        <Typography
-          color="textSecondary"
-          variant="body2"
-        >
-          {user.jobTitle}
+          {
+            profile && `${profile.last_name} ${profile.first_name}`
+          }
         </Typography>
       </Box>
       <Divider />
