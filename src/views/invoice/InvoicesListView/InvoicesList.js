@@ -175,6 +175,7 @@ const InvoicesList = ({ data }) => {
         const fetchData = await response.json();
         const dataByProvider = { invoices: fetchData.data.items, meta: fetchData.data.meta };
         dispatch(actLoadInvoices(dataByProvider));
+        setPage(+newPage);
       }
     } else {
       const response = await API.get(INVOICE_ENDPOINT + `?page=${newPage + 1}&limit=50`);
@@ -182,8 +183,8 @@ const InvoicesList = ({ data }) => {
         const fetchData = await response.json();
         const data = { invoices: fetchData.data.items, meta: fetchData.data.meta };
         dispatch(actLoadInvoices(data));
+        setPage(+newPage);
       }
-      setPage(+newPage);
     }
     setPage(+newPage);
     setLoadingModal(false);
@@ -212,12 +213,12 @@ const InvoicesList = ({ data }) => {
 
   const handleAssignInvoice = async (shipper_id) => {
     setLoadingModal(true);
-    const data = {
+    const dataAssign = {
       shipper_id: shipper_id,
       invoice_id: selectedInvoice
     };
 
-    const response = await API.post(DELIVERIES_STATUS_ENDPOINT, data);
+    const response = await API.post(DELIVERIES_STATUS_ENDPOINT, dataAssign);
     const json = await response.json();
 
     setLoadingModal(false);
