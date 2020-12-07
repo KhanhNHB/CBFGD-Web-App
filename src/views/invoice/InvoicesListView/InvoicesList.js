@@ -16,6 +16,7 @@ import {
   Button,
   Modal,
   TableSortLabel,
+  CircularProgress,
 } from '@material-ui/core';
 import TableContainer from '@material-ui/core/TableContainer';
 import ModalAssign from './ModalAssign';
@@ -126,12 +127,21 @@ const useStyles = makeStyles((theme) => ({
     height: '100%',
     justifyContent: 'center',
     alignItems: 'center',
-  }
+  },
+  loadingModal: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    '& .MuiCircularProgress-root': {
+      outline: 'none'
+    },
+  },
 }));
 
 const InvoicesList = ({ data }) => {
   const classes = useStyles();
   const dispatch = useDispatch();
+  const [data, setData] = useState(rest.data);
   let totalPage = 0;
   const provider_name = useSelector(state => state.providers.provider_name);
   const keyword = useSelector(state => state.invoice.keyword);
@@ -143,6 +153,7 @@ const InvoicesList = ({ data }) => {
   const [invoiceDetail, setInvoiceDetail] = useState({});
   const [order, setOrder] = useState('asc');
   const [orderBy, setOrderBy] = useState('id');
+  const [loadingModal, setLoadingModal] = useState(false);
 
   useEffect(() => {
     if (data.invoices) {
@@ -151,6 +162,12 @@ const InvoicesList = ({ data }) => {
     }
   }, [data]);
 
+  useEffect(() => {
+    if (rest.data) {
+      setData(rest.data);
+    }
+  }, [rest.data]);
+
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc';
     setOrder(isAsc ? 'desc' : 'asc');
@@ -158,6 +175,7 @@ const InvoicesList = ({ data }) => {
   };
 
   const handleChangePage = async (event, newPage) => {
+    setLoadingModal(true);
     if (provider_name !== 'NONE') {
       const response = await API.get(INVOICE_ENDPOINT + `/providers/${provider_name}?page=${newPage + 1}&limit=50`);
       if (response.ok) {
@@ -175,6 +193,7 @@ const InvoicesList = ({ data }) => {
       setPage(+newPage);
     }
     setPage(+newPage);
+    setLoadingModal(false);
   };
 
   const handleSelectedRow = (invoiceId) => {
@@ -199,6 +218,7 @@ const InvoicesList = ({ data }) => {
   };
 
   const handleAssignInvoice = async (shipper_id) => {
+    setLoadingModal(true);
     const data = {
       shipper_id: shipper_id,
       invoice_id: selectedInvoice
@@ -207,12 +227,23 @@ const InvoicesList = ({ data }) => {
     const response = await API.post(DELIVERIES_STATUS_ENDPOINT, data);
     const json = await response.json();
 
+    setLoadingModal(false);
+
     const message = json.message;
     if (message) {
       alert(message);
       return;
     }
 
+    let cloneRestData = rest.data;
+    for (let i = 0; i < cloneRestData.invoices.length; i++) {
+      const element = cloneRestData.invoices[i];
+      if (element.id === selectedInvoice) {
+        element.is_assign = true;
+        break;
+      }
+    }
+    rest.data = cloneRestData;
     setSelectedInvoice(null);
     handleInvisibleModal();
   };
@@ -335,6 +366,9 @@ const InvoicesList = ({ data }) => {
             onCloseModal={handleInvisibleModalInvoiceDetail}
           />
         </div>
+      </Modal>
+      <Modal open={loadingModal} className={classes.loadingModal}>
+        <CircularProgress />
       </Modal>
     </>
   );
