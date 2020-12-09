@@ -23,6 +23,9 @@ import { useSelector, useDispatch } from 'react-redux';
 import API from '../../../api/API';
 import { actChangeKeyword, actLoadInvoices, actLoadProvider, actLoadProviderName } from '../../../actions/index';
 import { INVOICE_ENDPOINT, PROVIDER_ENDPOINT } from '../../../api/endpoint';
+import { ACCESS_TOKEN_FABRIC, RESPONSE_STATUS, USER_TOKEN } from '../../../common';
+import Cookies from 'js-cookie';
+import { useNavigate } from 'react-router-dom';
 
 const useStyles = makeStyles((theme) => ({
   root: {},
@@ -52,10 +55,11 @@ const useStyles = makeStyles((theme) => ({
 
 const Toolbar = ({ onHandleFileUpload, onHandleFileChange, ...rest }) => {
   const classes = useStyles();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const [loadingModal, setLoadingModal] = useState(false);
   const providers = useSelector(state => state.providers.providers);
   const selectedProvider = useSelector(state => state.providers.provider_name);
-  const [loadingModal, setLoadingModal] = useState(false);
-  const dispatch = useDispatch();
 
   useEffect(() => {
     dispatch(actLoadProviderName(selectedProvider));
@@ -68,6 +72,11 @@ const Toolbar = ({ onHandleFileUpload, onHandleFileChange, ...rest }) => {
   useEffect(() => {
     API.get(PROVIDER_ENDPOINT)
       .then(async response => {
+        if (response.status === RESPONSE_STATUS.FORBIDDEN) {
+          Cookies.remove(USER_TOKEN);
+          Cookies.remove(ACCESS_TOKEN_FABRIC);
+          navigate('/', { replace: true });
+        }
         if (response.ok) {
           const fetchData = await response.json();
           const providersData = fetchData.data;

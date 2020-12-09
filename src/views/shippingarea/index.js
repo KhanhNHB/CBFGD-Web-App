@@ -6,10 +6,13 @@ import { useDispatch, useSelector } from 'react-redux';
 import { actGetListHub, actLoadInvoices } from '../../actions';
 import { Box, Button, Container, Modal } from '@material-ui/core';
 import ModalHubAdd from '../../components/ModalHubAdd';
+import { ACCESS_TOKEN_FABRIC, RESPONSE_STATUS, USER_TOKEN } from '../../common';
+import Cookies from 'js-cookie';
+import { useNavigate } from 'react-router-dom';
 
 export function MapContainer(props) {
   const dispatch = useDispatch();
-
+  const navigate = useNavigate();
   const mapStyles = {
     width: '100%',
     height: '100%',
@@ -42,6 +45,11 @@ export function MapContainer(props) {
   useEffect(() => {
     API.get(`${HUB_ENDPOINT}`)
       .then(async response => {
+        if (response.status === RESPONSE_STATUS.FORBIDDEN) {
+          Cookies.remove(USER_TOKEN);
+          Cookies.remove(ACCESS_TOKEN_FABRIC);
+          navigate('/', { replace: true });
+        }
         if (response.ok) {
           const fetchData = await response.json();
           dispatch(actGetListHub(fetchData.data));
