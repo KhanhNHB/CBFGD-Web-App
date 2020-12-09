@@ -5,6 +5,9 @@ export const GENDER = {
 
 export const USER_TOKEN = 'USER_TOKEN';
 export const ACCESS_TOKEN_FABRIC = 'ACCESS_TOKEN_FABRIC';
+export const RESPONSE_STATUS = {
+    FORBIDDEN: 403
+};
 
 export const ROLE = {
     CUSTOMER: 'Customer',

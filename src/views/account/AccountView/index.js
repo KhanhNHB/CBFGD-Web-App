@@ -10,10 +10,11 @@ import Profile from './Profile';
 import ProfileDetails from './ProfileDetails';
 import API from '../../../api/API';
 import { PROFILE_ENDPOINT } from '../../../api/endpoint';
-import { USER_TOKEN } from "../../../common";
+import { ACCESS_TOKEN_FABRIC, RESPONSE_STATUS, USER_TOKEN } from "../../../common";
 import Cookies from 'js-cookie';
 import { actLoadProfile } from '../../../actions/index';
 import { useSelector, useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -38,6 +39,7 @@ const useStyles = makeStyles((theme) => ({
 
 const Account = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const classes = useStyles();
 
   const user = useSelector(state => state.profile.profile);
@@ -48,7 +50,11 @@ const Account = () => {
       const response = await API.post(`${PROFILE_ENDPOINT}`, {
         "access_token": Cookies.get(USER_TOKEN)
       });
-
+      if (response.status === RESPONSE_STATUS.FORBIDDEN) {
+        Cookies.remove(USER_TOKEN);
+        Cookies.remove(ACCESS_TOKEN_FABRIC);
+        navigate('/', { replace: true });
+      }
       if (response.ok) {
         const fetchData = await response.json();
         dispatch(actLoadProfile(fetchData.data));

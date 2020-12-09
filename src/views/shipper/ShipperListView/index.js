@@ -16,6 +16,9 @@ import ShipperList from './ShipperList';
 import API from '../../../api/API';
 import { useSelector, useDispatch } from 'react-redux';
 import { actLoadShipper } from '../../../actions/index';
+import { ACCESS_TOKEN_FABRIC, RESPONSE_STATUS, USER_TOKEN } from '../../../common';
+import { useNavigate } from 'react-router-dom';
+import Cookies from 'js-cookie';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -40,6 +43,7 @@ const useStyles = makeStyles((theme) => ({
 const ShipperListView = () => {
   const dispatch = useDispatch();
   const classes = useStyles();
+  const navigate = useNavigate();
   const [loadingModal, setLoadingModal] = useState(false);
 
   const shippers = useSelector(state => state.shipper.shippers);
@@ -48,6 +52,11 @@ const ShipperListView = () => {
     setLoadingModal(true);
     API.get(SHIPPER_ENDPOINT)
       .then(async response => {
+        if (response.status === RESPONSE_STATUS.FORBIDDEN) {
+          Cookies.remove(USER_TOKEN);
+          Cookies.remove(ACCESS_TOKEN_FABRIC);
+          navigate('/', { replace: true });
+        }
         if (response.ok) {
           const fetchData = await response.json();
           const shippersData = fetchData.data;

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   Container,
@@ -19,6 +19,7 @@ import API from '../../../api/API';
 import { USER_TOKEN } from '../../../common';
 import { actLoadInvoices } from '../../../actions';
 import { useDispatch, useSelector } from 'react-redux';
+import LinearProgress from '@material-ui/core/LinearProgress';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -47,13 +48,13 @@ const Invoices = () => {
   const selectedProvider = useSelector(state => state.providers.provider_name);
   const [fileSelected, setFileSelected] = useState(null);
   const [loadingModal, setLoadingModal] = useState(false);
+  const [progress, setProgress] = useState(0);
 
   const onHandleFileUpload = async () => {
     if (!fileSelected) {
       alert('Please choose file!');
       return;
     }
-
     setLoadingModal(true);
 
     const formData = new FormData();
@@ -62,8 +63,12 @@ const Invoices = () => {
       headers: {
         'Authorization': 'Bearer ' + Cookies.get(USER_TOKEN),
       },
+      onUploadProgress: (progressEvent) => {
+        const { loaded, total } = progressEvent;
+        let percent = Math.floor(+loaded / +total * 100);
+        setProgress(percent);
+      }
     });
-    setFileSelected(null);
 
     if (response.status === 201) {
       if (selectedProvider === 'NONE') {
@@ -83,6 +88,7 @@ const Invoices = () => {
       }
     }
     setLoadingModal(false);
+    setFileSelected(null);
   };
 
   const onFileChange = (e) => {
@@ -97,14 +103,15 @@ const Invoices = () => {
       <Container maxWidth={false}>
         <Toolbar onHandleFileUpload={onHandleFileUpload} onHandleFileChange={onFileChange} />
         <Box mt={3}>
+          {loadingModal && <LinearProgress variant="determinate" value={progress} />}
           <Grid container spacing={3}>
             {data && <InvoicesList data={data} />}
           </Grid>
         </Box>
       </Container>
-      <Modal open={loadingModal} className={classes.loadingModal}>
+      {/* <Modal open={loadingModal} className={classes.loadingModal}>
         <CircularProgress />
-      </Modal>
+      </Modal> */}
     </Page>
   );
 };
