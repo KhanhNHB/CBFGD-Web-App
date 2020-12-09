@@ -6,24 +6,24 @@ import GlobalStyles from './components/GlobalStyles';
 import './mixins/chartjs';
 import theme from './theme';
 import routes from './routes';
-import { messaging } from './firebase';
+// import { messaging } from './firebase';
 
 const App = () => {
   const routing = useRoutes(routes);
 
   useEffect(() => {
-    messaging.requestPermission().then(() => {
-      console.log('Have permission');
-      return messaging.getToken();
-    }).then(token => {
-      console.log(token);
-    }).catch(error => {
-      console.log('Error occured');
-    });
+    // messaging.requestPermission().then(() => {
+    //   console.log('Have permission');
+    //   return messaging.getToken();
+    // }).then(token => {
+    //   console.log(token);
+    // }).catch(error => {
+    //   console.log('Error occured');
+    // });
 
-    messaging.onMessage((payload) => {
-      console.log('onMessage: ' + payload.toString());
-    });
+    // messaging.onMessage((payload) => {
+    //   console.log('onMessage: ' + payload.toString());
+    // });
   }, []);
 
   return (

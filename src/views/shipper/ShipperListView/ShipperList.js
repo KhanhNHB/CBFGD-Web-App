@@ -29,11 +29,11 @@ import { HUB_ENDPOINT, SHIPPER_ENDPOINT } from '../../../api/endpoint';
 import ModalShipperDetail from '../../../components/ModalShipperDetail';
 
 const columns = [
-  { id: 'avatar', label: 'Avatar', minWidth: 200, align: 'center' },
-  { id: 'last_name', label: 'Last name', minWidth: 200, align: 'center' },
-  { id: 'first_name', label: 'First name', minWidth: 500, align: 'center' },
-  { id: 'phone', label: 'Phone', minWidth: 200, align: 'center' },
-  { id: 'status', label: 'Status', minWidth: 120, align: 'center' },
+  { id: 'avatar', label: 'Avatar', minWidth: 120, align: 'left' },
+  { id: 'last_name', label: 'Last name', minWidth: 200, align: 'left' },
+  { id: 'first_name', label: 'First name', minWidth: 200, align: 'left' },
+  { id: 'phone', label: 'Phone', minWidth: 200, align: 'left' },
+  { id: 'status', label: 'Status', minWidth: 120, align: 'left' },
 ];
 
 const EnhancedTableHead = (props) => {
@@ -176,10 +176,13 @@ const ShipperList = ({ className, shippers, ...rest }) => {
     return (<div style={{
       backgroundColor: backgroundColor,
       color: 'white',
-      padding: 6,
-      borderRadius: 5
+      width: 105,
+      padding: 8,
+      borderRadius: 3,
+      textAlign: 'center'
+
     }}>
-      {value}
+      {value.toUpperCase()}
     </div>);
   }
 
