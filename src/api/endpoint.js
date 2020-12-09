@@ -1,6 +1,6 @@
 // export const BASE_URL = "http://18.141.214.35:8090";
-export const BASE_URL = "http://34.126.70.182:8090";
-// export const BASE_URL = "http://localhost:8090";
+// export const BASE_URL = "http://34.126.70.182:8090";
+export const BASE_URL = "http://localhost:8090";
 export const LOGIN_ENDPOINT = `${BASE_URL}/auth/signin/admins`;
 export const ADMIN_ENDPOINT = `${BASE_URL}/admins`;
 export const CUSTOMER_ENDPOINT = `${BASE_URL}/customers`;

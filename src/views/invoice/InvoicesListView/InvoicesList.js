@@ -27,25 +27,26 @@ import { INVOICE_STATUS, INVOICE_PRIORITY } from '../../../common';
 import ModalInvoiceDetail from '../../../components/ModalInvoiceDetail';
 import { useSelector, useDispatch } from 'react-redux';
 import { actLoadInvoices } from '../../../actions/index';
+import ModalAssignHub from './ModalAssignHub';
 
 const columns = [
-  { id: 'id', label: 'Id', minWidth: 200, align: 'center' },
-  { id: 'code', label: 'Code', minWidth: 200, align: 'center' },
-  { id: 'receiver_name', label: 'Receiver', minWidth: 200, align: 'center' },
-  { id: 'address', label: 'Address', minWidth: 500, align: 'center' },
-  { id: 'customer_phone_number', label: 'Customer Phone Number', minWidth: 200, align: 'center' },
-  { id: 'receiver_phone_number', label: 'Receiver Phone Number', minWidth: 200, align: 'center' },
-  { id: 'priority', label: 'Priority', minWidth: 170, align: 'center' },
-  { id: 'note', label: 'Note', minWidth: 200, align: 'center' },
-  { id: 'product_name', label: 'Product Name', minWidth: 200, align: 'center' },
-  { id: 'product_image', label: 'Phoduct Image', minWidth: 200, align: 'center' },
-  { id: 'status', label: 'Available', minWidth: 200, align: 'center' },
-  { id: 'total_amount', label: 'Total Amount', minWidth: 170, align: 'center' },
-  { id: 'quantity', label: 'Quantity', minWidth: 170, align: 'center' },
-  { id: 'shipping_fee', label: 'Shipping Fee', minWidth: 170, align: 'center' },
-  { id: 'from_date', label: 'From Date', minWidth: 200, align: 'center' },
-  { id: 'to_date', label: 'To Date', minWidth: 200, align: 'center' },
-  { id: 'created_at', label: 'Created At', minWidth: 200, align: 'center' },
+  { id: 'id', label: 'Id', minWidth: 120, align: 'left' },
+  { id: 'code', label: 'Code Invoice', minWidth: 170, align: 'left' },
+  { id: 'receiver_name', label: 'Receiver Invoice', minWidth: 240, align: 'left' },
+  { id: 'customer_phone_number', label: 'Customer Phone Number', minWidth: 220, align: 'left' },
+  { id: 'receiver_phone_number', label: 'Receiver Phone Number', minWidth: 220, align: 'left' },
+  { id: 'address', label: 'Receiver Address', minWidth: 350, align: 'left' },
+  { id: 'priority', label: 'Priority', minWidth: 80, align: 'left' },
+  { id: 'note', label: 'Note', minWidth: 120, align: 'left' },
+  { id: 'product_name', label: 'Product Name', minWidth: 200, align: 'left' },
+  { id: 'product_image', label: 'Phoduct Image', minWidth: 200, align: 'left' },
+  { id: 'total_amount', label: 'Total Amount', minWidth: 170, align: 'left' },
+  { id: 'quantity', label: 'Quantity', minWidth: 80, align: 'left' },
+  { id: 'shipping_fee', label: 'Shipping Fee', minWidth: 170, align: 'left' },
+  { id: 'from_date', label: 'From Date', minWidth: 200, align: 'left' },
+  { id: 'to_date', label: 'To Date', minWidth: 200, align: 'left' },
+  { id: 'created_at', label: 'Created At', minWidth: 200, align: 'left' },
+  { id: 'status', label: 'Status Invoice', minWidth: 170, align: 'left' },
 ];
 
 function descendingComparator(a, b, orderBy) {
@@ -100,7 +101,8 @@ const EnhancedTableHead = (props) => {
             </TableSortLabel>
           </TableCell>
         ))}
-        <TableCell align={"center"} style={{ minWidth: 200 }}>Status</TableCell>
+        <TableCell align={"center"} style={{ minWidth: 200 }}>Assign Shipper</TableCell>
+        <TableCell align={"center"} style={{ minWidth: 200 }}>Assign Hub</TableCell>
       </TableRow>
     </TableHead>
   );
@@ -149,10 +151,13 @@ const InvoicesList = ({ data }) => {
   const [visiableModal, setVisibleModal] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState(null);
   const [visibleModalInvoiceDetail, setVisibleModalInvoiceDetail] = useState(false);
+  const [visibleModalAssignHub, setVisibleModalAssignHub] = useState(false);
   const [invoiceDetail, setInvoiceDetail] = useState({});
   const [order, setOrder] = useState('asc');
   const [orderBy, setOrderBy] = useState('id');
   const [loadingModal, setLoadingModal] = useState(false);
+  const [currentHub, setCurrentHub] = useState(null);
+  const [currentShipper, setCurrentShipper] = useState(null);
 
   useEffect(() => {
     if (data.invoices) {
@@ -195,12 +200,27 @@ const InvoicesList = ({ data }) => {
     setVisibleModal(true);
   }
 
+  const handleSelectedRowForAssignHub = (invoiceId, invoiceHub) => {
+    setSelectedInvoice(invoiceId);
+    setVisibleModalAssignHub(true);
+    setCurrentHub(invoiceHub);
+  }
+
+
   const handleVisibleModal = () => {
     setVisibleModal(true);
   };
 
   const handleInvisibleModal = () => {
     setVisibleModal(false);
+  };
+
+  const handleVisibleModalAssignHub = () => {
+    setVisibleModalAssignHub(true);
+  };
+
+  const handleInvisibleModalAssignHub = () => {
+    setVisibleModalAssignHub(false);
   };
 
   const handleVisibleModalInvoiceDetail = () => {
@@ -242,10 +262,36 @@ const InvoicesList = ({ data }) => {
     handleInvisibleModal();
   };
 
+  const _rowStatus = (backgroundColor, value) => {
+    return (<div style={{
+      backgroundColor: backgroundColor,
+      color: 'white',
+      width: 85,
+      padding: 8,
+      borderRadius: 3,
+      textAlign: 'center'
+    }}>
+      {value}
+    </div>);
+  }
+
+  const _rowPriority = (backgroundColor, value) => {
+    return (<div style={{
+      backgroundColor: backgroundColor,
+      color: 'white',
+      width: 85,
+      padding: 8,
+      borderRadius: 3,
+      textAlign: 'center'
+    }}>
+      {value ? INVOICE_PRIORITY.EXPRESS : INVOICE_PRIORITY.STANDARD}
+    </div>);
+  }
+
   const _hanleRowTableData = (column, value) => {
     switch (column) {
       case 'priority':
-        return value ? INVOICE_PRIORITY.EXPRESS : INVOICE_PRIORITY.STANDARD;
+        return (value ? _rowPriority("#d9534f", value) : _rowPriority("#1e8101", value));
       case 'from_date':
         return datetimeUtils.DisplayDateTimeFormat(new Date(value));
       case 'to_date':
@@ -255,7 +301,7 @@ const InvoicesList = ({ data }) => {
       case 'shipping_fee':
         return formatPrice.format(value) + " VND";
       case 'status':
-        return value ? INVOICE_STATUS.ACTIVE : INVOICE_STATUS.DEACTIVE;
+        return (value === INVOICE_STATUS.ACTIVE ? _rowStatus("#1e8101", value) : _rowStatus("#d9534f", value));
       case 'product_image':
         return (<img alt="Product" style={{ height: 60, width: 60 }} src={value} />);
       case 'created_at':
@@ -268,6 +314,30 @@ const InvoicesList = ({ data }) => {
   const handleClickInvoiceItem = (invoice) => {
     setInvoiceDetail(invoice);
     handleVisibleModalInvoiceDetail();
+  };
+
+  const handleAssignHub = async (hub_id) => {
+    console.log(hub_id);
+    // setLoadingModal(true);
+    // const data = {
+    //   shipper_phone: selectedShipper
+    // };
+    // await API.patch(HUB_ENDPOINT + "/" + hub_id + "/assign_shipper", data);
+
+    // API.get(SHIPPER_ENDPOINT)
+    //   .then(async response => {
+    //     if (response.ok) {
+    //       const fetchData = await response.json();
+    //       const shippersData = fetchData.data;
+    //       if (shippersData.length > 0) {
+    //         dispatch(actLoadShipper(shippersData));
+    //       }
+    //     }
+    //     setLoadingModal(false);
+    //   });
+
+    // setSelectedShipper(null);
+    // handleInvisibleModal();
   };
 
   // Search if have keyword.
@@ -295,6 +365,7 @@ const InvoicesList = ({ data }) => {
                 <>
                   <TableBody>
                     {stableSort(filterData, getComparator(order, orderBy)).map((invoice, index) => {
+                      console.log(invoice);
                       return (
                         <TableRow hover role="checkbox" tabIndex={-1} key={invoice.id}>
                           {columns.map((column, index) => {
@@ -316,9 +387,37 @@ const InvoicesList = ({ data }) => {
                               variant="contained"
                               onClick={() => handleSelectedRow(invoice.id)}
                               style={{ color: 'white' }}
-                              disabled={invoice.is_assign ? true : false}
                             >
                               {invoice.is_assign ? 'Assigned' : 'Assign'}
+                            </Button>
+                          </TableCell>
+                          <TableCell key={index} align={"center"} >
+                            <Button
+                              color="primary"
+                              variant="contained"
+                              onClick={() => handleSelectedRowForAssignHub(invoice.id, invoice.hub_id ? invoice.hub_id : null)}
+                              style={{
+                                // color: 'white',
+                                backgroundColor: 'transparent',
+                              }}
+                              disabled={invoice.is_in_warehouse ? false : true}
+                            >
+                              {invoice.is_in_warehouse
+                                ? invoice.hub_id ? 'in hub' : 'out hub'
+                                : <>
+                                  <div style={{
+                                    width: 55,
+                                    height: 25,
+                                    borderRadius: 3,
+                                    textAlign: 'center'
+                                  }}>
+                                    <CircularProgress size={15} style={{
+                                      backgroundColor: 'transparent',
+                                      color: invoice.is_in_warehouse ? 'white' : '#39beb6'
+                                    }} />
+                                  </div>
+                                </>
+                              }
                             </Button>
                           </TableCell>
                         </TableRow>
@@ -350,6 +449,16 @@ const InvoicesList = ({ data }) => {
             onInvisibleModel={handleInvisibleModal}
             onVisibleModal={handleVisibleModal}
             onHandleAssign={handleAssignInvoice}
+          />
+        </div>
+      </Modal>
+      <Modal open={visibleModalAssignHub}>
+        <div className={classes.modal}>
+          <ModalAssignHub
+            onInvisibleModel={handleInvisibleModalAssignHub}
+            onVisibleModal={handleVisibleModalAssignHub}
+            onHandleAssign={handleAssignHub}
+            onCurrentHub={currentHub}
           />
         </div>
       </Modal>
