@@ -216,8 +216,8 @@ const ModalInvoiceDetail = (props) => {
                                                 ? <tr key={index} className={classes.currentstatus}>
                                                     <td className={classes.dot}>&bull;</td>
                                                     <td className={classes.tableRow}>
-                                                        <p>Transaction Id: {process.TxId}</p>
                                                         <p>{process.Value.status}</p>
+                                                        <p>Transaction Id: {process.TxId}</p>
                                                         <p>Time: {datetimeUtils.DisplayDateTimeFormat(process.Timestamp)}</p>
                                                         {process.Value.shipper_phone
                                                             ? <>
@@ -233,8 +233,8 @@ const ModalInvoiceDetail = (props) => {
                                                     <td className={classes.tableRow}>
                                                         <p>{process.Value.status}</p>
                                                         <p>Transaction Id: {process.TxId}</p>
-                                                        <p>Shipper phone number: {process.Value.shipper_phone}</p>
                                                         <p>Time: {datetimeUtils.DisplayDateTimeFormat(process.Timestamp)}</p>
+                                                        <p>Shipper phone number: {process.Value.shipper_phone}</p>
                                                     </td>
                                                 </tr>
                                         })

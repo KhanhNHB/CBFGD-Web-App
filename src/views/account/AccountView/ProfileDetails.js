@@ -25,7 +25,7 @@ const formSchema = Yup.object().shape({
   first_name: Yup.string().required("First name is not empty"),
   last_name: Yup.string().required("Last name is not empty"),
   email: Yup.string().email("Email is incorrect"),
-  phone: Yup.number().required("Phone is not empty").min(7).max(11),
+  phone: Yup.number().required("Phone is not empty").min(7),
   DOB: Yup.date()
 });
 
