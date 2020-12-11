@@ -7,6 +7,9 @@ import {
   TextField,
   makeStyles,
   CircularProgress,
+  FormControl,
+  InputLabel,
+  Select,
 } from '@material-ui/core';
 import Page from '../../components/Page';
 import API from '../../api/API';
@@ -22,16 +25,28 @@ const useStyles = makeStyles((theme) => ({
     height: '100%',
     paddingBottom: theme.spacing(3),
     paddingTop: theme.spacing(3)
-  }
+  },
+  formControl: {
+    width: '100%'
+  },
+  selectEmpty: {
+    marginTop: theme.spacing(2),
+  },
 }));
+
+const roles = [
+  { code: 'admin', label: 'Administrator' },
+  { code: 'hub_manager', label: 'Hub Manager' },
+];
 
 const LoginView = () => {
   const classes = useStyles();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const [role, setRole] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
 
   useEffect(() => {
     const readCookie = async () => {
@@ -51,12 +66,26 @@ const LoginView = () => {
     readCookie();
   }, [navigate]);
 
-  const signIn = async (username, password) => {
+  const signIn = async (username, password, role) => {
+    if (!username) {
+      alert('Please input phone number');
+      return;
+    }
+    if (!username) {
+      alert('Please input password');
+      return;
+    }
+    if (!role) {
+      alert('Please select role');
+      return;
+    }
+
     setIsLoading(true);
 
     const response = await API.post(LOGIN_ENDPOINT, {
       phone: username,
       password: password,
+      role: role
     });
 
     const json = await response.json();
@@ -85,13 +114,17 @@ const LoginView = () => {
             <img style={{ height: 200, width: 200, marginLeft: 170 }} src={require("../../images/logo_gds.png")} alt="" />
           </Box>
           <TextField
-            placeholder="Phone number or email"
+            placeholder="Phone number"
             fullWidth
             margin="normal"
             name="username"
             onChange={event => {
               const { value } = event.target;
               setUsername(value);
+            }}
+            style={{
+              backgroundColor: 'white',
+              border: 'hidden'
             }}
             type="email"
             value={username}
@@ -106,10 +139,43 @@ const LoginView = () => {
               const { value } = event.target;
               setPassword(value);
             }}
+            style={{
+              backgroundColor: 'white',
+              border: 'hidden'
+            }}
             type="password"
             value={password}
             variant="outlined"
           />
+          <FormControl
+            variant="outlined"
+            className={classes.formControl}
+            fullWidth
+            margin="normal"
+            style={{
+              backgroundColor: 'white',
+              border: 'hidden'
+            }}
+          >
+            <InputLabel htmlFor="outlined-role-native-simple">Role</InputLabel>
+            <Select
+              native
+              value={role}
+              onChange={event => {
+                const { value } = event.target;
+                setRole(value);
+              }}
+              label="Role"
+              inputProps={{
+                name: 'role',
+                id: 'outlined-role-native-simple',
+              }}
+            >
+              <option aria-label="Select Role" value="" />
+              <option value={"admin"}>Administrator</option>
+              <option value={"hub_manager"}>Hub Manager</option>
+            </Select>
+          </FormControl>
           <Box my={2}>
             <Button
               disabled={isLoading}
@@ -118,7 +184,7 @@ const LoginView = () => {
               size="large"
               type="submit"
               variant="contained"
-              onClick={() => signIn(username, password)}
+              onClick={() => signIn(username, password, role)}
               style={{ color: "white" }}
             >
               {
