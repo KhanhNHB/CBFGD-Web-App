@@ -53,7 +53,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Toolbar = ({ onHandleFileUpload, onHandleFileChange, ...rest }) => {
+const Toolbar = ({ onHandleFileUpload, onHandleFileChange, user, ...rest }) => {
   const classes = useStyles();
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -85,12 +85,18 @@ const Toolbar = ({ onHandleFileUpload, onHandleFileChange, ...rest }) => {
           }
         }
       });
-  }, [dispatch]);
+  }, [dispatch, navigate]);
 
   useEffect(() => {
     setLoadingModal(true);
     if (selectedProvider !== 'NONE') {
-      API.get(INVOICE_ENDPOINT + `/providers/${selectedProvider}?page=1&limit=50`)
+      let query = null;
+      if (user && user.role === 'Admin') {
+        query = 'page=1&limit=50&hub_id=none';
+      } else {
+        query = `page=1&limit=50&hub_id=${user.hub.id}`
+      }
+      API.get(`${INVOICE_ENDPOINT}/providers/${selectedProvider}?${query}`)
         .then(async response => {
           if (response.ok) {
             const fetchData = await response.json();
@@ -100,7 +106,13 @@ const Toolbar = ({ onHandleFileUpload, onHandleFileChange, ...rest }) => {
           setLoadingModal(false);
         });
     } else {
-      API.get(INVOICE_ENDPOINT + '?page=1&limit=50')
+      let query = null;
+      if (user && user.role === 'Admin') {
+        query = 'page=1&limit=50&hub_id=none';
+      } else {
+        query = `page=1&limit=50&hub_id=${user.hub.id}`
+      }
+      API.get(`${INVOICE_ENDPOINT}?${query}`)
         .then(async response => {
           if (response.ok) {
             const fetchData = await response.json();
@@ -110,7 +122,7 @@ const Toolbar = ({ onHandleFileUpload, onHandleFileChange, ...rest }) => {
           setLoadingModal(false);
         });
     }
-  }, [selectedProvider, dispatch]);
+  }, [selectedProvider, dispatch, user]);
 
   const onChangeKeyword = (event) => {
     const keyword = event.target.value;
@@ -126,21 +138,24 @@ const Toolbar = ({ onHandleFileUpload, onHandleFileChange, ...rest }) => {
 
   return (
     <div className={clsx(classes.root)} {...rest}>
-      <Box
-        display="flex"
-        justifyContent="flex-end"
-      >
-        <Input type="file" onChange={(e) => onHandleFileChange(e)} />
-        <Button
-          className={classes.importButton}
-          onClick={(e) => onHandleFileUpload(e)}
-          color="primary"
-          variant="contained"
-          style={{ color: 'white', marginLeft: 10 }}
+      {(user && user.role === 'Admin')
+        ? <Box
+          display="flex"
+          justifyContent="flex-end"
         >
-          Import Excel
+          <Input type="file" onChange={(e) => onHandleFileChange(e)} />
+          <Button
+            className={classes.importButton}
+            onClick={(e) => onHandleFileUpload(e)}
+            color="primary"
+            variant="contained"
+            style={{ color: 'white', marginLeft: 10 }}
+          >
+            Import Excel
         </Button>
-      </Box>
+        </Box>
+        : null
+      }
       <Box mt={3}>
         <Card>
           <CardContent className={classes.content}>

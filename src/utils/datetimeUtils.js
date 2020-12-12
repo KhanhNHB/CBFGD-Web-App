@@ -38,7 +38,8 @@ export default {
         return moment(new Date(milliseconds)).format(FORMAT_DATE_TIME);
     },
     DisplayDateTimeFormat: (dateTime) => {
-        return moment(new Date(dateTime)).utc().format(FORMAT_DATE_TIME)
+        // return moment(new Date(dateTime)).format(FORMAT_DATE_TIME);
+        return moment(dateTime).format(FORMAT_DATE_TIME);
     },
     DisplayDateFormat: (date) => {
         return moment(date).format(FORMAT_DATE);

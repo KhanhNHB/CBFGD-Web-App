@@ -25,7 +25,7 @@ import { STATUS } from '../../../common/index';
 import { actLoadShipper } from '../../../actions';
 import TableContainer from '@material-ui/core/TableContainer';
 import ModalShipperAdd from '../../../components/ModalShipperAdd';
-import { HUB_ENDPOINT, SHIPPER_ENDPOINT } from '../../../api/endpoint';
+import { ADMIN_ENDPOINT, SHIPPER_ENDPOINT } from '../../../api/endpoint';
 import ModalShipperDetail from '../../../components/ModalShipperDetail';
 
 const columns = [
@@ -62,7 +62,7 @@ const EnhancedTableHead = (props) => {
             </TableSortLabel>
           </TableCell>
         ))}
-        <TableCell align={"center"} style={{ minWidth: 200 }}>Hub</TableCell>
+        <TableCell align={"left"} style={{ minWidth: 200 }}>Hub</TableCell>
       </TableRow>
     </TableHead>
   );
@@ -100,7 +100,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const ShipperList = ({ className, shippers, ...rest }) => {
+const ShipperList = ({ className, shippers, user, ...rest }) => {
   const rowsPerPage = 50;
   const classes = useStyles();
   const dispatch = useDispatch();
@@ -149,25 +149,33 @@ const ShipperList = ({ className, shippers, ...rest }) => {
     setVisibleModalShipperDetail(false);
   };
 
+  // For Admin assign shipper to hub
   const handleAssignHub = async (hub_id) => {
     setLoadingModal(true);
     const data = {
-      shipper_phone: selectedShipper
+      shipper_phone: selectedShipper,
+      hub_id: hub_id
     };
-    await API.patch(HUB_ENDPOINT + "/" + hub_id + "/assign_shipper", data);
 
-    API.get(SHIPPER_ENDPOINT)
-      .then(async response => {
-        if (response.ok) {
-          const fetchData = await response.json();
-          const shippersData = fetchData.data;
-          if (shippersData.length > 0) {
-            dispatch(actLoadShipper(shippersData));
+    const response = await API.patch(`${ADMIN_ENDPOINT}/${user.phone}/assign-shipper-to-hub`, data);
+    const patchData = await response.json();
+    if (patchData.message) {
+      alert(patchData.message);
+    } else {
+      API.get(SHIPPER_ENDPOINT)
+        .then(async response => {
+          if (response.ok) {
+            const fetchData = await response.json();
+            const shippersData = fetchData.data;
+            if (shippersData.length > 0) {
+              dispatch(actLoadShipper(shippersData));
+            }
           }
-        }
-        setLoadingModal(false);
-      });
-
+          setLoadingModal(false);
+        }).catch(err => {
+          alert(err.message);
+        });
+    }
     setSelectedShipper(null);
     handleInvisibleModal();
   };
@@ -198,6 +206,8 @@ const ShipperList = ({ className, shippers, ...rest }) => {
         return (<img alt="User Avatar" style={{ height: 45, width: 60 }} src={value ? value : 'https://res.cloudinary.com/dvehkdedj/image/upload/v1598777976/269-2697881_computer-icons-user-clip-art-transparent-png-icon_yqpi0g.png'} />);
       case 'created_at':
         return datetimeUtils.DisplayDateTimeFormat(value);
+      case 'updated_at':
+        return value ? datetimeUtils.DisplayDateTimeFormat(value) : '';
       default:
         return value;
     }
@@ -253,15 +263,19 @@ const ShipperList = ({ className, shippers, ...rest }) => {
                           </TableCell>
                         );
                       })}
-                      <TableCell align={"center"}>
-                        <Button
-                          color="primary"
-                          variant="contained"
-                          onClick={() => handleSelectedRow(shipper.phone, shipper.hub ? shipper.hub.id : null)}
-                          style={{ color: 'white' }}
-                        >
-                          {shipper.hub ? 'Assigned' : 'Assign'}
-                        </Button>
+                      <TableCell align={"left"}>
+                        {(user && user.role === 'Admin')
+                          ?
+                          <Button
+                            color="primary"
+                            variant="contained"
+                            onClick={() => handleSelectedRow(shipper.phone, shipper.hub ? shipper.hub.id : null)}
+                            style={{ color: 'white' }}
+                          >
+                            {shipper.hub ? 'Assigned' : 'Assign'}
+                          </Button>
+                          : <p>{shipper.hub.name}</p>
+                        }
                       </TableCell>
                     </TableRow>
                   );

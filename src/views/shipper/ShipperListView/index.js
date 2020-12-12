@@ -11,11 +11,11 @@ import {
   Modal,
 } from '@material-ui/core';
 import Page from '../../../components/Page';
-import { SHIPPER_ENDPOINT } from '../../../api/endpoint';
+import { PROFILE_ENDPOINT, SHIPPER_ENDPOINT } from '../../../api/endpoint';
 import ShipperList from './ShipperList';
 import API from '../../../api/API';
 import { useSelector, useDispatch } from 'react-redux';
-import { actLoadShipper } from '../../../actions/index';
+import { actLoadProfile, actLoadShipper } from '../../../actions/index';
 import { ACCESS_TOKEN_FABRIC, RESPONSE_STATUS, USER_TOKEN } from '../../../common';
 import { useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
@@ -45,28 +45,55 @@ const ShipperListView = () => {
   const classes = useStyles();
   const navigate = useNavigate();
   const [loadingModal, setLoadingModal] = useState(false);
-
   const shippers = useSelector(state => state.shipper.shippers);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     setLoadingModal(true);
-    API.get(SHIPPER_ENDPOINT)
-      .then(async response => {
-        if (response.status === RESPONSE_STATUS.FORBIDDEN) {
-          Cookies.remove(USER_TOKEN);
-          Cookies.remove(ACCESS_TOKEN_FABRIC);
-          navigate('/', { replace: true });
-        }
+
+    const fetchShipper = async (user) => {
+      let query = null;
+      if (user.role === 'Admin') {
+        query = '?hub_manager_phone=none';
+      } else {
+        query = `?hub_manager_phone=${user.phone}`;
+      }
+
+      API.get(`${SHIPPER_ENDPOINT}/${query}`)
+        .then(async response => {
+          if (response.status === RESPONSE_STATUS.FORBIDDEN) {
+            Cookies.remove(USER_TOKEN);
+            Cookies.remove(ACCESS_TOKEN_FABRIC);
+            navigate('/', { replace: true });
+          }
+          if (response.ok) {
+            const fetchData = await response.json();
+            const shippersData = fetchData.data;
+            if (shippersData.length > 0) {
+              dispatch(actLoadShipper(shippersData));
+            }
+          }
+          setLoadingModal(false);
+        });
+    }
+
+    const readCookie = async () => {
+      const user = Cookies.get(USER_TOKEN);
+      if (user) {
+        const response = await API.post(`${PROFILE_ENDPOINT}`, {
+          "access_token": user
+        });
+
         if (response.ok) {
           const fetchData = await response.json();
-          const shippersData = fetchData.data;
-          if (shippersData.length > 0) {
-            dispatch(actLoadShipper(shippersData));
-          }
+          setUser(fetchData.data);
+          fetchShipper(fetchData.data);
+          dispatch(actLoadProfile(fetchData.data));
         }
-        setLoadingModal(false);
-      });
-  }, [dispatch]);
+      }
+    };
+    readCookie();
+  }, [dispatch, navigate]);
 
   return (
     <Page
@@ -75,7 +102,7 @@ const ShipperListView = () => {
       <Container maxWidth={false}>
         <Box mt={3}>
           <Grid container spacing={3}>
-            <ShipperList shippers={shippers} />
+            <ShipperList shippers={shippers} user={user} />
           </Grid>
         </Box>
       </Container>

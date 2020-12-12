@@ -34,11 +34,6 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const roles = [
-  { code: 'admin', label: 'Administrator' },
-  { code: 'hub_manager', label: 'Hub Manager' },
-];
-
 const LoginView = () => {
   const classes = useStyles();
   const navigate = useNavigate();
@@ -64,7 +59,7 @@ const LoginView = () => {
       }
     };
     readCookie();
-  }, [navigate]);
+  }, [dispatch, navigate]);
 
   const signIn = async (username, password, role) => {
     if (!username) {
