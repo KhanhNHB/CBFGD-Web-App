@@ -101,7 +101,7 @@ const ModalShipperDetail = (props) => {
                                 <StyledTableCell align="center">License Number</StyledTableCell>
                                 <StyledTableCell align="center">Status</StyledTableCell>
                                 <StyledTableCell align="center">Created At</StyledTableCell>
-                                <StyledTableCell align="center">Update At</StyledTableCell>
+                                <StyledTableCell align="center">Updated At</StyledTableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -117,7 +117,7 @@ const ModalShipperDetail = (props) => {
                                 <StyledTableCell align="center">{shipper.license_number}</StyledTableCell>
                                 <StyledTableCell align="center">{shipper.status}</StyledTableCell>
                                 <StyledTableCell align="center">{datetimeUtils.DisplayDateTimeFormat(shipper.created_at)}</StyledTableCell>
-                                <StyledTableCell align="center">{datetimeUtils.DisplayDateTimeFormat(shipper.updated_at)}</StyledTableCell>
+                                <StyledTableCell align="center">{shipper.updated_at ? datetimeUtils.DisplayDateTimeFormat(shipper.updated_at) : ''}</StyledTableCell>
                             </StyledTableRow>
                         </TableBody>
                     </Table>

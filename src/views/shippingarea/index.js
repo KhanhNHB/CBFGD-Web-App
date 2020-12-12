@@ -63,7 +63,7 @@ export function MapContainer(props) {
           dispatch(actLoadInvoices(fetchData.data));
         }
       });
-  }, [dispatch]);
+  }, [dispatch, navigate]);
 
 
   const onMarkerClick = (evt) => {

@@ -19,15 +19,14 @@ import {
   CircularProgress,
 } from '@material-ui/core';
 import TableContainer from '@material-ui/core/TableContainer';
-import ModalAssign from './ModalAssign';
 import API from '../../../api/API';
-import { INVOICE_ENDPOINT } from '../../../api/endpoint';
-import { DELIVERIES_STATUS_ENDPOINT } from '../../../api/endpoint';
+import { ADMIN_ENDPOINT, HUB_MANAGER_ENDPOINT, INVOICE_ENDPOINT } from '../../../api/endpoint';
 import { INVOICE_STATUS, INVOICE_PRIORITY } from '../../../common';
 import ModalInvoiceDetail from '../../../components/ModalInvoiceDetail';
 import { useSelector, useDispatch } from 'react-redux';
 import { actLoadInvoices } from '../../../actions/index';
 import ModalAssignHub from './ModalAssignHub';
+import ModalAssignShipper from './ModalAssignShipper';
 
 const columns = [
   { id: 'id', label: 'Id', minWidth: 120, align: 'left' },
@@ -76,7 +75,7 @@ function stableSort(array, comparator) {
 }
 
 const EnhancedTableHead = (props) => {
-  const { order, orderBy, onRequestSort } = props;
+  const { order, orderBy, user, onRequestSort } = props;
   const createSortHandler = (property) => (event) => {
     onRequestSort(event, property);
   };
@@ -101,8 +100,14 @@ const EnhancedTableHead = (props) => {
             </TableSortLabel>
           </TableCell>
         ))}
-        <TableCell align={"center"} style={{ minWidth: 200 }}>Assign Shipper</TableCell>
-        <TableCell align={"center"} style={{ minWidth: 200 }}>Assign Hub</TableCell>
+        {(user && user.role === 'Hub_Manager')
+          ? <TableCell align={"center"} style={{ minWidth: 200 }}>Assign Shipper</TableCell>
+          : null
+        }
+        {(user && user.role === 'Admin')
+          ? <TableCell align={"center"} style={{ minWidth: 200 }}>Assign Hub</TableCell>
+          : null
+        }
       </TableRow>
     </TableHead>
   );
@@ -140,7 +145,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const InvoicesList = ({ data }) => {
+const InvoicesList = ({ data, user }) => {
   const classes = useStyles();
   const dispatch = useDispatch();
   let totalPage = 0;
@@ -148,10 +153,10 @@ const InvoicesList = ({ data }) => {
   const keyword = useSelector(state => state.invoice.keyword);
   const [page, setPage] = useState(totalPage);
   const rowsPerPage = 50;
-  const [visiableModal, setVisibleModal] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState(null);
   const [visibleModalInvoiceDetail, setVisibleModalInvoiceDetail] = useState(false);
   const [visibleModalAssignHub, setVisibleModalAssignHub] = useState(false);
+  const [visibleModalAssignShipper, setVisibleModalAssignShipper] = useState(false);
   const [invoiceDetail, setInvoiceDetail] = useState({});
   const [order, setOrder] = useState('asc');
   const [orderBy, setOrderBy] = useState('id');
@@ -195,25 +200,17 @@ const InvoicesList = ({ data }) => {
     setLoadingModal(false);
   };
 
-  const handleSelectedRow = (invoiceId) => {
+  const handleSelectedRowForAssignShipper = (invoiceId, shipperId) => {
     setSelectedInvoice(invoiceId);
-    setVisibleModal(true);
+    setCurrentShipper(shipperId);
+    setVisibleModalAssignShipper(true);
   }
 
-  const handleSelectedRowForAssignHub = (invoiceId, invoiceHub) => {
+  const handleSelectedRowForAssignHub = (invoiceId, hubId) => {
     setSelectedInvoice(invoiceId);
+    setCurrentHub(hubId);
     setVisibleModalAssignHub(true);
-    setCurrentHub(invoiceHub);
   }
-
-
-  const handleVisibleModal = () => {
-    setVisibleModal(true);
-  };
-
-  const handleInvisibleModal = () => {
-    setVisibleModal(false);
-  };
 
   const handleVisibleModalAssignHub = () => {
     setVisibleModalAssignHub(true);
@@ -221,6 +218,14 @@ const InvoicesList = ({ data }) => {
 
   const handleInvisibleModalAssignHub = () => {
     setVisibleModalAssignHub(false);
+  };
+
+  const handleVisibleModalAssignShipper = () => {
+    setVisibleModalAssignShipper(true);
+  };
+
+  const handleInvisibleModalAssignShipper = () => {
+    setVisibleModalAssignShipper(false);
   };
 
   const handleVisibleModalInvoiceDetail = () => {
@@ -231,14 +236,13 @@ const InvoicesList = ({ data }) => {
     setVisibleModalInvoiceDetail(false);
   };
 
-  const handleAssignInvoice = async (shipper_id) => {
+  const handleAssignShipper = async (shipper_id) => {
     setLoadingModal(true);
     const dataAssign = {
       shipper_id: shipper_id,
       invoice_id: selectedInvoice
     };
-
-    const response = await API.post(DELIVERIES_STATUS_ENDPOINT, dataAssign);
+    const response = await API.patch(`${HUB_MANAGER_ENDPOINT}/${user.phone}/assign-shipper`, dataAssign);
     const json = await response.json();
 
     setLoadingModal(false);
@@ -259,7 +263,7 @@ const InvoicesList = ({ data }) => {
     }
     data = cloneRestData;
     setSelectedInvoice(null);
-    handleInvisibleModal();
+    handleInvisibleModalAssignShipper();
   };
 
   const _rowStatus = (backgroundColor, value) => {
@@ -317,27 +321,26 @@ const InvoicesList = ({ data }) => {
   };
 
   const handleAssignHub = async (hub_id) => {
-    console.log(hub_id);
-    // setLoadingModal(true);
-    // const data = {
-    //   shipper_phone: selectedShipper
-    // };
-    // await API.patch(HUB_ENDPOINT + "/" + hub_id + "/assign_shipper", data);
+    setLoadingModal(true);
+    const data = {
+      invoice_id: selectedInvoice,
+      hub_id: +hub_id
+    };
+    await API.patch(`${ADMIN_ENDPOINT}/${user.phone}/assign-invoice-to-hub`, data);
 
-    // API.get(SHIPPER_ENDPOINT)
-    //   .then(async response => {
-    //     if (response.ok) {
-    //       const fetchData = await response.json();
-    //       const shippersData = fetchData.data;
-    //       if (shippersData.length > 0) {
-    //         dispatch(actLoadShipper(shippersData));
-    //       }
-    //     }
-    //     setLoadingModal(false);
-    //   });
+    API.get(INVOICE_ENDPOINT + '?page=1&limit=50&hub_id=none')
+      .then(async response => {
+        if (response.ok) {
+          const fetchData = await response.json();
+          const data = { invoices: fetchData.data.items, meta: fetchData.data.meta };
+          dispatch(actLoadInvoices(data));
+        }
+        setLoadingModal(false);
+      });
 
     // setSelectedShipper(null);
-    // handleInvisibleModal();
+    setSelectedInvoice(null);
+    handleInvisibleModalAssignHub();
   };
 
   // Search if have keyword.
@@ -358,6 +361,7 @@ const InvoicesList = ({ data }) => {
                 classes={classes}
                 order={order}
                 orderBy={orderBy}
+                user={user}
                 onRequestSort={handleRequestSort}
               />
               {filterData && filterData.length
@@ -381,45 +385,31 @@ const InvoicesList = ({ data }) => {
                               </TableCell>
                             );
                           })}
-                          <TableCell key={index} align={"center"} >
-                            <Button
-                              color="primary"
-                              variant="contained"
-                              onClick={() => handleSelectedRow(invoice.id)}
-                              style={{ color: 'white' }}
-                            >
-                              {invoice.is_assign ? 'Assigned' : 'Assign'}
-                            </Button>
-                          </TableCell>
-                          <TableCell key={index} align={"center"} >
-                            <Button
-                              color="primary"
-                              variant="contained"
-                              onClick={() => handleSelectedRowForAssignHub(invoice.id, invoice.hub_id ? invoice.hub_id : null)}
-                              style={{
-                                // color: 'white',
-                                backgroundColor: 'transparent',
-                              }}
-                              disabled={invoice.is_in_warehouse ? false : true}
-                            >
-                              {invoice.is_in_warehouse
-                                ? invoice.hub_id ? 'in hub' : 'out hub'
-                                : <>
-                                  <div style={{
-                                    width: 55,
-                                    height: 25,
-                                    borderRadius: 3,
-                                    textAlign: 'center'
-                                  }}>
-                                    <CircularProgress size={15} style={{
-                                      backgroundColor: 'transparent',
-                                      color: invoice.is_in_warehouse ? 'white' : '#39beb6'
-                                    }} />
-                                  </div>
-                                </>
-                              }
-                            </Button>
-                          </TableCell>
+                          {(user && user.role === 'Admin')
+                            ? <TableCell key={index} align={"center"} >
+                              <Button
+                                color="primary"
+                                variant="contained"
+                                onClick={() => handleSelectedRowForAssignHub(invoice.id, invoice.hub ? invoice.hub.id : null)}
+                                style={{ color: 'white' }}
+                              >
+                                {invoice.hub ? 'Assigned' : 'Assign'}
+                              </Button>
+                            </TableCell>
+                            : null}
+                          {(user && user.role === 'Hub_Manager')
+                            ? <TableCell key={index} align={"center"} >
+                              <Button
+                                color="primary"
+                                variant="contained"
+                                onClick={() => handleSelectedRowForAssignShipper(invoice.id, invoice.shipper_id ? invoice.shipper_id : null)}
+                                style={{ color: 'white' }}
+                              >
+                                {invoice.is_assign ? 'Assigned' : 'Assign'}
+                              </Button>
+                            </TableCell>
+                            : null
+                          }
                         </TableRow>
                       );
                     })}
@@ -443,15 +433,6 @@ const InvoicesList = ({ data }) => {
           : null
         }
       </Card>
-      <Modal open={visiableModal}>
-        <div className={classes.modal}>
-          <ModalAssign
-            onInvisibleModel={handleInvisibleModal}
-            onVisibleModal={handleVisibleModal}
-            onHandleAssign={handleAssignInvoice}
-          />
-        </div>
-      </Modal>
       <Modal open={visibleModalAssignHub}>
         <div className={classes.modal}>
           <ModalAssignHub
@@ -459,6 +440,17 @@ const InvoicesList = ({ data }) => {
             onVisibleModal={handleVisibleModalAssignHub}
             onHandleAssign={handleAssignHub}
             onCurrentHub={currentHub}
+          />
+        </div>
+      </Modal>
+      <Modal open={visibleModalAssignShipper}>
+        <div className={classes.modal}>
+          <ModalAssignShipper
+            onInvisibleModel={handleInvisibleModalAssignShipper}
+            onVisibleModal={handleVisibleModalAssignShipper}
+            onHandleAssign={handleAssignShipper}
+            user={user}
+            onCurrentShipper={currentShipper}
           />
         </div>
       </Modal>
