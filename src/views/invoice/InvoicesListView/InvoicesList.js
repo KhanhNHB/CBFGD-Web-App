@@ -369,7 +369,6 @@ const InvoicesList = ({ data, user }) => {
                 <>
                   <TableBody>
                     {stableSort(filterData, getComparator(order, orderBy)).map((invoice, index) => {
-                      console.log(invoice);
                       return (
                         <TableRow hover role="checkbox" tabIndex={-1} key={invoice.id}>
                           {columns.map((column, index) => {

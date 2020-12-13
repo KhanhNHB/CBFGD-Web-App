@@ -21,12 +21,14 @@ import {
 import API from '../../../api/API';
 import ModalAssign from './ModalAssign';
 import { useDispatch } from 'react-redux';
-import { STATUS } from '../../../common/index';
+import { ACCESS_TOKEN_FABRIC, RESPONSE_STATUS, STATUS, USER_TOKEN } from '../../../common/index';
 import { actLoadShipper } from '../../../actions';
 import TableContainer from '@material-ui/core/TableContainer';
 import ModalShipperAdd from '../../../components/ModalShipperAdd';
 import { ADMIN_ENDPOINT, SHIPPER_ENDPOINT } from '../../../api/endpoint';
 import ModalShipperDetail from '../../../components/ModalShipperDetail';
+import Cookies from 'js-cookie';
+import { useNavigate } from 'react-router-dom';
 
 const columns = [
   { id: 'avatar', label: 'Avatar', minWidth: 120, align: 'left' },
@@ -114,12 +116,30 @@ const ShipperList = ({ className, shippers, user, ...rest }) => {
   const [selectedShipper, setSelectedShipper] = useState(null);
   const [visibleModalShipperDetail, setVisibleModalShipperDetail] = useState(false);
   const [loadingModal, setLoadingModal] = useState(false);
+  const navigate = useNavigate();
 
   const openModalFormAdd = () => {
     setModalOpenAdd(true);
   }
 
-  const onCloseModalAdd = async () => {
+  const onCloseModalAdd = async (isChanged) => {
+    if (isChanged) {
+      API.get(`${SHIPPER_ENDPOINT}?hub_manager_phone=none`)
+        .then(async response => {
+          if (response.status === RESPONSE_STATUS.FORBIDDEN) {
+            Cookies.remove(USER_TOKEN);
+            Cookies.remove(ACCESS_TOKEN_FABRIC);
+            navigate('/', { replace: true });
+          }
+          if (response.ok) {
+            const fetchData = await response.json();
+            const shippersData = fetchData.data;
+            if (shippersData.length > 0) {
+              dispatch(actLoadShipper(shippersData));
+            }
+          }
+        });
+    }
     setModalOpenAdd(false);
   }
 
@@ -162,7 +182,7 @@ const ShipperList = ({ className, shippers, user, ...rest }) => {
     if (patchData.message) {
       alert(patchData.message);
     } else {
-      API.get(SHIPPER_ENDPOINT)
+      API.get(`${SHIPPER_ENDPOINT}?hub_manager_phone=none`)
         .then(async response => {
           if (response.ok) {
             const fetchData = await response.json();
@@ -171,13 +191,13 @@ const ShipperList = ({ className, shippers, user, ...rest }) => {
               dispatch(actLoadShipper(shippersData));
             }
           }
-          setLoadingModal(false);
         }).catch(err => {
           alert(err.message);
         });
     }
     setSelectedShipper(null);
     handleInvisibleModal();
+    setLoadingModal(false);
   };
 
   const _rowStatus = (backgroundColor, value) => {
@@ -227,14 +247,16 @@ const ShipperList = ({ className, shippers, user, ...rest }) => {
   return (
     <>
       <Box display="flex" justifyContent="flex-end">
-        <Button
-          color="primary"
-          variant="contained"
-          style={{ color: 'white' }}
-          onClick={openModalFormAdd}
-        >
-          Add Shipper
+        {(user && user.role === 'Admin')
+          ? <Button
+            color="primary"
+            variant="contained"
+            style={{ color: 'white' }}
+            onClick={openModalFormAdd}
+          >
+            Add Shipper
         </Button>
+          : null}
       </Box>
       <Card className={clsx(classes.root, className)} {...rest} >
         <Box>
@@ -274,7 +296,7 @@ const ShipperList = ({ className, shippers, user, ...rest }) => {
                           >
                             {shipper.hub ? 'Assigned' : 'Assign'}
                           </Button>
-                          : <p>{shipper.hub.name}</p>
+                          : <p>{shipper.hub ? shipper.hub.name : ''}</p>
                         }
                       </TableCell>
                     </TableRow>

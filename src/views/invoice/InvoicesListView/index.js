@@ -71,14 +71,14 @@ const Invoices = () => {
 
     if (response.status === 201) {
       if (selectedProvider === 'NONE') {
-        const responseInvoice = await API.get(INVOICE_ENDPOINT + '?page=1&limit=50');
+        const responseInvoice = await API.get(`${INVOICE_ENDPOINT}?page=1&limit=50&hub_id=none`);
         if (responseInvoice.ok) {
           const fetchInvoice = await responseInvoice.json();
           const dataInvoice = { invoices: fetchInvoice.data.items, meta: fetchInvoice.data.meta };
           dispatch(actLoadInvoices(dataInvoice));
         }
       } else {
-        const responseProvider = await API.get(INVOICE_ENDPOINT + `/providers/${selectedProvider}?page=1&limit=50`);
+        const responseProvider = await API.get(`${INVOICE_ENDPOINT}/providers/${selectedProvider}?page=1&limit=50&hub_id=none`);
         if (responseProvider.ok) {
           const fetchProvider = await responseProvider.json();
           const dataProvider = { invoices: fetchProvider.data.items, meta: fetchProvider.data.meta };

@@ -54,12 +54,12 @@ const ShipperListView = () => {
     const fetchShipper = async (user) => {
       let query = null;
       if (user.role === 'Admin') {
-        query = '?hub_manager_phone=none';
+        query = 'hub_manager_phone=none';
       } else {
-        query = `?hub_manager_phone=${user.phone}`;
+        query = `hub_manager_phone=${user.phone}`;
       }
 
-      API.get(`${SHIPPER_ENDPOINT}/${query}`)
+      API.get(`${SHIPPER_ENDPOINT}?${query}`)
         .then(async response => {
           if (response.status === RESPONSE_STATUS.FORBIDDEN) {
             Cookies.remove(USER_TOKEN);
