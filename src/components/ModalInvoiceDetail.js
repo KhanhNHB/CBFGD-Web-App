@@ -1,7 +1,13 @@
 import React, { useState, useEffect } from "react";
 import {
+    Button,
     CircularProgress,
     makeStyles,
+    Step,
+    StepContent,
+    StepLabel,
+    Stepper,
+    Typography,
 } from "@material-ui/core";
 import { BASE_URL_FABRIC } from "../api/endpoint";
 import CloseIcon from '@material-ui/icons/Close';
@@ -9,6 +15,9 @@ import datetimeUtils from '../utils/datetimeUtils';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import { ACCESS_TOKEN_FABRIC } from "../common";
+import clsx from 'clsx';
+import { Check } from "react-feather";
+import PropTypes from 'prop-types';
 
 const useStyles = makeStyles((theme) => ({
     container: {
@@ -75,80 +84,96 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-// function getSteps() {
-//     return ['IN WAREHOUSE', 'DELIVERING', 'COMPETED'];
-// }
+function getSteps() {
+    return ['IN_WAREHOUSE', 'TO_DELIVERY', 'DELIVERING', 'COMPLETED', 'CANCELLED', 'REFUND'];
+}
 
-// function getStepContent(step) {
-//     switch (step) {
-//         case 0:
-//             return 'Select campaign settings...';
-//         case 1:
-//             return 'What is an ad group anyways?';
-//         case 2:
-//             return 'This is the bit I really care about!';
-//         default:
-//             return 'Unknown step';
-//     }
-// }
-// const useQontoStepIconStyles = makeStyles({
-//     root: {
-//         color: '#eaeaf0',
-//         display: 'flex',
-//         height: 22,
-//         alignItems: 'center',
-//     },
-//     active: {
-//         color: '#39beb6',
-//     },
-//     circle: {
-//         width: 10,
-//         height: 10,
-//         borderRadius: '50%',
-//         backgroundColor: 'currentColor',
-//     },
-//     completed: {
-//         color: '#39beb6',
-//         zIndex: 1,
-//         fontSize: 18,
-//     },
-// });
+const useQontoStepIconStyles = makeStyles({
+    root: {
+        color: '#eaeaf0',
+        display: 'flex',
+        height: 22,
+        alignItems: 'center',
+    },
+    active: {
+        color: '#39beb6',
+    },
+    circle: {
+        width: 10,
+        height: 10,
+        borderRadius: '50%',
+        backgroundColor: 'currentColor',
+    },
+    completed: {
+        color: '#39beb6',
+        zIndex: 1,
+        fontSize: 18,
+    },
+});
 
-// function QontoStepIcon(props) {
-//     const classes = useQontoStepIconStyles();
-//     const { active, completed } = props;
+function QontoStepIcon(props) {
+    const classes = useQontoStepIconStyles();
+    const { active, completed } = props;
 
-//     return (
-//         <div
-//             className={clsx(classes.root, {
-//                 [classes.active]: active,
-//             })}
-//         >
-//             {completed ? <Check className={classes.completed} /> : <div className={classes.circle} />}
-//         </div>
-//     );
-// }
+    return (
+        <div
+            className={clsx(classes.root, {
+                [classes.active]: active,
+            })}
+        >
+            {completed ? <Check className={classes.completed} /> : <div className={classes.circle} />}
+        </div>
+    );
+}
 
-// QontoStepIcon.propTypes = {
-//     /**
-//      * Whether this step is active.
-//      */
-//     active: PropTypes.bool,
-//     /**
-//      * Mark the step as completed. Is passed to child components.
-//      */
-//     completed: PropTypes.bool,
-// };
+QontoStepIcon.propTypes = {
+    /**
+     * Whether this step is active.
+     */
+    active: PropTypes.bool,
+    /**
+     * Mark the step as completed. Is passed to child components.
+     */
+    completed: PropTypes.bool,
+};
 
 const ModalInvoiceDetail = (props) => {
     const classes = useStyles();
     const [deliveringProcess, setDeliveringProcess] = useState([]);
     const [loading, setLoading] = useState(false);
-    // const [activeStep, setActiveStep] = useState(0);
-    // const steps = getSteps();
+    const [activeStep, setActiveStep] = useState(0);
+    const [contentTransaction, setContentTransaction] = useState(null);
+    const steps = getSteps();
 
     useEffect(() => {
         setLoading(true);
+
+        const handleStep = (data) => {
+            if (!data || !data.length) return;
+            switch (data[0].Value.status) {
+                case 'IN_WAREHOUSE':
+                    setActiveStep(0);
+                    return;
+                case 'TO_DELIVERY':
+                    setActiveStep(1);
+                    return;
+                case 'DELIVERING':
+                    setActiveStep(2);
+                    return;
+                case 'COMPLETED':
+                    setActiveStep(3);
+                    return;
+                case 'CANCELLED':
+                    setActiveStep(4);
+                    return;
+                case 'REFUND':
+                    setActiveStep(5);
+                    return;
+                default:
+                    return
+            }
+        }
+
         axios.get(`${BASE_URL_FABRIC}/channels/mychannel/chaincodes/fabinvoice?args=["${props.invoice.provider.name}${props.invoice.code}"]&fcn=getHistoryForAsset&peer=peer0.org1.example.com`, {
             headers: {
                 'Authorization': 'Bearer ' + Cookies.get(ACCESS_TOKEN_FABRIC),
@@ -159,10 +184,29 @@ const ModalInvoiceDetail = (props) => {
                     return;
                 }
                 setDeliveringProcess(response.data);
+                handleStep(response.data);
                 setLoading(false);
             }
         });
     }, [props.invoice.code, props.invoice.provider.name]);
+
+    function getStepContent(label) {
+        return deliveringProcess.map(transaction => {
+            if (transaction.Value.status === label) {
+                return (
+                    <Typography>Transaction ID: {transaction.TxId}</Typography>
+                );
+            }
+        });
+    }
+
+    const handleNext = () => {
+        setActiveStep((prevActiveStep) => prevActiveStep + 1);
+    };
+
+    const handleBack = () => {
+        setActiveStep((prevActiveStep) => prevActiveStep - 1);
+    };
 
     return (
         <div className={classes.container}>
@@ -174,11 +218,11 @@ const ModalInvoiceDetail = (props) => {
             </div>
             <div className={classes.wrapperLeft}>
                 <h2 className={classes.titleText}>Invoice Detail</h2>
-                <p className={classes.detailRow}><span><b>Invoice ID:</b> </span><span>{props.invoice.code}</span></p>
-                <p className={classes.detailRow}><span><b>Receiver_name:</b> </span><span>{props.invoice.receiver_name}</span></p>
-                <p className={classes.detailRow}><span><b>Address:</b> </span><span>{props.invoice.address}</span></p>
-                <p className={classes.detailRow}><span></span><b>Customer phone number:</b> <span>{props.invoice.customer_phone_number}</span></p>
-                <p className={classes.detailRow}><span></span><b>Receiver phone number:</b> <span>{props.invoice.receiver_phone_number}</span></p>
+                <p className={classes.detailRow}><span><b>Invoice Code:</b> </span><span>{props.invoice.code}</span></p>
+                <p className={classes.detailRow}><span><b>Receiver Name:</b> </span><span>{props.invoice.receiver_name}</span></p>
+                <p className={classes.detailRow}><span></span><b>Customer Phone Number:</b> <span>{props.invoice.customer_phone_number}</span></p>
+                <p className={classes.detailRow}><span></span><b>Receiver Phone Number:</b> <span>{props.invoice.receiver_phone_number}</span></p>
+                <p className={classes.detailRow}><span><b>Receiver Address:</b> </span><span>{props.invoice.address}</span></p>
             </div>
             <div className={classes.wrapperRight}>
                 {loading
@@ -197,17 +241,36 @@ const ModalInvoiceDetail = (props) => {
                     : (
                         <>
                             <h2 className={classes.titleText}>Delivery Status Detail</h2>
-                            {/* <Stepper activeStep={activeStep} orientation="vertical">
+                            <Stepper activeStep={activeStep} orientation="vertical">
                                 {steps.map((label, index) => (
                                     <Step key={label}>
                                         <StepLabel StepIconComponent={QontoStepIcon}>{label}</StepLabel>
                                         <StepContent>
-                                            <Typography>{getStepContent(index)}</Typography>
+                                            {getStepContent(label)}
+                                            <div className={classes.actionsContainer}>
+                                                <div>
+                                                    <Button
+                                                        disabled={activeStep === 0}
+                                                        onClick={handleBack}
+                                                        className={classes.button}
+                                                    >
+                                                        Back
+                                                    </Button>
+                                                    <Button
+                                                        variant="contained"
+                                                        color="primary"
+                                                        onClick={handleNext}
+                                                        className={classes.button}
+                                                    >
+                                                        {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
+                                                    </Button>
+                                                </div>
+                                            </div>
                                         </StepContent>
                                     </Step>
                                 ))}
-                            </Stepper> */}
-                            <table className={classes.table}>
+                            </Stepper>
+                            {/* <table className={classes.table}>
                                 <tbody>
                                     {
                                         deliveringProcess.map((process, index) => {
@@ -240,7 +303,7 @@ const ModalInvoiceDetail = (props) => {
                                         })
                                     }
                                 </tbody>
-                            </table>
+                            </table> */}
                         </>
                     )
                 }
