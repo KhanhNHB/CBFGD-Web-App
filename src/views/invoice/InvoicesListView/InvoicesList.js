@@ -143,6 +143,9 @@ const useStyles = makeStyles((theme) => ({
       outline: 'none'
     },
   },
+  assigned: {
+    backgroundColor: 'whitesmoke',
+  }
 }));
 
 const InvoicesList = ({ data, user }) => {
@@ -370,7 +373,7 @@ const InvoicesList = ({ data, user }) => {
                   <TableBody>
                     {stableSort(filterData, getComparator(order, orderBy)).map((invoice, index) => {
                       return (
-                        <TableRow hover role="checkbox" tabIndex={-1} key={invoice.id}>
+                        <TableRow hover role="checkbox" tabIndex={-1} key={invoice.id} className={invoice.is_assign && classes.assigned}>
                           {columns.map((column, index) => {
                             const value = _hanleRowTableData(column.id, invoice[column.id]);
                             return (
@@ -390,7 +393,7 @@ const InvoicesList = ({ data, user }) => {
                                 color="primary"
                                 variant="contained"
                                 onClick={() => handleSelectedRowForAssignHub(invoice.id, invoice.hub ? invoice.hub.id : null)}
-                                style={{ color: 'white' }}
+                                style={invoice.is_assign ? { backgroundColor: '#E69403', color: 'white' } : { color: 'white' }}
                               >
                                 {invoice.hub ? 'Assigned' : 'Assign'}
                               </Button>
@@ -402,7 +405,7 @@ const InvoicesList = ({ data, user }) => {
                                 color="primary"
                                 variant="contained"
                                 onClick={() => handleSelectedRowForAssignShipper(invoice.id, invoice.shipper_id ? invoice.shipper_id : null)}
-                                style={{ color: 'white' }}
+                                style={invoice.is_assign ? { backgroundColor: '#E69403', color: 'white' } : { color: 'white' }}
                               >
                                 {invoice.is_assign ? 'Assigned' : 'Assign'}
                               </Button>

@@ -41,6 +41,7 @@ const TopBar = ({
   }, []);
 
   const handleSignOut = () => {
+    console.log('---------')
     Cookies.remove(USER_TOKEN);
     Cookies.remove(ACCESS_TOKEN_FABRIC);
     navigate('/', { replace: true });
@@ -53,7 +54,7 @@ const TopBar = ({
       {...rest}
     >
       <Toolbar>
-        <RouterLink to="/">
+        <RouterLink to="/app/invoices-list">
           <Logo />
         </RouterLink>
         <Box flexGrow={1} />
@@ -68,7 +69,7 @@ const TopBar = ({
             </Badge>
           </IconButton>
           <IconButton color="inherit">
-            <InputIcon style={{ color: 'white' }} onClick={handleSignOut} />
+            <InputIcon style={{ color: 'white' }} onClick={() => handleSignOut()} />
           </IconButton>
         </Hidden>
         <Hidden lgUp>

@@ -79,6 +79,10 @@ EnhancedTableHead.propTypes = {
 
 const useStyles = makeStyles((theme) => ({
   root: {},
+  boundary: {
+    display: 'flex',
+    flexDirection: 'column',
+  },
   avatar: {
     marginRight: theme.spacing(2)
   },
@@ -245,19 +249,20 @@ const ShipperList = ({ className, shippers, user, ...rest }) => {
   };
 
   return (
-    <>
-      <Box display="flex" justifyContent="flex-end">
-        {(user && user.role === 'Admin')
-          ? <Button
+    <div className={classes.boundary}>
+      <div style={{ marginBottom: 10 }}>
+        {
+          (user && user.role === 'Admin')
+          && <Button
             color="primary"
             variant="contained"
             style={{ color: 'white' }}
             onClick={openModalFormAdd}
           >
             Add Shipper
-        </Button>
-          : null}
-      </Box>
+          </Button>
+        }
+      </div>
       <Card className={clsx(classes.root, className)} {...rest} >
         <Box>
           <TableContainer className={classes.container}>
@@ -341,7 +346,7 @@ const ShipperList = ({ className, shippers, user, ...rest }) => {
       <Modal open={loadingModal} className={classes.loadingModal}>
         <CircularProgress />
       </Modal>
-    </>
+    </div>
   );
 };
 
