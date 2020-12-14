@@ -17,7 +17,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { actLoadHubManager } from '../../actions'
 import { useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
-import { HUB_MANAGER } from '../../api/endpoint';
+import { HUB_MANAGER_ENDPOINT } from '../../api/endpoint';
 import { RESPONSE_STATUS, USER_TOKEN } from '../../common';
 import HubManagerList from './HubManagerList'
 
@@ -51,7 +51,7 @@ const HubManagerListView = () => {
 
     useEffect(() => {
         setLoadingModal(true);
-        API.get(HUB_MANAGER)
+        API.get(HUB_MANAGER_ENDPOINT)
             .then(async response => {
                 if (response.status === RESPONSE_STATUS.FORBIDDEN) {
                     Cookies.remove(USER_TOKEN);
