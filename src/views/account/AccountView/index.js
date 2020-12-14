@@ -63,7 +63,7 @@ const Account = () => {
     }
 
     fetchProfile();
-  }, [dispatch]);
+  }, [dispatch, navigate]);
 
   return (
     <Page className={classes.root} title="Account">

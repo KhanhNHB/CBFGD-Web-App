@@ -97,6 +97,15 @@ const NavBar = ({ onMobileClose, openMobile }) => {
             profile && `${profile.last_name} ${profile.first_name}`
           }
         </Typography>
+        <Typography
+          className={classes.name}
+          color="textPrimary"
+          variant="h5"
+        >
+          {
+            profile && `${profile.role}`
+          }
+        </Typography>
       </Box>
       <Divider />
       <Box p={2}>

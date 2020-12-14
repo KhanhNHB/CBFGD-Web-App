@@ -1,11 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Container,
   Grid,
   makeStyles,
-  Modal,
-  CircularProgress,
 } from '@material-ui/core';
 import Page from '../../../components/Page';
 import Toolbar from './Toolbar';
@@ -49,6 +47,7 @@ const Invoices = () => {
   const [fileSelected, setFileSelected] = useState(null);
   const [loadingModal, setLoadingModal] = useState(false);
   const [progress, setProgress] = useState(0);
+  const user = useSelector(state => state.profile.profile);
 
   const onHandleFileUpload = async () => {
     if (!fileSelected) {
@@ -72,14 +71,14 @@ const Invoices = () => {
 
     if (response.status === 201) {
       if (selectedProvider === 'NONE') {
-        const responseInvoice = await API.get(INVOICE_ENDPOINT + '?page=1&limit=50');
+        const responseInvoice = await API.get(`${INVOICE_ENDPOINT}?page=1&limit=50&hub_id=none`);
         if (responseInvoice.ok) {
           const fetchInvoice = await responseInvoice.json();
           const dataInvoice = { invoices: fetchInvoice.data.items, meta: fetchInvoice.data.meta };
           dispatch(actLoadInvoices(dataInvoice));
         }
       } else {
-        const responseProvider = await API.get(INVOICE_ENDPOINT + `/providers/${selectedProvider}?page=1&limit=50`);
+        const responseProvider = await API.get(`${INVOICE_ENDPOINT}/providers/${selectedProvider}?page=1&limit=50&hub_id=none`);
         if (responseProvider.ok) {
           const fetchProvider = await responseProvider.json();
           const dataProvider = { invoices: fetchProvider.data.items, meta: fetchProvider.data.meta };
@@ -101,11 +100,11 @@ const Invoices = () => {
       className={classes.root}
       title="Invoices">
       <Container maxWidth={false}>
-        <Toolbar onHandleFileUpload={onHandleFileUpload} onHandleFileChange={onFileChange} />
+        {user && <Toolbar onHandleFileUpload={onHandleFileUpload} onHandleFileChange={onFileChange} user={user} />}
         <Box mt={3}>
           {loadingModal && <LinearProgress variant="determinate" value={progress} />}
           <Grid container spacing={3}>
-            {data && <InvoicesList data={data} />}
+            {(data && user) && <InvoicesList data={data} user={user} />}
           </Grid>
         </Box>
       </Container>

@@ -62,7 +62,7 @@ const DashboardLayout = () => {
       }
     };
     readCookie();
-  }, [navigate]);
+  }, [navigate, dispatch]);
 
   return (
     <div className={classes.root}>

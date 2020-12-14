@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Map, GoogleApiWrapper, Marker, Circle } from 'google-maps-react';
 import API from '../../api/API';
-import { HUB_ENDPOINT, INVOICE_ENDPOINT } from '../../api/endpoint';
+import { HUB_ENDPOINT, INVOICE_ENDPOINT, PROFILE_ENDPOINT } from '../../api/endpoint';
 import { useDispatch, useSelector } from 'react-redux';
-import { actGetListHub, actLoadInvoices } from '../../actions';
+import { actGetListHub, actLoadInvoices, actLoadProfile } from '../../actions';
 import { Box, Button, Container, Modal } from '@material-ui/core';
 import ModalHubAdd from '../../components/ModalHubAdd';
 import { ACCESS_TOKEN_FABRIC, RESPONSE_STATUS, USER_TOKEN } from '../../common';
@@ -25,6 +25,7 @@ export function MapContainer(props) {
   const [radius, setRadius] = useState('');
   const [status, setStatus] = useState('Available');
   const [id, setId] = useState('');
+  const [user, setUser] = useState(null);
 
   const handleOpenHub = () => {
     setOpenHub(true);
@@ -43,6 +44,22 @@ export function MapContainer(props) {
   }
 
   useEffect(() => {
+    const readCookie = async () => {
+      const user = Cookies.get(USER_TOKEN);
+      if (user) {
+        const response = await API.post(`${PROFILE_ENDPOINT}`, {
+          "access_token": user
+        });
+
+        if (response.ok) {
+          const fetchData = await response.json();
+          setUser(fetchData.data);
+          dispatch(actLoadProfile(fetchData.data));
+        }
+      }
+    };
+
+
     API.get(`${HUB_ENDPOINT}`)
       .then(async response => {
         if (response.status === RESPONSE_STATUS.FORBIDDEN) {
@@ -63,7 +80,9 @@ export function MapContainer(props) {
           dispatch(actLoadInvoices(fetchData.data));
         }
       });
-  }, [dispatch]);
+
+    readCookie();
+  }, [dispatch, navigate]);
 
 
   const onMarkerClick = (evt) => {
@@ -154,14 +173,17 @@ export function MapContainer(props) {
             justifyContent="flex-end"
             style={{ float: "left", marginLeft: '10%', marginTop: 10 }}
           >
-            <Button
-              color="primary"
-              variant="contained"
-              style={{ color: 'white', height: 45, width: 100, marginLeft: 120 }}
-              onClick={handleOpenAddHub}
-            >
-              Add Hub
-        </Button>
+            {(user && user.role === 'Admin')
+              ? <Button color="primary" onClick={handleOpenAddHub} variant="contained" style={{
+                color: 'white',
+                height: 45,
+                width: 100,
+                marginLeft: 120
+              }}
+              >
+                Add Hub
+              </Button>
+              : null}
           </Box>
         </Container>
         <Modal open={openHub}>

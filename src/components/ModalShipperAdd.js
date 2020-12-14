@@ -105,7 +105,7 @@ const ModalShipperAdd = (props) => {
             alert(fetchData.message);
             return;
         }
-        props.onCloseModal();
+        props.onCloseModal(isChanged);
     }
 
     return (

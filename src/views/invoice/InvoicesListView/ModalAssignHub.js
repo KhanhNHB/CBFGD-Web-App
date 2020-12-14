@@ -41,7 +41,6 @@ const useStyles = makeStyles((theme) => ({
 
 const ModalAssignHub = ({
     onInvisibleModel,
-    onVisibleModal,
     onHandleAssign,
     onCurrentHub
 }) => {
@@ -89,7 +88,7 @@ const ModalAssignHub = ({
                         <RadioGroup
                             aria-label="List hubs"
                             onChange={handleChange}
-                            value={selectedHub}
+                            value={+selectedHub}
                         >
                             {hubs.map((hub, index) => {
                                 return <FormControlLabel

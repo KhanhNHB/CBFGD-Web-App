@@ -39,21 +39,25 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-const ModalAssign = ({
+const ModalAssignShipper = ({
     onInvisibleModel,
-    onHandleAssign
+    onHandleAssign,
+    user,
+    onCurrentShipper,
 }) => {
     const classes = useStyles();
     const [shippers, setShippers] = useState([]);
-    const [selectedShipper, setSelectedShipper] = useState(null);
+    const [selectedShipper, setSelectedShipper] = useState(onCurrentShipper);
 
     const fetchShipper = async () => {
-        const response = await API.get(SHIPPER_ENDPOINT);
-        const json = await response.json();
-        if (!json.data.length) {
-            return;
+        if (user && user.role === 'Hub_Manager') {
+            const response = await API.get(`${SHIPPER_ENDPOINT}?hub_manager_phone=${user.phone}`);
+            const json = await response.json();
+            if (!json.data.length) {
+                return;
+            }
+            setShippers(json.data);
         }
-        setShippers(json.data);
     };
 
     useEffect(() => {
@@ -61,7 +65,7 @@ const ModalAssign = ({
     }, []);
 
     const handleChange = (event) => {
-        setSelectedShipper(event.target.value);
+        setSelectedShipper(+event.target.value);
     };
 
     const handleSubmit = () => {
@@ -84,7 +88,7 @@ const ModalAssign = ({
                         {shippers.map((shipper, index) => (
                             <FormControlLabel
                                 key={index}
-                                value={shipper.phone}
+                                value={+shipper.id}
                                 control={<Radio />}
                                 label={shipper.last_name + " " + shipper.first_name}
                             />
@@ -115,4 +119,4 @@ const ModalAssign = ({
     );
 };
 
-export default ModalAssign;
+export default ModalAssignShipper;
