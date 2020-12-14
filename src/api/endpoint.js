@@ -14,6 +14,9 @@ export const PROVIDER_ENDPOINT = `${BASE_URL}/providers`;
 export const PROFILE_ENDPOINT = `${BASE_URL}/auth/profile`;
 export const DELIVERIES_STATUS_ENDPOINT = `${BASE_URL}/deliveries-status`;
 
+export const HUB_MANAGER = `${BASE_URL}/hub-managers`;
+
+
 // API Google
 // export const BASE_URL_FABRIC = `http://34.126.123.79:4000`;
 // API AWS

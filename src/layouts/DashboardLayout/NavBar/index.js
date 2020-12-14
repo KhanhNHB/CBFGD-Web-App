@@ -14,7 +14,8 @@ import {
   ShoppingBag as ShoppingBagIcon,
   User as UserIcon,
   Users as UsersIcon,
-  MapPin as MapIcon
+  MapPin as MapIcon,
+  Octagon as Octagon,
 } from 'react-feather';
 import NavItem from './NavItem';
 import { useSelector } from 'react-redux';
@@ -40,6 +41,11 @@ const items = [
     icon: MapIcon,
     title: 'Shipping Area'
   },
+  {
+    href: '/app/hub-manager',
+    icon: Octagon,
+    title: 'Hub Manager'
+  }
 ];
 
 const useStyles = makeStyles(() => ({
