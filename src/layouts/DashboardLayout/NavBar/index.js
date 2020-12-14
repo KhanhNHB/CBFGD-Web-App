@@ -20,7 +20,7 @@ import {
 import NavItem from './NavItem';
 import { useSelector } from 'react-redux';
 
-const items = [
+const itemsAdmin = [
   {
     href: '/app/invoices-list',
     icon: ShoppingBagIcon,
@@ -45,6 +45,29 @@ const items = [
     href: '/app/hub-manager',
     icon: Octagon,
     title: 'Hub Manager'
+  }
+];
+
+const itemsHubManager = [
+  {
+    href: '/app/invoices-list',
+    icon: ShoppingBagIcon,
+    title: 'Invoices'
+  },
+  {
+    href: '/app/shipper',
+    icon: UsersIcon,
+    title: 'Shipper'
+  },
+  {
+    href: '/app/account',
+    icon: UserIcon,
+    title: 'Account'
+  },
+  {
+    href: '/app/shipping-area',
+    icon: MapIcon,
+    title: 'Shipping Area'
   }
 ];
 
@@ -110,14 +133,25 @@ const NavBar = ({ onMobileClose, openMobile }) => {
       <Divider />
       <Box p={2}>
         <List>
-          {items.map((item) => (
-            <NavItem
-              href={item.href}
-              key={item.title}
-              title={item.title}
-              icon={item.icon}
-            />
-          ))}
+          {
+            (profile && profile.role === 'Admin')
+              ? itemsAdmin.map((item) => (
+                <NavItem
+                  href={item.href}
+                  key={item.title}
+                  title={item.title}
+                  icon={item.icon}
+                />
+              ))
+              : itemsHubManager.map((item) => (
+                <NavItem
+                  href={item.href}
+                  key={item.title}
+                  title={item.title}
+                  icon={item.icon}
+                />
+              ))
+          }
         </List>
       </Box>
       <Box flexGrow={1} />

@@ -74,6 +74,10 @@ EnhancedTableHead.propTypes = {
 
 const useStyles = makeStyles((theme) => ({
     root: {},
+    boundary: {
+        display: 'flex',
+        flexDirection: 'column',
+    },
     avatar: {
         marginRight: theme.spacing(2)
     },
@@ -190,8 +194,8 @@ const HubManagerList = ({ className, hubmanagers, ...rest }) => {
     };
 
     return (
-        <>
-            <Box display="flex" justifyContent="flex-end">
+        <div className={classes.boundary}>
+            <div style={{ marginBottom: 10 }}>
                 <Button
                     color="primary"
                     variant="contained"
@@ -199,8 +203,8 @@ const HubManagerList = ({ className, hubmanagers, ...rest }) => {
                     onClick={openModalFormAdd}
                 >
                     Add Hub Manager
-        </Button>
-            </Box>
+                </Button>
+            </div>
             <Card className={clsx(classes.root, className)} {...rest} >
                 <Box>
                     <TableContainer className={classes.container}>
@@ -255,7 +259,7 @@ const HubManagerList = ({ className, hubmanagers, ...rest }) => {
                     <ModalHubManagerAdd onCloseModal={onCloseModalAdd} />
                 </div>
             </Modal>
-        </>
+        </div>
     );
 };
 

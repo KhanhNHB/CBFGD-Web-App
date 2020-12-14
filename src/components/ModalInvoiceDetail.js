@@ -141,6 +141,7 @@ const ModalInvoiceDetail = (props) => {
     const classes = useStyles();
     const [deliveringProcess, setDeliveringProcess] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [maxStep, setMaxStep] = useState(0);
     const [activeStep, setActiveStep] = useState(0);
     const [contentTransaction, setContentTransaction] = useState(null);
     const steps = getSteps();
@@ -152,21 +153,27 @@ const ModalInvoiceDetail = (props) => {
             if (!data || !data.length) return;
             switch (data[0].Value.status) {
                 case 'IN_WAREHOUSE':
+                    setMaxStep(0);
                     setActiveStep(0);
                     return;
                 case 'TO_DELIVERY':
+                    setMaxStep(1);
                     setActiveStep(1);
                     return;
                 case 'DELIVERING':
+                    setMaxStep(2);
                     setActiveStep(2);
                     return;
                 case 'COMPLETED':
+                    setMaxStep(3);
                     setActiveStep(3);
                     return;
                 case 'CANCELLED':
+                    setMaxStep(4);
                     setActiveStep(4);
                     return;
                 case 'REFUND':
+                    setMaxStep(5);
                     setActiveStep(5);
                     return;
                 default:
@@ -257,12 +264,13 @@ const ModalInvoiceDetail = (props) => {
                                                         Back
                                                     </Button>
                                                     <Button
+                                                        disabled={activeStep === maxStep}
                                                         variant="contained"
                                                         color="primary"
                                                         onClick={handleNext}
                                                         className={classes.button}
                                                     >
-                                                        {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
+                                                        Next
                                                     </Button>
                                                 </div>
                                             </div>

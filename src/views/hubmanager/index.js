@@ -9,6 +9,7 @@ import {
     Grid,
     makeStyles,
     Modal,
+    NativeSelect,
 } from '@material-ui/core';
 import Page from '../../components/Page';
 
@@ -46,8 +47,15 @@ const HubManagerListView = () => {
     const classes = useStyles();
     const navigate = useNavigate();
     const [loadingModal, setLoadingModal] = useState(false);
+    const profile = useSelector(state => state.profile.profile);
 
     const hubmanagers = useSelector(state => state.hubmanager.listHubManager);
+
+    useEffect(() => {
+        if (profile && profile.role === 'Hub_Manager') {
+            navigate('/app/invoices-list', { replace: true });
+        }
+    }, [profile]);
 
     useEffect(() => {
         setLoadingModal(true);

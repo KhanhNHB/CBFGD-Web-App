@@ -90,7 +90,9 @@ export function MapContainer(props) {
     setName(evt.title);
     setRadius(evt.radius);
     setStatus(evt.status);
-    handleOpenHub(true);
+    if (user && user.role === 'Admin') {
+      handleOpenHub(true);
+    }
   };
 
   const displayHubMarkers = () => {
