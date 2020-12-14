@@ -17,7 +17,7 @@ export const DELIVERIES_STATUS_ENDPOINT = `${BASE_URL}/deliveries-status`;
 // API Google
 // export const BASE_URL_FABRIC = `http://34.126.123.79:4000`;
 // API AWS
-export const BASE_URL_FABRIC = `http://13.212.128.132:4000`;
+export const BASE_URL_FABRIC = `http://54.255.239.112:4000`;
 // API IPv.4
 // export const BASE_URL_FABRIC = `http://192.168.1.18:4000`;
 // export const BASE_URL_BLOCKCHAIN = "http://18.141.214.35:8090";
