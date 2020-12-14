@@ -13,7 +13,7 @@ import {
     Select
 } from '@material-ui/core';
 import API from '../api/API';
-import { HUB_ENDPOINT, HUB_MANAGER } from '../api/endpoint';
+import { HUB_ENDPOINT, HUB_MANAGER_ENDPOINT } from '../api/endpoint';
 import CloseIcon from '@material-ui/icons/Close';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
@@ -107,14 +107,14 @@ const ModalHubManagerAdd = (props) => {
             password: data.password,
             hub_id: hub_id
         };
-        const response = await API.post(HUB_MANAGER, dataBody);
+        const response = await API.post(HUB_MANAGER_ENDPOINT, dataBody);
         const fetchData = await response.json();
 
         if (fetchData.message) {
             alert(fetchData.message);
             return;
         }
-        const responseHubManager = await API.get(HUB_MANAGER);
+        const responseHubManager = await API.get(HUB_MANAGER_ENDPOINT);
         if (responseHubManager.ok) {
             const fetchHubManager = await responseHubManager.json();
             dispatch(actLoadHubManager(fetchHubManager.data));
