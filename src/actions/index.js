@@ -81,3 +81,10 @@ export const actLoadShipper = (shippers) => {
         shippers,
     }
 };
+
+export const actLoadHubManager = (hubmanger) => {
+    return {
+        type: types.LOAD_HUB_MANAGER,
+        hubmanger,
+    }
+}

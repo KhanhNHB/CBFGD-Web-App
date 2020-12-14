@@ -6,6 +6,7 @@ import ShipperListView from './views/shipper/ShipperListView/index';
 import LoginView from './views/auth/LoginView';
 import Invoices from './views/invoice/InvoicesListView/index';
 import ShippingArea from './views/shippingarea';
+import HubManagerListView from './views/hubmanager';
 
 
 const routes = [
@@ -19,6 +20,7 @@ const routes = [
       { path: 'shipper', element: <ShipperListView /> },
       { path: 'shipping-area', element: <ShippingArea /> },
       { path: 'invoices-list', element: <Invoices /> },
+      { path: 'hub-manager', element: <HubManagerListView /> }
     ]
   },
   {
