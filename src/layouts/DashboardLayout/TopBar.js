@@ -16,7 +16,7 @@ import NotificationsIcon from '@material-ui/icons/NotificationsOutlined';
 import InputIcon from '@material-ui/icons/Input';
 import Logo from '../../components/Logo';
 import Cookies from 'js-cookie';
-import { ACCESS_TOKEN_FABRIC, USER_TOKEN } from '../../common';
+import { ACCESS_TOKEN_FABRIC, USER_DEVICE_TOKEN, USER_TOKEN } from '../../common';
 
 const useStyles = makeStyles(() => ({
   root: {},
@@ -44,6 +44,7 @@ const TopBar = ({
     console.log('---------')
     Cookies.remove(USER_TOKEN);
     Cookies.remove(ACCESS_TOKEN_FABRIC);
+    Cookies.remove(USER_DEVICE_TOKEN);
     navigate('/', { replace: true });
   }
 

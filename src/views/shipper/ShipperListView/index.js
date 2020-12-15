@@ -16,7 +16,7 @@ import ShipperList from './ShipperList';
 import API from '../../../api/API';
 import { useSelector, useDispatch } from 'react-redux';
 import { actLoadProfile, actLoadShipper } from '../../../actions/index';
-import { ACCESS_TOKEN_FABRIC, RESPONSE_STATUS, USER_TOKEN } from '../../../common';
+import { ACCESS_TOKEN_FABRIC, RESPONSE_STATUS, USER_DEVICE_TOKEN, USER_TOKEN } from '../../../common';
 import { useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
 
@@ -64,6 +64,7 @@ const ShipperListView = () => {
           if (response.status === RESPONSE_STATUS.FORBIDDEN) {
             Cookies.remove(USER_TOKEN);
             Cookies.remove(ACCESS_TOKEN_FABRIC);
+            Cookies.remove(USER_DEVICE_TOKEN);
             navigate('/', { replace: true });
           }
           if (response.ok) {

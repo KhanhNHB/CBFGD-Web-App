@@ -7,7 +7,6 @@ import {
     StepContent,
     StepLabel,
     Stepper,
-    Typography,
 } from "@material-ui/core";
 import { BASE_URL_FABRIC } from "../api/endpoint";
 import CloseIcon from '@material-ui/icons/Close';
@@ -21,7 +20,7 @@ import PropTypes from 'prop-types';
 
 const useStyles = makeStyles((theme) => ({
     container: {
-        width: "60%",
+        width: "80%",
         height: "80%",
         position: "absolute",
         left: "50%",
@@ -42,8 +41,8 @@ const useStyles = makeStyles((theme) => ({
         backgroundColor: "white",
         width: "50%",
         height: "100%",
-        float: "left",
-        overflowY: "auto",
+        float: "right",
+        overflow: "auto",
         borderBottom: "3px solid #e0e0e0",
         borderBottomRightRadius: "5px",
     },
@@ -143,7 +142,6 @@ const ModalInvoiceDetail = (props) => {
     const [loading, setLoading] = useState(false);
     const [maxStep, setMaxStep] = useState(0);
     const [activeStep, setActiveStep] = useState(0);
-    const [contentTransaction, setContentTransaction] = useState(null);
     const steps = getSteps();
 
     useEffect(() => {
@@ -201,7 +199,15 @@ const ModalInvoiceDetail = (props) => {
         return deliveringProcess.map(transaction => {
             if (transaction.Value.status === label) {
                 return (
-                    <Typography>Transaction ID: {transaction.TxId}</Typography>
+                    <>
+                        <p style={{ marginTop: 5, marginBottom: 5 }}><span style={{ fontWeight: 'bold' }}>Code: </span>{transaction.Value.code}</p>
+                        <p style={{ marginTop: 5, marginBottom: 5 }}><span style={{ fontWeight: 'bold' }}>Provider: </span> {transaction.Value.provider}</p>
+                        <p style={{ marginTop: 5, marginBottom: 5 }}><span style={{ fontWeight: 'bold' }}>Status: </span>{transaction.Value.status}</p>
+                        <p style={{ marginTop: 5, marginBottom: 5 }}><span style={{ fontWeight: 'bold' }}>Shipper Name: </span>{transaction.Value.owner ? transaction.Value.owner : 'none'}</p>
+                        <p style={{ marginTop: 5, marginBottom: 5 }}><span style={{ fontWeight: 'bold' }}>Shipper Phone: </span>{transaction.Value.shipper_phone ? transaction.Value.shipper_phone : 'none'}</p>
+                        <p style={{ marginTop: 5, marginBottom: 5 }}><span style={{ fontWeight: 'bold' }}>Created At: </span>{datetimeUtils.DisplayDateTimeFormat(transaction.Value.created_at)}</p>
+                        <p style={{ marginTop: 5, marginBottom: 5, overflowY: 'auto' }}><span style={{ fontWeight: 'bold' }}>Transaction ID: </span>{transaction.TxId}</p>
+                    </>
                 );
             }
         });
@@ -260,6 +266,7 @@ const ModalInvoiceDetail = (props) => {
                                                         disabled={activeStep === 0}
                                                         onClick={handleBack}
                                                         className={classes.button}
+
                                                     >
                                                         Back
                                                     </Button>
@@ -269,6 +276,7 @@ const ModalInvoiceDetail = (props) => {
                                                         color="primary"
                                                         onClick={handleNext}
                                                         className={classes.button}
+                                                        style={{ color: (activeStep !== maxStep) && 'white' }}
                                                     >
                                                         Next
                                                     </Button>
@@ -278,40 +286,6 @@ const ModalInvoiceDetail = (props) => {
                                     </Step>
                                 ))}
                             </Stepper>
-                            {/* <table className={classes.table}>
-                                <tbody>
-                                    {
-                                        deliveringProcess.map((process, index) => {
-                                            console.log(process);
-                                            return (index === (deliveringProcess.length - 1))
-                                                ? <tr key={index} className={classes.currentstatus}>
-                                                    <td className={classes.dot}>&bull;</td>
-                                                    <td className={classes.tableRow}>
-                                                        <p>{process.Value.status}</p>
-                                                        <p>Transaction Id: {process.TxId}</p>
-                                                        <p>Time: {datetimeUtils.DisplayDateTimeFormat(process.Timestamp)}</p>
-                                                        {process.Value.shipper_phone
-                                                            ? <>
-                                                                <p>Shipper phone number: {process.Value.shipper_phone}</p>
-                                                                <p>Shipper name: {process.Value.shipper_name}</p>
-                                                            </>
-                                                            : <p>Shipper: Not Assign</p>
-                                                        }
-                                                    </td>
-                                                </tr>
-                                                : <tr key={index}>
-                                                    <td className={classes.dot}>&bull;</td>
-                                                    <td className={classes.tableRow}>
-                                                        <p>{process.Value.status}</p>
-                                                        <p>Transaction Id: {process.TxId}</p>
-                                                        <p>Time: {datetimeUtils.DisplayDateTimeFormat(process.Timestamp)}</p>
-                                                        <p>Shipper phone number: {process.Value.shipper_phone}</p>
-                                                    </td>
-                                                </tr>
-                                        })
-                                    }
-                                </tbody>
-                            </table> */}
                         </>
                     )
                 }
