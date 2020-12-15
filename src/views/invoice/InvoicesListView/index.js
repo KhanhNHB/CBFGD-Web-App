@@ -102,7 +102,7 @@ const Invoices = () => {
       <Container maxWidth={false}>
         {user && <Toolbar onHandleFileUpload={onHandleFileUpload} onHandleFileChange={onFileChange} user={user} />}
         <Box mt={3}>
-          {loadingModal && <LinearProgress variant="determinate" value={progress} />}
+          {loadingModal && <LinearProgress />}
           <Grid container spacing={3}>
             {(data && user) && <InvoicesList data={data} user={user} />}
           </Grid>

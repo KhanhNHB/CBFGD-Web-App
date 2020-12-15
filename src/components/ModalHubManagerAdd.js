@@ -22,7 +22,8 @@ import { actGetListHub, actLoadHubManager } from '../actions';
 
 const formSchema = Yup.object().shape({
     first_name: Yup.string().required("First name is not empty"),
-    last_name: Yup.string().required("First name is not empty"),
+    last_name: Yup.string().required("Last name is not empty"),
+    password: Yup.string().required("Password is not empty"),
     phone: Yup.string().required("Phone is not empty").min(7),
 });
 
@@ -71,12 +72,8 @@ const ModalHubManagerAdd = (props) => {
     const classes = useStyles();
     const dispatch = useDispatch();
     const hubLocation = useSelector(state => state.hub.listHub);
-    const [selectedHub, setSelectedHub] = useState(null);
-    const [first_name, setFirst_name] = useState('');
-    const [last_name, setLast_name] = useState('');
-    const [phone, setPhone] = useState('');
-    const [password, setPassword] = useState('');
     const [hub_id, setHub_id] = useState('');
+
     useEffect(() => {
         const fetchHub = async () => {
             API.get(`${HUB_ENDPOINT}`)
@@ -88,7 +85,8 @@ const ModalHubManagerAdd = (props) => {
                 });
         }
         fetchHub();
-    }, [])
+    }, [dispatch]);
+
     const hubmanager = {
         first_name: "",
         last_name: "",
@@ -96,6 +94,7 @@ const ModalHubManagerAdd = (props) => {
         password: "",
         hub_id: "",
     }
+
     const handleCreateHubManager = async (data) => {
         const isChanged = JSON.stringify(hubmanager) !== JSON.stringify(data);
         if (!isChanged) return;
@@ -114,6 +113,7 @@ const ModalHubManagerAdd = (props) => {
             alert(fetchData.message);
             return;
         }
+
         const responseHubManager = await API.get(HUB_MANAGER_ENDPOINT);
         if (responseHubManager.ok) {
             const fetchHubManager = await responseHubManager.json();
@@ -122,9 +122,10 @@ const ModalHubManagerAdd = (props) => {
 
         props.onCloseModal();
     };
+
     const handleChangeHub = (event) => {
         setHub_id(event.target.value);
-    }
+    };
 
     return (
         <div className={classes.container}>

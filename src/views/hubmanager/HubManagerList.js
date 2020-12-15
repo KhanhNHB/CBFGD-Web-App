@@ -15,14 +15,16 @@ import {
     Button,
     Modal,
     TableSortLabel,
-    CircularProgress
 } from '@material-ui/core';
 
-import API from '../../api/API';
 import { useDispatch } from 'react-redux';
 import { STATUS } from '../../common/index';
 import TableContainer from '@material-ui/core/TableContainer';
 import ModalHubManagerAdd from '../../components/ModalHubManagerAdd';
+import ModalAssignHub from './ModalAssignHub';
+import { ADMIN_ENDPOINT, HUB_MANAGER_ENDPOINT } from '../../api/endpoint';
+import API from '../../api/API';
+import { actLoadHubManager } from '../../actions';
 
 const columns = [
     { id: 'avatar', label: 'Avatar', minWidth: 120, align: 'left' },
@@ -30,7 +32,6 @@ const columns = [
     { id: 'first_name', label: 'First name', minWidth: 200, align: 'left' },
     { id: 'phone', label: 'Phone', minWidth: 200, align: 'left' },
     { id: 'status', label: 'Status', minWidth: 120, align: 'left' },
-    { id: 'hub', label: 'Hub', minWidth: 120, align: 'left' },
 ];
 
 const EnhancedTableHead = (props) => {
@@ -59,7 +60,7 @@ const EnhancedTableHead = (props) => {
                         </TableSortLabel>
                     </TableCell>
                 ))}
-
+                <TableCell align={"left"} style={{ minWidth: 200 }}>Hub</TableCell>
             </TableRow>
         </TableHead>
     );
@@ -101,20 +102,17 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-const HubManagerList = ({ className, hubmanagers, ...rest }) => {
+const HubManagerList = ({ className, hubmanagers, user, ...rest }) => {
     const rowsPerPage = 50;
     const classes = useStyles();
     const dispatch = useDispatch();
     const [page, setPage] = useState(0);
     const [order, setOrder] = useState('asc');
-    const [hubmanager, setHubmanager] = useState({});
     const [orderBy, setOrderBy] = useState('id');
     const [currentHub, setCurrentHub] = useState(null);
     const [modalOpenAdd, setModalOpenAdd] = useState(false);
-    const [visiableModal, setVisibleModal] = useState(false);
+    const [visiableModalHub, setVisibleModalHub] = useState(false);
     const [selectedHubManager, setSelectedHubManager] = useState(null);
-    const [visibleModalHubManagerDetail, setVisibleModalHubManagerDetail] = useState(false);
-    const [loadingModal, setLoadingModal] = useState(false);
 
     const openModalFormAdd = () => {
         setModalOpenAdd(true);
@@ -128,28 +126,19 @@ const HubManagerList = ({ className, hubmanagers, ...rest }) => {
         setPage(newPage);
     };
 
-    const handleSelectedRow = (shipperPhone, shipperHub) => {
-        setSelectedHubManager(shipperPhone);
-        setCurrentHub(shipperHub);
-        setVisibleModal(true);
+    const handleSelectedRow = (hubManagerId, hub) => {
+        setSelectedHubManager(hubManagerId);
+        setCurrentHub(hub);
+        setVisibleModalHub(true);
     }
 
-    const handleVisibleModal = () => {
-        setVisibleModal(true);
+    const handleVisibleModalHub = () => {
+        setVisibleModalHub(true);
     };
 
-    const handleInvisibleModal = () => {
-        setVisibleModal(false);
+    const handleInvisibleModalHub = () => {
+        setVisibleModalHub(false);
     };
-
-    const handleVisibleModalHubManagerDetail = () => {
-        setVisibleModalHubManagerDetail(true);
-    };
-
-    const handleInvisibleModalShipperDetail = () => {
-        setVisibleModalHubManagerDetail(false);
-    };
-
 
     const _rowStatus = (backgroundColor, value) => {
         return (<div style={{
@@ -182,15 +171,38 @@ const HubManagerList = ({ className, hubmanagers, ...rest }) => {
         }
     };
 
-    const handleClickHubManagerItem = (shipper) => {
-        setHubmanager(shipper);
-        handleVisibleModalHubManagerDetail();
-    };
-
     const handleRequestSort = (event, property) => {
         const isAsc = orderBy === property && order === 'asc';
         setOrder(isAsc ? 'desc' : 'asc');
         setOrderBy(property);
+    };
+
+    const handleAssignHub = async (hub_id) => {
+        const data = {
+            hub_manager_id: selectedHubManager,
+            hub_id: hub_id
+        };
+
+        const response = await API.patch(`${ADMIN_ENDPOINT}/${user.phone}/assign-hub-manager-to-hub`, data);
+        const patchData = await response.json();
+        if (patchData.message) {
+            alert(patchData.message);
+        } else {
+            API.get(`${HUB_MANAGER_ENDPOINT}`)
+                .then(async response => {
+                    if (response.ok) {
+                        const fetchData = await response.json();
+                        const hubManagerData = fetchData.data;
+                        if (hubManagerData.length > 0) {
+                            dispatch(actLoadHubManager(hubManagerData));
+                        }
+                    }
+                }).catch(err => {
+                    alert(err.message);
+                });
+        }
+        setSelectedHubManager(null);
+        handleInvisibleModalHub();
     };
 
     return (
@@ -231,13 +243,21 @@ const HubManagerList = ({ className, hubmanagers, ...rest }) => {
                                                         align={column.align}
                                                         id={index}
                                                         key={index}
-                                                        onClick={() => handleClickHubManagerItem(hubmanager)}
                                                     >
                                                         {value}
                                                     </TableCell>
                                                 );
                                             })}
-
+                                            <TableCell align={"left"}>
+                                                <Button
+                                                    color="primary"
+                                                    variant="contained"
+                                                    onClick={() => handleSelectedRow(hubmanager.id, hubmanager.hub ? hubmanager.hub.id : null)}
+                                                    style={{ color: 'white' }}
+                                                >
+                                                    {hubmanager.hub.name}
+                                                </Button>
+                                            </TableCell>
                                         </TableRow>
                                     );
                                 })}
@@ -257,6 +277,16 @@ const HubManagerList = ({ className, hubmanagers, ...rest }) => {
             <Modal open={modalOpenAdd}>
                 <div className={classes.modal}>
                     <ModalHubManagerAdd onCloseModal={onCloseModalAdd} />
+                </div>
+            </Modal>
+            <Modal open={visiableModalHub}>
+                <div className={classes.modal}>
+                    <ModalAssignHub
+                        onInvisibleModel={handleInvisibleModalHub}
+                        onVisibleModal={handleVisibleModalHub}
+                        onHandleAssign={handleAssignHub}
+                        onCurrentHub={currentHub}
+                    />
                 </div>
             </Modal>
         </div>

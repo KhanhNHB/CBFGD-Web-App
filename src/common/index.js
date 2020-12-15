@@ -4,7 +4,9 @@ export const GENDER = {
 }
 
 export const USER_TOKEN = 'USER_TOKEN';
+export const USER_DEVICE_TOKEN = 'USER_DEVICE_TOKEN';
 export const ACCESS_TOKEN_FABRIC = 'ACCESS_TOKEN_FABRIC';
+
 export const RESPONSE_STATUS = {
     FORBIDDEN: 403
 };

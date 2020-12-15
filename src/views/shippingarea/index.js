@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { Map, GoogleApiWrapper, Marker, Circle } from 'google-maps-react';
+import { Map, GoogleApiWrapper, Marker, Circle, InfoWindow } from 'google-maps-react';
 import API from '../../api/API';
 import { HUB_ENDPOINT, INVOICE_ENDPOINT, PROFILE_ENDPOINT } from '../../api/endpoint';
 import { useDispatch, useSelector } from 'react-redux';
-import { actGetListHub, actLoadInvoices, actLoadProfile } from '../../actions';
+import { actGetListHub, actLoadProfile } from '../../actions';
 import { Box, Button, Container, Modal } from '@material-ui/core';
 import ModalHubAdd from '../../components/ModalHubAdd';
-import { ACCESS_TOKEN_FABRIC, RESPONSE_STATUS, USER_TOKEN } from '../../common';
+import { ACCESS_TOKEN_FABRIC, RESPONSE_STATUS, USER_DEVICE_TOKEN, USER_TOKEN } from '../../common';
 import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router-dom';
+import formatPrice from '../../utils/formatPrice';
 
 export function MapContainer(props) {
   const dispatch = useDispatch();
@@ -19,13 +20,16 @@ export function MapContainer(props) {
   };
 
   const hubLocation = useSelector(state => state.hub.listHub);
-  const invoiceLocation = useSelector(state => state.invoice.invoices);
   const [openHub, setOpenHub] = useState(false);
   const [name, setName] = useState('');
   const [radius, setRadius] = useState('');
   const [status, setStatus] = useState('Available');
   const [id, setId] = useState('');
   const [user, setUser] = useState(null);
+  const [showingInfoWindow, setShowingInfoWindow] = useState(false);
+  const [activeMarker, setActiveMarker] = useState(null);
+  const [selectedPlace, setSelectedPlace] = useState(null);
+  const [invoiceLocation, setInvoiceLocation] = useState([]);
 
   const handleOpenHub = () => {
     setOpenHub(true);
@@ -59,12 +63,12 @@ export function MapContainer(props) {
       }
     };
 
-
     API.get(`${HUB_ENDPOINT}`)
       .then(async response => {
         if (response.status === RESPONSE_STATUS.FORBIDDEN) {
           Cookies.remove(USER_TOKEN);
           Cookies.remove(ACCESS_TOKEN_FABRIC);
+          Cookies.remove(USER_DEVICE_TOKEN);
           navigate('/', { replace: true });
         }
         if (response.ok) {
@@ -77,13 +81,13 @@ export function MapContainer(props) {
       .then(async response => {
         if (response.ok) {
           const fetchData = await response.json();
-          dispatch(actLoadInvoices(fetchData.data));
+          setInvoiceLocation(fetchData.data);
+          // dispatch(actLoadInvoices(fetchData.data));
         }
       });
 
     readCookie();
   }, [dispatch, navigate]);
-
 
   const onMarkerClick = (evt) => {
     setId(evt.id);
@@ -121,26 +125,31 @@ export function MapContainer(props) {
 
   const displayInvoiceMarkers = () => {
     const onMarkerClick = (props, marker, e) => {
+      setSelectedPlace(props.invoice);
+      setActiveMarker(marker);
+      setShowingInfoWindow(true);
       console.log(props);
     }
+
     if (invoiceLocation && invoiceLocation.length) {
       return invoiceLocation.map((invoice, index) => {
-        return <Marker
-          key={index}
-          position={{
-            lat: invoice.latitude,
-            lng: invoice.longitude
-          }}
-          icon={{
-            url: "https://res.cloudinary.com/dvehkdedj/image/upload/v1605980191/gain-icon-point-2_wyxrpw.png",
-            width: 5,
-            height: 5,
-            scaledSize: new window.google.maps.Size(15, 15)
-          }}
-          onClick={onMarkerClick}
-          name={invoice.address}
-          id={invoice.id}
-        />
+        return (
+          <Marker
+            key={index}
+            position={{
+              lat: invoice.latitude,
+              lng: invoice.longitude
+            }}
+            icon={{
+              url: "https://res.cloudinary.com/dvehkdedj/image/upload/v1605980191/gain-icon-point-2_wyxrpw.png",
+              width: 5,
+              height: 5,
+              scaledSize: new window.google.maps.Size(15, 15)
+            }}
+            onClick={onMarkerClick}
+            invoice={invoice}
+          />
+        );
       });
     }
   };
@@ -164,6 +173,28 @@ export function MapContainer(props) {
         style={mapStyles}
         initialCenter={{ lat: 10.8061536, lng: 106.6853458 }}
       >
+        <InfoWindow
+          marker={activeMarker}
+          visible={showingInfoWindow}>
+          <div>
+            {selectedPlace
+              ? (
+                <>
+                  <p style={{ fontSize: 16 }}><span style={{ fontWeight: 'bold' }}>ID: </span>{selectedPlace.id}</p>
+                  <p style={{ fontSize: 16 }}><span style={{ fontWeight: 'bold' }}>Code: </span>{selectedPlace.code}</p>
+                  <p style={{ fontSize: 16 }}><span style={{ fontWeight: 'bold' }}>Receiver Name: </span> {selectedPlace.receiver_name}</p>
+                  <p style={{ fontSize: 16 }}><span style={{ fontWeight: 'bold' }}>Receiver Phone: </span>{selectedPlace.receiver_phone}</p>
+                  <p style={{ fontSize: 16 }}><span style={{ fontWeight: 'bold' }}>Address: </span>{selectedPlace.address}</p>
+                  <p style={{ fontSize: 16 }}><span style={{ fontWeight: 'bold' }}>Total Quantity: </span>{selectedPlace.quantity}</p>
+                  <p style={{ fontSize: 16 }}><span style={{ fontWeight: 'bold' }}>Total Amount: </span>{formatPrice.format(selectedPlace.total_amount) + " VND"}</p>
+                  <p style={{ fontSize: 16 }}><span style={{ fontWeight: 'bold' }}>Shipping Fee: </span>{formatPrice.format(selectedPlace.shipping_fee) + " VND"}</p>
+                </>
+              )
+              : ''
+            }
+
+          </div>
+        </InfoWindow>
         {displayInvoiceMarkers()}
         {displayHubMarkers()}
         {displayCircles()}

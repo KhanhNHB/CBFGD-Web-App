@@ -49,20 +49,19 @@ const ModalAssignShipper = ({
     const [shippers, setShippers] = useState([]);
     const [selectedShipper, setSelectedShipper] = useState(onCurrentShipper);
 
-    const fetchShipper = async () => {
-        if (user && user.role === 'Hub_Manager') {
-            const response = await API.get(`${SHIPPER_ENDPOINT}?hub_manager_phone=${user.phone}`);
-            const json = await response.json();
-            if (!json.data.length) {
-                return;
-            }
-            setShippers(json.data);
-        }
-    };
-
     useEffect(() => {
+        const fetchShipper = async () => {
+            if (user && user.role === 'Hub_Manager') {
+                const response = await API.get(`${SHIPPER_ENDPOINT}?hub_manager_phone=${user.phone}`);
+                const json = await response.json();
+                if (!json.data.length) {
+                    return;
+                }
+                setShippers(json.data);
+            }
+        };
         fetchShipper();
-    }, []);
+    }, [user]);
 
     const handleChange = (event) => {
         setSelectedShipper(+event.target.value);

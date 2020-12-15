@@ -23,7 +23,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import API from '../../../api/API';
 import { actChangeKeyword, actLoadInvoices, actLoadProvider, actLoadProviderName } from '../../../actions/index';
 import { INVOICE_ENDPOINT, PROVIDER_ENDPOINT } from '../../../api/endpoint';
-import { ACCESS_TOKEN_FABRIC, RESPONSE_STATUS, USER_TOKEN } from '../../../common';
+import { ACCESS_TOKEN_FABRIC, RESPONSE_STATUS, USER_DEVICE_TOKEN, USER_TOKEN } from '../../../common';
 import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router-dom';
 
@@ -75,6 +75,7 @@ const Toolbar = ({ onHandleFileUpload, onHandleFileChange, user, ...rest }) => {
         if (response.status === RESPONSE_STATUS.FORBIDDEN) {
           Cookies.remove(USER_TOKEN);
           Cookies.remove(ACCESS_TOKEN_FABRIC);
+          Cookies.remove(USER_DEVICE_TOKEN);
           navigate('/', { replace: true });
         }
         if (response.ok) {

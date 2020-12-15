@@ -10,7 +10,7 @@ import * as Yup from 'yup';
 import API from '../../../api/API';
 import { ADMIN_ENDPOINT } from '../../../api/endpoint';
 import Cookies from 'js-cookie';
-import { ACCESS_TOKEN_FABRIC, USER_TOKEN } from '../../../common';
+import { ACCESS_TOKEN_FABRIC, USER_DEVICE_TOKEN, USER_TOKEN } from '../../../common';
 import { useNavigate } from 'react-router-dom';
 
 const useStyles = makeStyles((theme) => ({
@@ -68,6 +68,7 @@ const ProfileDetails = ({ user, className }) => {
 
     Cookies.remove(USER_TOKEN);
     Cookies.remove(ACCESS_TOKEN_FABRIC);
+    Cookies.remove(USER_DEVICE_TOKEN);
     navigate('/', { replace: true });
   }
 

@@ -46,6 +46,7 @@ const columns = [
   { id: 'to_date', label: 'To Date', minWidth: 200, align: 'left' },
   { id: 'created_at', label: 'Created At', minWidth: 200, align: 'left' },
   { id: 'status', label: 'Status Invoice', minWidth: 170, align: 'left' },
+  { id: 'current_delivery_status', label: 'Current Delivery Status', minWidth: 220, align: 'left' },
 ];
 
 function descendingComparator(a, b, orderBy) {
@@ -313,6 +314,22 @@ const InvoicesList = ({ data, user }) => {
         return (<img alt="Product" style={{ height: 60, width: 60 }} src={value} />);
       case 'created_at':
         return datetimeUtils.DisplayDateTimeFormat(value);
+      case 'current_delivery_status':
+        return (
+          <div style={{
+            width: 120,
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: '#00aff0',
+            color: 'white',
+            height: 36,
+            borderRadius: 3,
+            fontWeight: 'bold'
+          }}>
+            {value}
+          </div>
+        );
       default:
         return value;
     }
@@ -372,6 +389,7 @@ const InvoicesList = ({ data, user }) => {
                 <>
                   <TableBody>
                     {stableSort(filterData, getComparator(order, orderBy)).map((invoice, index) => {
+                      console.log(invoice);
                       return (
                         <TableRow hover role="checkbox" tabIndex={-1} key={invoice.id} className={invoice.is_assign && classes.assigned}>
                           {columns.map((column, index) => {
@@ -393,23 +411,39 @@ const InvoicesList = ({ data, user }) => {
                                 color="primary"
                                 variant="contained"
                                 onClick={() => handleSelectedRowForAssignHub(invoice.id, invoice.hub ? invoice.hub.id : null)}
-                                style={invoice.is_assign ? { backgroundColor: '#E69403', color: 'white' } : { color: 'white' }}
+                                style={invoice.is_assign
+                                  ? {
+                                    backgroundColor: invoice.available ? '#E69403' : '#aeb0b6',
+                                    color: 'white'
+                                  }
+                                  : { color: 'white' }
+                                }
+                                disabled={invoice.available ? false : true}
                               >
                                 {invoice.hub ? 'Assigned' : 'Assign'}
                               </Button>
                             </TableCell>
                             : null}
                           {(user && user.role === 'Hub_Manager')
-                            ? <TableCell key={index} align={"center"} >
-                              <Button
-                                color="primary"
-                                variant="contained"
-                                onClick={() => handleSelectedRowForAssignShipper(invoice.id, invoice.shipper_id ? invoice.shipper_id : null)}
-                                style={invoice.is_assign ? { backgroundColor: '#E69403', color: 'white' } : { color: 'white' }}
-                              >
-                                {invoice.is_assign ? 'Assigned' : 'Assign'}
-                              </Button>
-                            </TableCell>
+                            ? (
+                              <TableCell key={index} align={"center"} >
+                                <Button
+                                  color="primary"
+                                  variant="contained"
+                                  onClick={() => handleSelectedRowForAssignShipper(invoice.id, invoice.shipper_id ? invoice.shipper_id : null)}
+                                  style={invoice.is_assign
+                                    ? {
+                                      backgroundColor: invoice.available ? '#E69403' : '#aeb0b6',
+                                      color: 'white'
+                                    }
+                                    : { color: 'white' }
+                                  }
+                                  disabled={invoice.available ? false : true}
+                                >
+                                  {invoice.is_assign ? 'Assigned' : 'Assign'}
+                                </Button>
+                              </TableCell>
+                            )
                             : null
                           }
                         </TableRow>

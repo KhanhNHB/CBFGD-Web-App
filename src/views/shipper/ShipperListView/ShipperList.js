@@ -21,7 +21,7 @@ import {
 import API from '../../../api/API';
 import ModalAssign from './ModalAssign';
 import { useDispatch } from 'react-redux';
-import { ACCESS_TOKEN_FABRIC, RESPONSE_STATUS, STATUS, USER_TOKEN } from '../../../common/index';
+import { ACCESS_TOKEN_FABRIC, RESPONSE_STATUS, STATUS, USER_DEVICE_TOKEN, USER_TOKEN } from '../../../common/index';
 import { actLoadShipper } from '../../../actions';
 import TableContainer from '@material-ui/core/TableContainer';
 import ModalShipperAdd from '../../../components/ModalShipperAdd';
@@ -133,6 +133,7 @@ const ShipperList = ({ className, shippers, user, ...rest }) => {
           if (response.status === RESPONSE_STATUS.FORBIDDEN) {
             Cookies.remove(USER_TOKEN);
             Cookies.remove(ACCESS_TOKEN_FABRIC);
+            Cookies.remove(USER_DEVICE_TOKEN);
             navigate('/', { replace: true });
           }
           if (response.ok) {
