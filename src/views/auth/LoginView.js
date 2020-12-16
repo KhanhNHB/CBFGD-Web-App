@@ -13,11 +13,17 @@ import {
 } from '@material-ui/core';
 import Page from '../../components/Page';
 import API from '../../api/API';
-import { LOGIN_ENDPOINT, PROFILE_ENDPOINT } from '../../api/endpoint';
+import {
+  LOGIN_ENDPOINT,
+  PROFILE_ENDPOINT,
+  ADMIN_ENDPOINT,
+  HUB_MANAGER_ENDPOINT
+} from '../../api/endpoint';
 import { useDispatch } from 'react-redux';
 import { actLoadProfile, actSignIn } from '../../actions';
 import Cookies from 'js-cookie';
-import { ACCESS_TOKEN_FABRIC, USER_TOKEN } from '../../common';
+import { ACCESS_TOKEN_FABRIC, USER_DEVICE_TOKEN, USER_TOKEN } from '../../common';
+import { messaging } from '../../init-fcm';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -91,9 +97,33 @@ const LoginView = () => {
       return;
     }
 
-    setIsLoading(false);
+    const initPermission = async () => {
+      messaging.requestPermission()
+        .then(async function () {
+          const token = await messaging.getToken();
+          if (token) {
+            const data = {
+              token: token
+            };
+
+            const userData = json.data;
+            if (userData.user && userData.user.role === 'Admin') {
+              await API.post(`${ADMIN_ENDPOINT}/${userData.user.id}/token`, data);
+            } else if (userData.user && userData.user.role === 'Hub_Manager') {
+              await API.post(`${HUB_MANAGER_ENDPOINT}/${userData.user.id}/token`, data);
+            }
+            Cookies.set(USER_DEVICE_TOKEN, token);
+          }
+        })
+        .catch(function (err) {
+          console.log("Unable to get permission to notify.", err);
+        });
+    }
+
+    initPermission();
 
     dispatch(actLoadProfile(json.data.user));
+    setIsLoading(false);
 
     Cookies.set(USER_TOKEN, json.data.access_token);
     Cookies.set(ACCESS_TOKEN_FABRIC, json.data.user.access_token_fabric);

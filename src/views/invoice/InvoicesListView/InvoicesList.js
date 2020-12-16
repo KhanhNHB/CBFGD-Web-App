@@ -144,9 +144,6 @@ const useStyles = makeStyles((theme) => ({
       outline: 'none'
     },
   },
-  assigned: {
-    backgroundColor: 'whitesmoke',
-  }
 }));
 
 const InvoicesList = ({ data, user }) => {
@@ -389,9 +386,14 @@ const InvoicesList = ({ data, user }) => {
                 <>
                   <TableBody>
                     {stableSort(filterData, getComparator(order, orderBy)).map((invoice, index) => {
-                      console.log(invoice);
                       return (
-                        <TableRow hover role="checkbox" tabIndex={-1} key={invoice.id} className={invoice.is_assign && classes.assigned}>
+                        <TableRow
+                          hover
+                          role="checkbox"
+                          tabIndex={-1}
+                          key={invoice.id}
+                          style={{ backgroundColor: invoice.is_assign && 'whitesmoke' }}
+                        >
                           {columns.map((column, index) => {
                             const value = _hanleRowTableData(column.id, invoice[column.id]);
                             return (
