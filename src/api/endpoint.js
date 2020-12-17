@@ -1,5 +1,5 @@
 // API AWS
-export const BASE_URL = "http://18.141.214.35:8090";
+export const BASE_URL = "https://aws.api.gds.cloudns.asia";
 // API Google
 // export const BASE_URL = "http://34.126.70.182:8090";
 // export const BASE_URL = "http://localhost:8090";
