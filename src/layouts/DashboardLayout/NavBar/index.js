@@ -15,7 +15,7 @@ import {
   User as UserIcon,
   Users as UsersIcon,
   MapPin as MapIcon,
-  Octagon as Octagon,
+  Octagon,
 } from 'react-feather';
 import NavItem from './NavItem';
 import { useSelector } from 'react-redux';
