@@ -126,13 +126,7 @@ function QontoStepIcon(props) {
 }
 
 QontoStepIcon.propTypes = {
-    /**
-     * Whether this step is active.
-     */
     active: PropTypes.bool,
-    /**
-     * Mark the step as completed. Is passed to child components.
-     */
     completed: PropTypes.bool,
 };
 
@@ -210,6 +204,7 @@ const ModalInvoiceDetail = (props) => {
                     </>
                 );
             }
+            return null;
         });
     }
 
@@ -290,7 +285,6 @@ const ModalInvoiceDetail = (props) => {
                     )
                 }
             </div>
-
         </div >
     );
 };

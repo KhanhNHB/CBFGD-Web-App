@@ -55,7 +55,7 @@ const HubManagerListView = () => {
         if (profile && profile.role === 'Hub_Manager') {
             navigate('/app/invoices-list', { replace: true });
         }
-    }, [profile]);
+    }, [profile, navigate]);
 
     useEffect(() => {
         setLoadingModal(true);

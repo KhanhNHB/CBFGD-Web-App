@@ -46,7 +46,6 @@ const Invoices = () => {
   const selectedProvider = useSelector(state => state.providers.provider_name);
   const [fileSelected, setFileSelected] = useState(null);
   const [loadingModal, setLoadingModal] = useState(false);
-  const [progress, setProgress] = useState(0);
   const user = useSelector(state => state.profile.profile);
 
   const onHandleFileUpload = async () => {
@@ -62,11 +61,7 @@ const Invoices = () => {
       headers: {
         'Authorization': 'Bearer ' + Cookies.get(USER_TOKEN),
       },
-      onUploadProgress: (progressEvent) => {
-        const { loaded, total } = progressEvent;
-        let percent = Math.floor(+loaded / +total * 100);
-        setProgress(percent);
-      }
+      onUploadProgress: (progressEvent) => { }
     });
 
     if (response.status === 201) {
