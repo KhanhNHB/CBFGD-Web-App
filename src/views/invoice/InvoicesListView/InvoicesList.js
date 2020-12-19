@@ -24,7 +24,7 @@ import { ADMIN_ENDPOINT, HUB_MANAGER_ENDPOINT, INVOICE_ENDPOINT } from '../../..
 import { INVOICE_STATUS, INVOICE_PRIORITY } from '../../../common';
 import ModalInvoiceDetail from '../../../components/ModalInvoiceDetail';
 import { useSelector, useDispatch } from 'react-redux';
-import { actLoadInvoices } from '../../../actions/index';
+import { actLoadInvoices, actLoadProviderName } from '../../../actions/index';
 import ModalAssignHub from './ModalAssignHub';
 import ModalAssignShipper from './ModalAssignShipper';
 
@@ -181,7 +181,13 @@ const InvoicesList = ({ data, user }) => {
   const handleChangePage = async (event, newPage) => {
     setLoadingModal(true);
     if (provider_name !== 'NONE') {
-      const response = await API.get(INVOICE_ENDPOINT + `/providers/${provider_name}?page=${newPage + 1}&limit=50`);
+      let query = null;
+      if (user && user.role === 'Admin') {
+        query = 'hub_id=none';
+      } else {
+        query = `hub_id=${user.hub.id}`
+      }
+      const response = await API.get(INVOICE_ENDPOINT + `/providers/${provider_name}?page=${newPage + 1}&limit=50&${query}`);
       if (response.ok) {
         const fetchData = await response.json();
         const dataByProvider = { invoices: fetchData.data.items, meta: fetchData.data.meta };
@@ -189,7 +195,13 @@ const InvoicesList = ({ data, user }) => {
         setPage(+newPage);
       }
     } else {
-      const response = await API.get(INVOICE_ENDPOINT + `?page=${newPage + 1}&limit=50`);
+      let query = null;
+      if (user && user.role === 'Admin') {
+        query = 'hub_id=none';
+      } else {
+        query = `hub_id=${user.hub.id}`
+      }
+      const response = await API.get(INVOICE_ENDPOINT + `?page=${newPage + 1}&limit=50&${query}`);
       if (response.ok) {
         const fetchData = await response.json();
         const data = { invoices: fetchData.data.items, meta: fetchData.data.meta };
@@ -244,6 +256,17 @@ const InvoicesList = ({ data, user }) => {
       invoice_id: selectedInvoice
     };
     const response = await API.patch(`${HUB_MANAGER_ENDPOINT}/${user.phone}/assign-shipper`, dataAssign);
+    if (response.ok) {
+
+      let query = `hub_id=${user.hub.id}`;
+      const response = await API.get(INVOICE_ENDPOINT + `?page=${1}&limit=50&${query}`);
+      if (response.ok) {
+        const fetchData = await response.json();
+        const data = { invoices: fetchData.data.items, meta: fetchData.data.meta };
+        dispatch(actLoadProviderName("NONE"));
+        dispatch(actLoadInvoices(data));
+      }
+    }
     const json = await response.json();
 
     setLoadingModal(false);
@@ -343,19 +366,21 @@ const InvoicesList = ({ data, user }) => {
       invoice_id: selectedInvoice,
       hub_id: +hub_id
     };
-    await API.patch(`${ADMIN_ENDPOINT}/${user.phone}/assign-invoice-to-hub`, data);
-
-    API.get(INVOICE_ENDPOINT + '?page=1&limit=50&hub_id=none')
-      .then(async response => {
-        if (response.ok) {
-          const fetchData = await response.json();
-          const data = { invoices: fetchData.data.items, meta: fetchData.data.meta };
-          dispatch(actLoadInvoices(data));
+    await API.patch(`${ADMIN_ENDPOINT}/${user.phone}/assign-invoice-to-hub`, data)
+      .then(res => {
+        if (res.ok) {
+          API.get(INVOICE_ENDPOINT + '?page=1&limit=50&hub_id=none')
+            .then(async response => {
+              if (response.ok) {
+                const fetchData = await response.json();
+                const data = { invoices: fetchData.data.items, meta: fetchData.data.meta };
+                dispatch(actLoadInvoices(data));
+              }
+              setLoadingModal(false);
+            });
         }
-        setLoadingModal(false);
       });
 
-    // setSelectedShipper(null);
     setSelectedInvoice(null);
     handleInvisibleModalAssignHub();
   };
