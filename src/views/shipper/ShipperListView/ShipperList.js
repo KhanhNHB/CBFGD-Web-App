@@ -21,7 +21,13 @@ import {
 import API from '../../../api/API';
 import ModalAssign from './ModalAssign';
 import { useDispatch } from 'react-redux';
-import { ACCESS_TOKEN_FABRIC, RESPONSE_STATUS, STATUS, USER_DEVICE_TOKEN, USER_TOKEN } from '../../../common/index';
+import {
+  ACCESS_TOKEN_FABRIC,
+  RESPONSE_STATUS,
+  STATUS,
+  USER_DEVICE_TOKEN,
+  USER_TOKEN
+} from '../../../common/index';
 import { actLoadShipper } from '../../../actions';
 import TableContainer from '@material-ui/core/TableContainer';
 import ModalShipperAdd from '../../../components/ModalShipperAdd';
@@ -275,39 +281,42 @@ const ShipperList = ({ className, shippers, user, ...rest }) => {
                 onRequestSort={handleRequestSort}
               />
               <TableBody>
-                {shippers.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((shipper, index) => {
-                  return (
-                    <TableRow hover role="checkbox" tabIndex={-1} key={shipper.phone}>
-                      {columns.map((column, index) => {
-                        const value = _hanleRowTableData(column.id, shipper[column.id]);
-                        return (
-                          <TableCell
-                            align={column.align}
-                            id={index}
-                            key={index}
-                            onClick={() => handleClickShipperItem(shipper)}
-                          >
-                            {value}
-                          </TableCell>
-                        );
-                      })}
-                      <TableCell align={"left"}>
-                        {(user && user.role === 'Admin')
-                          ?
-                          <Button
-                            color="primary"
-                            variant="contained"
-                            onClick={() => handleSelectedRow(shipper.phone, shipper.hub ? shipper.hub.id : null)}
-                            style={{ color: 'white' }}
-                          >
-                            {shipper.hub ? 'Assigned' : 'Assign'}
-                          </Button>
-                          : <p>{shipper.hub ? shipper.hub.name : ''}</p>
-                        }
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
+                {(shippers && shippers.length)
+                  ? shippers.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((shipper, index) => {
+                    return (
+                      <TableRow hover role="checkbox" tabIndex={-1} key={shipper.phone}>
+                        {columns.map((column, index) => {
+                          const value = _hanleRowTableData(column.id, shipper[column.id]);
+                          return (
+                            <TableCell
+                              align={column.align}
+                              id={index}
+                              key={index}
+                              onClick={() => handleClickShipperItem(shipper)}
+                            >
+                              {value}
+                            </TableCell>
+                          );
+                        })}
+                        <TableCell align={"left"}>
+                          {(user && user.role === 'Admin')
+                            ?
+                            <Button
+                              color="primary"
+                              variant="contained"
+                              onClick={() => handleSelectedRow(shipper.phone, shipper.hub ? shipper.hub.id : null)}
+                              style={{ color: 'white' }}
+                            >
+                              {shipper.hub ? 'Assigned' : 'Assign'}
+                            </Button>
+                            : <p>{shipper.hub ? shipper.hub.name : ''}</p>
+                          }
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
+                  : null
+                }
               </TableBody>
             </Table>
           </TableContainer>

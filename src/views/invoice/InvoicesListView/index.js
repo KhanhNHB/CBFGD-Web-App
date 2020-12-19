@@ -61,7 +61,6 @@ const Invoices = () => {
       headers: {
         'Authorization': 'Bearer ' + Cookies.get(USER_TOKEN),
       },
-      onUploadProgress: (progressEvent) => { }
     });
 
     if (response.status === 201) {
