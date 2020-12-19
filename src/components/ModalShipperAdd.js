@@ -124,7 +124,6 @@ const ModalShipperAdd = (props) => {
                     handleBlur,
                     touched,
                 }) => {
-                    console.log(values.DOB);
                     return (
                         <form onSubmit={handleSubmit} autoComplete="off">
                             <div className={classes.detailHeader}>

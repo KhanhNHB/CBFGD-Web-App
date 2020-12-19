@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     makeStyles,
     Table,
@@ -6,28 +6,45 @@ import {
     TableCell,
     TableContainer,
     TableHead,
-    TableRow
+    TableRow,
+    CircularProgress
 } from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
 import datetimeUtils from '../utils/datetimeUtils';
 import { withStyles } from '@material-ui/styles';
+import {
+    MuiPickersUtilsProvider,
+    KeyboardDatePicker,
+} from '@material-ui/pickers';
+import DateFnsUtils from '@date-io/date-fns';
+import 'date-fns';
+import Bags from './Bag';
+import { SHIPPER_ENDPOINT } from '../api/endpoint';
+import API from '../api/API';
 
 const useStyles = makeStyles((theme) => ({
     container: {
         width: "100%",
-        height: "80%",
+        height: "90%",
         position: "absolute",
-        marginTop: "10%",
-        left: "50%",
-        top: "50%",
-        transform: "translate(-50%, -50%)",
+        top: 10,
+        left: 0,
+        right: 0,
         padding: "10px",
     },
-    wrapperLeft: {
+    wrapperDetail: {
         backgroundColor: "white",
         width: "100%",
-        height: "45%",
-        float: "left",
+        height: "30%",
+        overflowY: "auto",
+        borderRight: "1px solid #e0e0e0",
+        borderBottom: "3px solid #e0e0e0",
+        borderBottomLeftRadius: "5px",
+    },
+    wrapperBag: {
+        backgroundColor: "white",
+        width: "100%",
+        height: "70%",
         overflowY: "auto",
         borderRight: "1px solid #e0e0e0",
         borderBottom: "3px solid #e0e0e0",
@@ -61,6 +78,7 @@ const useStyles = makeStyles((theme) => ({
         width: 150,
     }
 }));
+
 const StyledTableCell = withStyles((theme) => ({
     head: {
         backgroundColor: 'lightgrey',
@@ -70,6 +88,7 @@ const StyledTableCell = withStyles((theme) => ({
         fontSize: 14,
     },
 }))(TableCell);
+
 const StyledTableRow = withStyles((theme) => ({
     root: {
         '&:nth-of-type(odd)': {
@@ -77,15 +96,44 @@ const StyledTableRow = withStyles((theme) => ({
         },
     },
 }))(TableRow);
+
 const ModalShipperDetail = (props) => {
     const classes = useStyles();
     const { shipper } = props;
+    const [selectedDate, setSelectedDate] = useState(new Date());
+    const [bag, setBag] = useState(null);
+    const [loading, setLoading] = useState(false);
+
+    const fetchInvoiceShipperByAssignedAt = async (date) => {
+
+        const response = await API.get(`${SHIPPER_ENDPOINT}/${shipper.phone}/invoices?assigned_at=${date}`);
+        const fetchData = await response.json();
+        if (response.ok) {
+            setBag(fetchData.data);
+        } else {
+            setBag({
+                delivery_status: []
+            });
+        }
+    };
+
+    useEffect(() => {
+        setLoading(true);
+        fetchInvoiceShipperByAssignedAt(selectedDate);
+        setLoading(false);
+    }, []);
+
+    const onHandleDateChange = (date) => {
+        setSelectedDate(date);
+        fetchInvoiceShipperByAssignedAt(datetimeUtils.DisplayDatePicker(new Date(date)));
+    };
+
     return (
         <div className={classes.container}>
             <div className={classes.detailHeader}>
                 <CloseIcon className={classes.closeBtn} onClick={() => props.onCloseModal()} />
             </div>
-            <div className={classes.wrapperLeft}>
+            <div className={classes.wrapperDetail}>
                 <TableContainer>
                     <Table aria-label="customized table" >
                         <TableHead title="Shipper Detail" style={{ color: 'white' }}>
@@ -140,6 +188,52 @@ const ModalShipperDetail = (props) => {
                 </Container> */}
             </div>
 
+            <div className={classes.wrapperBag}>
+                {loading
+                    ? <div style={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        marginTop: 10,
+                    }}>
+                        <CircularProgress />
+                    </div>
+                    :
+                    <>
+                        <div style={{
+                            display: 'flex',
+                            flexDirection: 'row',
+                            justifyContent: 'start',
+                            alignItems: 'flex-end',
+                            marginLeft: 10
+                        }}>
+                            <MuiPickersUtilsProvider utils={DateFnsUtils}>
+                                <KeyboardDatePicker
+                                    disableToolbar
+                                    variant="inline"
+                                    format="MM/dd/yyyy"
+                                    margin="normal"
+                                    id="Date"
+                                    label="Date"
+                                    value={selectedDate}
+                                    onChange={onHandleDateChange}
+                                    KeyboardButtonProps={{
+                                        'aria-label': 'change date',
+                                    }}
+                                />
+                            </MuiPickersUtilsProvider>
+                            <div style={{
+                                fontWeight: 'bold',
+                                marginLeft: 10,
+                                marginBottom: 15
+                            }}>
+                                Total Invoice: {(bag && bag.delivery_status.length) ? bag.delivery_status.length : 0}
+                            </div>
+                        </div>
+                        {(bag && <Bags bag={bag} />)}
+                    </>
+                }
+            </div>
         </div>
     );
 };

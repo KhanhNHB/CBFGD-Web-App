@@ -20,6 +20,6 @@ export const DELIVERIES_STATUS_ENDPOINT = `${BASE_URL}/deliveries-status`;
 // API AWS
 export const BASE_URL_FABRIC = `https://aws.api.fabric.gds.cloudns.asia`;
 // API IPv.4
-// export const BASE_URL_FABRIC = `localhost:4000`;
+// export const BASE_URL_FABRIC = "http://10.1.108.111:4000";
 // export const BASE_URL_FABRIC = `http://192.168.1.5:4000`;
 // export const BASE_URL_FABRIC = `10.1.108.111:4000`;
