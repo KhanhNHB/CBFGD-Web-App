@@ -1,23 +1,28 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   Box,
+  Button,
   Container,
   Grid,
   makeStyles,
+  Slide,
+  Snackbar,
 } from '@material-ui/core';
 import Page from '../../../components/Page';
 import Toolbar from './Toolbar';
 import InvoicesList from './InvoicesList';
 import axios from 'axios';
 import {
-  INVOICE_ENDPOINT
+  INVOICE_ENDPOINT, PROVIDER_ENDPOINT
 } from '../../../api/endpoint';
 import Cookies from 'js-cookie';
 import API from '../../../api/API';
-import { USER_TOKEN } from '../../../common';
-import { actLoadInvoices } from '../../../actions';
+import { ACCESS_TOKEN_FABRIC, RESPONSE_STATUS, USER_DEVICE_TOKEN, USER_TOKEN } from '../../../common';
+import { actLoadInvoices, actLoadProvider, actLoadProviderName } from '../../../actions';
 import { useDispatch, useSelector } from 'react-redux';
 import LinearProgress from '@material-ui/core/LinearProgress';
+import MuiAlert from '@material-ui/lab/Alert';
+import { useNavigate } from 'react-router';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -39,16 +44,22 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+function Alert(props) {
+  return <MuiAlert elevation={6} variant="filled" {...props} />;
+}
+
 const Invoices = () => {
   const classes = useStyles();
   const dispatch = useDispatch();
   const data = useSelector(state => state.invoice.invoices);
-  const selectedProvider = useSelector(state => state.providers.provider_name);
   const [fileSelected, setFileSelected] = useState(null);
   const [loadingModal, setLoadingModal] = useState(false);
   const user = useSelector(state => state.profile.profile);
+  const navigate = useNavigate();
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const fileInputRef = useRef();
 
-  const onHandleFileUpload = async () => {
+  const onHandleFileUpload = () => {
     if (!fileSelected) {
       alert('Please choose file!');
       return;
@@ -57,36 +68,44 @@ const Invoices = () => {
 
     const formData = new FormData();
     formData.append("file", fileSelected.fileSelected);
-    const response = await axios.post(INVOICE_ENDPOINT, formData, {
+    axios.post(INVOICE_ENDPOINT, formData, {
       headers: {
-	'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Origin': '*',
         'Authorization': 'Bearer ' + Cookies.get(USER_TOKEN),
       },
     }).then(async response => {
-//	console.log(response);
-//	if (response.status === 201) {
-	        if (selectedProvider === 'NONE') {
-        	  const responseInvoice = await API.get(`${INVOICE_ENDPOINT}?page=1&limit=50&hub_id=none`);
+      if (response.status === 201) {
+        setOpenSnackbar(true);
 
-	          if (responseInvoice.ok) {
-	            const fetchInvoice = await responseInvoice.json();
-       		    const dataInvoice = { invoices: fetchInvoice.data.items, meta: fetchInvoice.data.meta };
-	            dispatch(actLoadInvoices(dataInvoice));
-       	  	 }
-	        } else {
-        	  const responseProvider = await API.get(`${INVOICE_ENDPOINT}/providers/${selectedProvider}?page=1&limit=50&hub_id=none`);
-	          if (responseProvider.ok) {
-        	    const fetchProvider = await responseProvider.json();
-	            const dataProvider = { invoices: fetchProvider.data.items, meta: fetchProvider.data.meta };
-	            dispatch(actLoadInvoices(dataProvider));
-        	  }
-	        }
-//	      }
+        API.get(PROVIDER_ENDPOINT)
+          .then(async response => {
+            if (response.status === RESPONSE_STATUS.FORBIDDEN) {
+              Cookies.remove(USER_TOKEN);
+              Cookies.remove(ACCESS_TOKEN_FABRIC);
+              Cookies.remove(USER_DEVICE_TOKEN);
+              navigate('/', { replace: true });
+            }
+            if (response.ok) {
+              const fetchData = await response.json();
+              const providersData = fetchData.data;
+              if (providersData.length > 0) {
+                dispatch(actLoadProvider(providersData));
+                dispatch(actLoadProviderName(`NONE`));
+              }
+            }
+          });
+
+        const responseInvoice = await API.get(`${INVOICE_ENDPOINT}?page=1&limit=50&hub_id=none`);
+
+        if (responseInvoice.ok) {
+          const fetchInvoice = await responseInvoice.json();
+          const dataInvoice = { invoices: fetchInvoice.data.items, meta: fetchInvoice.data.meta };
+          dispatch(actLoadInvoices(dataInvoice));
+        }
+      }
       setLoadingModal(false);
       setFileSelected(null);
     }).catch(err => {
-	console.log('----------');
-	console.log(err);
     });
   };
 
@@ -94,6 +113,13 @@ const Invoices = () => {
     const file = e.target.files[0];
     setFileSelected({ fileSelected: file });
   }
+
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setOpenSnackbar(false);
+  };
 
   return (
     <Page
@@ -108,9 +134,20 @@ const Invoices = () => {
           </Grid>
         </Box>
       </Container>
-      {/* <Modal open={loadingModal} className={classes.loadingModal}>
-        <CircularProgress />
-      </Modal> */}
+      <Snackbar
+        anchorOrigin={{
+          vertical: 'top',
+          horizontal: 'right'
+        }}
+        open={openSnackbar}
+        autoHideDuration={3000}
+        onClose={handleCloseSnackbar}
+        message={`Import Sucess!`}
+      >
+        <Alert onClose={handleCloseSnackbar} severity='success'>
+          Import Sucess!
+        </Alert>
+      </Snackbar>
     </Page>
   );
 };

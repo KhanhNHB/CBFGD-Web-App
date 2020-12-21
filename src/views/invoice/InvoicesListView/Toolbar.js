@@ -144,7 +144,10 @@ const Toolbar = ({ onHandleFileUpload, onHandleFileChange, user, ...rest }) => {
           display="flex"
           justifyContent="flex-end"
         >
-          <Input type="file" onChange={(e) => onHandleFileChange(e)} />
+          <Input type="file" onChange={(e) => {
+            onHandleFileChange(e);
+            e.target.value = null;
+          }} />
           <Button
             className={classes.importButton}
             onClick={(e) => onHandleFileUpload(e)}
