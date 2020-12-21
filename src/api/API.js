@@ -7,7 +7,7 @@ export default {
             method: 'GET',
             headers: {
                 Accept: 'application/json',
-		'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Origin': '*',
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer ' + Cookies.get(USER_TOKEN)
             }
@@ -18,7 +18,7 @@ export default {
             method: 'POST',
             headers: {
                 Accept: 'application/json',
-		'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Origin': '*',
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer ' + Cookies.get(USER_TOKEN)
             },
@@ -41,7 +41,7 @@ export default {
             method: 'PATCH',
             headers: {
                 Accept: 'application/json',
-		'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Origin': '*',
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer ' + Cookies.get(USER_TOKEN)
             },
@@ -52,7 +52,7 @@ export default {
         return await fetch(url, {
             method: 'POST',
             headers: {
-		'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Origin': '*',
                 'Content-Type': 'multipart/form-data'
             },
             body: JSON.stringify(body),
