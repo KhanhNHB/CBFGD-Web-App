@@ -451,12 +451,12 @@ const InvoicesList = ({ data, user }) => {
                                 onClick={() => handleSelectedRowForAssignHub(invoice.id, invoice.hub ? invoice.hub.id : null)}
                                 style={invoice.is_assign
                                   ? {
-                                    backgroundColor: invoice.available ? '#E69403' : '#aeb0b6',
+                                    backgroundColor: (invoice.available && invoice.status === 'ACTIVE') ? '#E69403' : '#aeb0b6',
                                     color: 'white'
                                   }
                                   : { color: 'white' }
                                 }
-                                disabled={invoice.available ? false : true}
+                                disabled={(invoice.available && invoice.status === 'ACTIVE') ? false : true}
                               >
                                 {invoice.hub ? 'Assigned' : 'Assign'}
                               </Button>
@@ -471,12 +471,12 @@ const InvoicesList = ({ data, user }) => {
                                   onClick={() => handleSelectedRowForAssignShipper(invoice.id, invoice.shipper_id ? invoice.shipper_id : null)}
                                   style={invoice.is_assign
                                     ? {
-                                      backgroundColor: invoice.available ? '#E69403' : '#aeb0b6',
+                                      backgroundColor: (invoice.available && invoice.status === 'ACTIVE') ? '#E69403' : '#aeb0b6',
                                       color: 'white'
                                     }
                                     : { color: 'white' }
                                   }
-                                  disabled={invoice.available ? false : true}
+                                  disabled={(invoice.available && invoice.status === 'ACTIVE') ? false : true}
                                 >
                                   {invoice.is_assign ? 'Assigned' : 'Assign'}
                                 </Button>
