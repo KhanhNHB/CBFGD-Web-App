@@ -62,9 +62,9 @@ const Toolbar = ({ onHandleFileUpload, onHandleFileChange, user, ...rest }) => {
   const selectedProvider = useSelector(state => state.providers.provider_name);
   const selectAssignHubStatus = useSelector(state => state.assignHubStatus.selectAssignHubStatus);
 
-  useEffect(() => {
-    dispatch(actLoadProviderName(selectedProvider));
-  }, [dispatch, selectedProvider]);
+  // useEffect(() => {
+  //   dispatch(actLoadProviderName(selectedProvider));
+  // }, [dispatch, selectedProvider]);
 
   const handleChangeProvider = (event) => {
     dispatch(actLoadProviderName(event.target.value));

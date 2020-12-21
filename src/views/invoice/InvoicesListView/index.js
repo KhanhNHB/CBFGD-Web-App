@@ -1,11 +1,9 @@
 import React, { useRef, useState } from 'react';
 import {
   Box,
-  Button,
   Container,
   Grid,
   makeStyles,
-  Slide,
   Snackbar,
 } from '@material-ui/core';
 import Page from '../../../components/Page';
@@ -57,7 +55,6 @@ const Invoices = () => {
   const user = useSelector(state => state.profile.profile);
   const navigate = useNavigate();
   const [openSnackbar, setOpenSnackbar] = useState(false);
-  const fileInputRef = useRef();
 
   const onHandleFileUpload = () => {
     if (!fileSelected) {
@@ -105,7 +102,36 @@ const Invoices = () => {
       }
       setLoadingModal(false);
       setFileSelected(null);
-    }).catch(err => {
+    }).catch(async err => {
+      setOpenSnackbar(true);
+
+      API.get(PROVIDER_ENDPOINT)
+        .then(async response => {
+          if (response.status === RESPONSE_STATUS.FORBIDDEN) {
+            Cookies.remove(USER_TOKEN);
+            Cookies.remove(ACCESS_TOKEN_FABRIC);
+            Cookies.remove(USER_DEVICE_TOKEN);
+            navigate('/', { replace: true });
+          }
+          if (response.ok) {
+            const fetchData = await response.json();
+            const providersData = fetchData.data;
+            if (providersData.length > 0) {
+              dispatch(actLoadProvider(providersData));
+              dispatch(actLoadProviderName(`NONE`));
+            }
+          }
+        });
+
+      const responseInvoice = await API.get(`${INVOICE_ENDPOINT}?page=1&limit=50&hub_id=none`);
+
+      if (responseInvoice.ok) {
+        const fetchInvoice = await responseInvoice.json();
+        const dataInvoice = { invoices: fetchInvoice.data.items, meta: fetchInvoice.data.meta };
+        dispatch(actLoadInvoices(dataInvoice));
+      }
+      setLoadingModal(false);
+      setFileSelected(null);
     });
   };
 
