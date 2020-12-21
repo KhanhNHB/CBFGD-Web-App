@@ -87,4 +87,11 @@ export const actLoadHubManager = (hubmanger) => {
         type: types.LOAD_HUB_MANAGER,
         hubmanger,
     }
-}
+};
+
+export const actLoadAssignStatus = (selectAssignHubStatus) => {
+    return {
+        type: types.CHANGE_ASSIGN_HUB_STATUS,
+        selectAssignHubStatus,
+    }
+};
