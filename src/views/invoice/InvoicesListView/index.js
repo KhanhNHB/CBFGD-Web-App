@@ -59,29 +59,35 @@ const Invoices = () => {
     formData.append("file", fileSelected.fileSelected);
     const response = await axios.post(INVOICE_ENDPOINT, formData, {
       headers: {
+	'Access-Control-Allow-Origin': '*',
         'Authorization': 'Bearer ' + Cookies.get(USER_TOKEN),
       },
-    });
+    }).then(async response => {
+//	console.log(response);
+//	if (response.status === 201) {
+	        if (selectedProvider === 'NONE') {
+        	  const responseInvoice = await API.get(`${INVOICE_ENDPOINT}?page=1&limit=50&hub_id=none`);
 
-    if (response.status === 201) {
-      if (selectedProvider === 'NONE') {
-        const responseInvoice = await API.get(`${INVOICE_ENDPOINT}?page=1&limit=50&hub_id=none`);
-        if (responseInvoice.ok) {
-          const fetchInvoice = await responseInvoice.json();
-          const dataInvoice = { invoices: fetchInvoice.data.items, meta: fetchInvoice.data.meta };
-          dispatch(actLoadInvoices(dataInvoice));
-        }
-      } else {
-        const responseProvider = await API.get(`${INVOICE_ENDPOINT}/providers/${selectedProvider}?page=1&limit=50&hub_id=none`);
-        if (responseProvider.ok) {
-          const fetchProvider = await responseProvider.json();
-          const dataProvider = { invoices: fetchProvider.data.items, meta: fetchProvider.data.meta };
-          dispatch(actLoadInvoices(dataProvider));
-        }
-      }
-    }
-    setLoadingModal(false);
-    setFileSelected(null);
+	          if (responseInvoice.ok) {
+	            const fetchInvoice = await responseInvoice.json();
+       		    const dataInvoice = { invoices: fetchInvoice.data.items, meta: fetchInvoice.data.meta };
+	            dispatch(actLoadInvoices(dataInvoice));
+       	  	 }
+	        } else {
+        	  const responseProvider = await API.get(`${INVOICE_ENDPOINT}/providers/${selectedProvider}?page=1&limit=50&hub_id=none`);
+	          if (responseProvider.ok) {
+        	    const fetchProvider = await responseProvider.json();
+	            const dataProvider = { invoices: fetchProvider.data.items, meta: fetchProvider.data.meta };
+	            dispatch(actLoadInvoices(dataProvider));
+        	  }
+	        }
+//	      }
+      setLoadingModal(false);
+      setFileSelected(null);
+    }).catch(err => {
+	console.log('----------');
+	console.log(err);
+    });
   };
 
   const onFileChange = (e) => {
