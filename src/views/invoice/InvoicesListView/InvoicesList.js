@@ -258,15 +258,28 @@ const InvoicesList = ({ data, user }) => {
     };
     const response = await API.patch(`${HUB_MANAGER_ENDPOINT}/${user.phone}/assign-shipper`, dataAssign);
     if (response.ok) {
-
-      let query = `hub_id=${user.hub.id}`;
-      const response = await API.get(INVOICE_ENDPOINT + `?page=${1}&limit=50&${query}`);
-      if (response.ok) {
-        const fetchData = await response.json();
-        const data = { invoices: fetchData.data.items, meta: fetchData.data.meta };
-        dispatch(actLoadProviderName("NONE"));
-        dispatch(actLoadInvoices(data));
+      if (provider_name !== 'NONE') {
+        let query = `hub_id=${user.hub.id}`;
+        const response = await API.get(INVOICE_ENDPOINT + `/providers/${provider_name}?page=${page + 1}&limit=50&${query}`);
+        if (response.ok) {
+          const fetchData = await response.json();
+          const dataByProvider = { invoices: fetchData.data.items, meta: fetchData.data.meta };
+          dispatch(actLoadInvoices(dataByProvider));
+          setPage(+page);
+        }
+        setLoadingModal(false);
+      } else {
+        let query = `hub_id=${user.hub.id}`;
+        const response = await API.get(INVOICE_ENDPOINT + `?page=${page + 1}&limit=50&${query}`);
+        if (response.ok) {
+          const fetchData = await response.json();
+          const data = { invoices: fetchData.data.items, meta: fetchData.data.meta };
+          dispatch(actLoadInvoices(data));
+          setPage(+page);
+        }
+        setLoadingModal(false);
       }
+      setPage(+page);
     }
     const json = await response.json();
 
@@ -368,17 +381,40 @@ const InvoicesList = ({ data, user }) => {
       hub_id: +hub_id
     };
     await API.patch(`${ADMIN_ENDPOINT}/${user.phone}/assign-invoice-to-hub`, data)
-      .then(res => {
+      .then(async res => {
         if (res.ok) {
-          API.get(INVOICE_ENDPOINT + '?page=1&limit=50&hub_id=none')
-            .then(async response => {
-              if (response.ok) {
-                const fetchData = await response.json();
-                const data = { invoices: fetchData.data.items, meta: fetchData.data.meta };
-                dispatch(actLoadInvoices(data));
-              }
-              setLoadingModal(false);
-            });
+          if (provider_name !== 'NONE') {
+            let query = null;
+            if (user && user.role === 'Admin') {
+              query = 'hub_id=none';
+            } else {
+              query = `hub_id=${user.hub.id}`
+            }
+            const response = await API.get(INVOICE_ENDPOINT + `/providers/${provider_name}?page=${page + 1}&limit=50&${query}`);
+            if (response.ok) {
+              const fetchData = await response.json();
+              const dataByProvider = { invoices: fetchData.data.items, meta: fetchData.data.meta };
+              dispatch(actLoadInvoices(dataByProvider));
+              setPage(+page);
+            }
+            setLoadingModal(false);
+          } else {
+            let query = null;
+            if (user && user.role === 'Admin') {
+              query = 'hub_id=none';
+            } else {
+              query = `hub_id=${user.hub.id}`
+            }
+            const response = await API.get(INVOICE_ENDPOINT + `?page=${page + 1}&limit=50&${query}`);
+            if (response.ok) {
+              const fetchData = await response.json();
+              const data = { invoices: fetchData.data.items, meta: fetchData.data.meta };
+              dispatch(actLoadInvoices(data));
+              setPage(+page);
+            }
+            setLoadingModal(false);
+          }
+          setPage(+page);
         }
       });
 

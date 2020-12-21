@@ -81,7 +81,7 @@ const ModalAssignHub = ({
             return;
         }
         onHandleAssign(selectedHub);
-        setSelectedHub(null);
+        // setSelectedHub(null);
     };
 
     const value = (item) => {
