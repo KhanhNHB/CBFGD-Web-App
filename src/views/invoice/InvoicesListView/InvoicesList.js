@@ -164,6 +164,7 @@ const InvoicesList = ({ data, user }) => {
   const [loadingModal, setLoadingModal] = useState(false);
   const [currentHub, setCurrentHub] = useState(null);
   const [currentShipper, setCurrentShipper] = useState(null);
+  const selectAssignHubStatus = useSelector(state => state.assignHubStatus.selectAssignHubStatus);
 
   useEffect(() => {
     if (data.invoices) {
@@ -390,6 +391,16 @@ const InvoicesList = ({ data, user }) => {
   if (keyword) {
     filterData = filterData.filter((invoice) => {
       return invoice.code.toLowerCase().indexOf(keyword.toLowerCase()) !== -1;
+    });
+  }
+
+  if (selectAssignHubStatus === 'NOT ASSIGN') {
+    filterData = filterData.filter((invoice) => {
+      return invoice.hub === null;
+    });
+  } else if (selectAssignHubStatus === 'ASSIGNED') {
+    filterData = filterData.filter((invoice) => {
+      return invoice.hub !== null;
     });
   }
 

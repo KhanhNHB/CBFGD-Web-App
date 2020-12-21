@@ -21,7 +21,7 @@ import {
 import { Search as SearchIcon } from 'react-feather';
 import { useSelector, useDispatch } from 'react-redux';
 import API from '../../../api/API';
-import { actChangeKeyword, actLoadInvoices, actLoadProvider, actLoadProviderName } from '../../../actions/index';
+import { actChangeKeyword, actLoadAssignStatus, actLoadInvoices, actLoadProvider, actLoadProviderName } from '../../../actions/index';
 import { INVOICE_ENDPOINT, PROVIDER_ENDPOINT } from '../../../api/endpoint';
 import { ACCESS_TOKEN_FABRIC, RESPONSE_STATUS, USER_DEVICE_TOKEN, USER_TOKEN } from '../../../common';
 import Cookies from 'js-cookie';
@@ -60,6 +60,7 @@ const Toolbar = ({ onHandleFileUpload, onHandleFileChange, user, ...rest }) => {
   const [loadingModal, setLoadingModal] = useState(false);
   const providers = useSelector(state => state.providers.providers);
   const selectedProvider = useSelector(state => state.providers.provider_name);
+  const selectAssignHubStatus = useSelector(state => state.assignHubStatus.selectAssignHubStatus);
 
   useEffect(() => {
     dispatch(actLoadProviderName(selectedProvider));
@@ -67,6 +68,10 @@ const Toolbar = ({ onHandleFileUpload, onHandleFileChange, user, ...rest }) => {
 
   const handleChangeProvider = (event) => {
     dispatch(actLoadProviderName(event.target.value));
+  };
+
+  const handleChangeAssignStatus = (event) => {
+    dispatch(actLoadAssignStatus(event.target.value));
   };
 
   useEffect(() => {
@@ -137,6 +142,12 @@ const Toolbar = ({ onHandleFileUpload, onHandleFileChange, user, ...rest }) => {
     }));
   }
 
+  let elementAssignStatusMenuItem = [
+    <MenuItem key={-1} value={`NONE`}>NONE</MenuItem>,
+    <MenuItem key={0} value={`NOT ASSIGN`}>NOT ASSIGN</MenuItem>,
+    <MenuItem key={1} value={`ASSIGNED`}>ASSIGNED</MenuItem>
+  ];
+
   return (
     <div className={clsx(classes.root)} {...rest}>
       {(user && user.role === 'Admin')
@@ -183,6 +194,21 @@ const Toolbar = ({ onHandleFileUpload, onHandleFileChange, user, ...rest }) => {
                 onChange={(event) => onChangeKeyword(event)}
               />
             </Box>
+            {user && user.role === 'Admin'
+              ? <FormControl variant="outlined" className={classes.formControl}>
+                <InputLabel id="demo-simple-select-outlined-label">Asign Status</InputLabel>
+                <Select
+                  labelId="demo-simple-select-outlined-label"
+                  id="demo-simple-select-outlined"
+                  label="Asign Status"
+                  value={selectAssignHubStatus}
+                  onChange={handleChangeAssignStatus}
+                >
+                  {elementAssignStatusMenuItem}
+                </Select>
+              </FormControl>
+              : null
+            }
             <FormControl variant="outlined" className={classes.formControl}>
               <InputLabel id="demo-simple-select-outlined-label">Provider</InputLabel>
               <Select
