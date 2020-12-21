@@ -105,7 +105,6 @@ const ModalShipperDetail = (props) => {
     const [loading, setLoading] = useState(false);
 
     const fetchInvoiceShipperByAssignedAt = async (date) => {
-
         const response = await API.get(`${SHIPPER_ENDPOINT}/${shipper.phone}/invoices?assigned_at=${date}`);
         const fetchData = await response.json();
         if (response.ok) {
@@ -119,7 +118,7 @@ const ModalShipperDetail = (props) => {
 
     useEffect(() => {
         setLoading(true);
-        fetchInvoiceShipperByAssignedAt(selectedDate);
+        fetchInvoiceShipperByAssignedAt(datetimeUtils.DisplayDatePicker(new Date(selectedDate)));
         setLoading(false);
     }, []);
 
@@ -170,22 +169,6 @@ const ModalShipperDetail = (props) => {
                         </TableBody>
                     </Table>
                 </TableContainer>
-                {/* <Container>
-                    <Grid container
-                        direction="row"
-                        justify="flex-end"
-                        alignItems="flex-end">
-                        <Grid xs={12} sm={6}>
-                            <Button
-                                color="primary"
-                                variant="contained"
-                                className={classes.buttonSave}
-                            >
-                                Save Shipper
-                        </Button>
-                        </Grid>
-                    </Grid>
-                </Container> */}
             </div>
 
             <div className={classes.wrapperBag}>
