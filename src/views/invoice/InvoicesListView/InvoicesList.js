@@ -502,6 +502,7 @@ const InvoicesList = ({ data, user }) => {
             onInvisibleModel={handleInvisibleModalAssignHub}
             onVisibleModal={handleVisibleModalAssignHub}
             onHandleAssign={handleAssignHub}
+            onSelectedInvoice={selectedInvoice}
             onCurrentHub={currentHub}
           />
         </div>

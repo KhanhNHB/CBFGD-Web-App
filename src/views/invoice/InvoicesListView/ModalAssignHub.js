@@ -42,7 +42,9 @@ const useStyles = makeStyles((theme) => ({
 const ModalAssignHub = ({
     onInvisibleModel,
     onHandleAssign,
+    onSelectedInvoice,
     onCurrentHub
+
 }) => {
     const classes = useStyles();
 
@@ -50,14 +52,17 @@ const ModalAssignHub = ({
     const [selectedHub, setSelectedHub] = useState(onCurrentHub);
 
     const fetchHub = async () => {
-        const response = await API.get(HUB_ENDPOINT);
-        const json = await response.json();
-        if (!json.data.length) {
-            return;
+        const response = await API.get(`${HUB_ENDPOINT}/recommend/invoices/${onSelectedInvoice}`);
+        if (response.ok) {
+            const fetchData = await response.json();
+            if (!fetchData.data.length) {
+                return;
+            }
+            setHubs(fetchData.data);
         }
-        setHubs(json.data);
     };
 
+    console.log(hubs);
     useEffect(() => {
         fetchHub();
     }, []);
@@ -79,6 +84,15 @@ const ModalAssignHub = ({
         setSelectedHub(null);
     };
 
+    const value = (item) => {
+        return (
+            <>
+                <div><span style={{ fontWeight: 'bold' }}>Address: </span>{item.hub.name}</div>
+                <div><span style={{ color: 'red' }}>Distance To Hub: </span><span style={{ fontWeight: 'bold' }}>{item.distance} Km</span></div>
+            </>
+        );
+    }
+
     return (
         <>
             <div className={classes.root}>
@@ -90,12 +104,13 @@ const ModalAssignHub = ({
                             onChange={handleChange}
                             value={+selectedHub}
                         >
-                            {hubs.map((hub, index) => {
+                            {hubs.map((item, index) => {
                                 return <FormControlLabel
                                     key={index}
-                                    value={+hub.id}
+                                    value={+item.hub.id}
                                     control={<Radio />}
-                                    label={hub.name}
+                                    label={value(item)}
+                                    style={{ padding: 10 }}
                                 />
                             })}
                         </RadioGroup>
