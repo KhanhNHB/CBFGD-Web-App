@@ -1,5 +1,5 @@
 // API AWS
-export const BASE_URL = "https://aws.api.gds.cloudns.asia";
+export const BASE_URL = "https://api.ebgds.cloudns.asia";
 // API Google
 // export const BASE_URL = "http://34.126.70.182:8090";
 // export const BASE_URL = "http://localhost:8090";
@@ -18,7 +18,7 @@ export const DELIVERIES_STATUS_ENDPOINT = `${BASE_URL}/deliveries-status`;
 // API Google
 // export const BASE_URL_FABRIC = `http://34.126.123.79:4000`;
 // API AWS
-export const BASE_URL_FABRIC = `https://aws.api.fabric.gds.cloudns.asia`;
+export const BASE_URL_FABRIC = `https://api.fabric.ebgds.cloudns.asia`;
 // API IPv.4
 // export const BASE_URL_FABRIC = "http://192.168.43.21:4000";
 // export const BASE_URL_FABRIC = `http://192.168.1.5:4000`;
