@@ -16,7 +16,7 @@ import NotificationsIcon from '@material-ui/icons/NotificationsOutlined';
 import InputIcon from '@material-ui/icons/Input';
 import Logo from '../../components/Logo';
 import Cookies from 'js-cookie';
-import { ACCESS_TOKEN_FABRIC, USER_DEVICE_TOKEN, USER_TOKEN } from '../../common';
+import { USER_DEVICE_TOKEN, USER_TOKEN } from '../../common';
 import { actLoadAssignStatus, actLoadProviderName } from '../../actions';
 import { useDispatch } from 'react-redux';
 
@@ -52,7 +52,6 @@ const TopBar = ({
 
   const handleSignOut = () => {
     Cookies.remove(USER_TOKEN);
-    Cookies.remove(ACCESS_TOKEN_FABRIC);
     Cookies.remove(USER_DEVICE_TOKEN);
     dispatch(actLoadProviderName("NONE"));
     dispatch(actLoadAssignStatus("NONE"));

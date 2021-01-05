@@ -60,7 +60,7 @@ const ModalShipperAdd = (props) => {
     const [name, setName] = useState(props.name ? props.name : '');
     const [radius, setRadius] = useState(props.radius ? props.radius : '');
     const [disabled, setDisabled] = useState(true);
-    const [status, setStatus] = useState('Available');
+    const [status, setStatus] = useState('Active');
 
     const handleChangeStatus = (event) => {
         setStatus(event.target.value);
@@ -75,20 +75,49 @@ const ModalShipperAdd = (props) => {
         }
     }, [name, radius, status]);
 
+    // For Adminstrator
     const handleAddHub = async () => {
         if (!id) {
-            const responseHub = await API.post(HUB_ENDPOINT, {
+            const responseHub = await API.post(`${HUB_ENDPOINT}`, {
                 name: name,
                 radius: radius.toString(),
-                status: status,
+                is_active: status === 'Active' ? true : false,
+            });
+            if (responseHub.ok) {
+                const fetchHubData = await responseHub.json();
+                if (!fetchHubData.message) {
+                    dispatch(actCreateHub(fetchHubData.data));
+                    const response = await API.get(`${HUB_ENDPOINT}?page=1&limit=50&hub_manager_phone=none`);
+                    if (response.ok) {
+                        const fetchHub = await response.json();
+                        dispatch(actGetListHub(fetchHub.data));
+                    }
+                    setName('');
+                    setRadius('');
+                    setId('');
+                    props.onCLoseHub();
+                }
+                return;
+            }
+        } else {
+            const responseUpdateStatusHub = await API.put(`${HUB_ENDPOINT}/${id}`, {
+                name: name,
+                radius: radius.toString(),
+                is_active: status === 'Active' ? true : false,
             });
 
-            const fetchHubData = await responseHub.json();
-            if (!fetchHubData.message) {
-                dispatch(actCreateHub(fetchHubData.data));
-                const response = await API.get(`${HUB_ENDPOINT}`);
-                if (response.ok) {
-                    const fetchHub = await response.json();
+            if (responseUpdateStatusHub.ok) {
+                const fetchData = await responseUpdateStatusHub.json();
+                const message = fetchData.message;
+                if (message) {
+                    alert(message);
+                    return;
+                }
+
+                dispatch(actCreateHub(fetchData.data));
+                const responseFetchHub = await API.get(`${HUB_ENDPOINT}?page=1&limit=50&hub_manager_phone=none`);
+                if (responseFetchHub.ok) {
+                    const fetchHub = await responseFetchHub.json();
                     dispatch(actGetListHub(fetchHub.data));
                 }
                 setName('');
@@ -96,27 +125,6 @@ const ModalShipperAdd = (props) => {
                 setId('');
                 props.onCLoseHub();
             }
-            return;
-        }
-
-        const response = await API.put(`${HUB_ENDPOINT}/${id}`, {
-            name: name,
-            radius: radius.toString(),
-            status: status,
-        });
-
-        const fetchData = await response.json();
-        if (!fetchData.message) {
-            dispatch(actCreateHub(fetchData.data));
-            const response = await API.get(`${HUB_ENDPOINT}`);
-            if (response.ok) {
-                const fetchHub = await response.json();
-                dispatch(actGetListHub(fetchHub.data));
-            }
-            setName('');
-            setRadius('');
-            setId('');
-            props.onCLoseHub();
         }
     };
 
@@ -168,8 +176,8 @@ const ModalShipperAdd = (props) => {
                                     onChange={handleChangeStatus}
                                     label="Status"
                                 >
-                                    <MenuItem value={`Available`}>Available</MenuItem>
-                                    <MenuItem value={`Terminal`}>Terminal</MenuItem>
+                                    <MenuItem value={`Active`}>Active</MenuItem>
+                                    <MenuItem value={`Deactive`}>Deactive</MenuItem>
                                 </Select>
                             </FormControl>
                         </Grid>

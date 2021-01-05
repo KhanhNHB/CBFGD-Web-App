@@ -20,8 +20,8 @@ import { INVOICE_STATUS, INVOICE_PRIORITY } from '../common';
 
 const columns = [
   { id: 'id', label: 'Id', minWidth: 120, align: 'left' },
-  { id: 'code', label: 'Code Invoice', minWidth: 170, align: 'left' },
-  { id: 'receiver_name', label: 'Receiver Invoice', minWidth: 240, align: 'left' },
+  { id: 'code', label: 'Code Order', minWidth: 170, align: 'left' },
+  { id: 'receiver_name', label: 'Receiver Order', minWidth: 240, align: 'left' },
   { id: 'customer_phone_number', label: 'Customer Phone Number', minWidth: 220, align: 'left' },
   { id: 'receiver_phone_number', label: 'Receiver Phone Number', minWidth: 220, align: 'left' },
   { id: 'address', label: 'Receiver Address', minWidth: 350, align: 'left' },
@@ -35,7 +35,7 @@ const columns = [
   { id: 'from_date', label: 'From Date', minWidth: 200, align: 'left' },
   { id: 'to_date', label: 'To Date', minWidth: 200, align: 'left' },
   { id: 'created_at', label: 'Created At', minWidth: 200, align: 'left' },
-  { id: 'status', label: 'Status Invoice', minWidth: 170, align: 'left' },
+  { id: 'is_active', label: 'Status Order', minWidth: 170, align: 'left' },
   { id: 'current_delivery_status', label: 'Current Delivery Status', minWidth: 220, align: 'left' },
 ];
 
@@ -238,11 +238,11 @@ const Bags = ({ bag }) => {
                             hover
                             role="checkbox"
                             tabIndex={-1}
-                            key={item.invoice.id}
-                            style={{ backgroundColor: item.invoice.is_assign && 'whitesmoke' }}
+                            key={item.order.id}
+                            style={{ backgroundColor: item.order.is_assign && 'whitesmoke' }}
                           >
                             {columns.map((column, index) => {
-                              const value = _hanleRowTableData(column.id, item.invoice[column.id]);
+                              const value = _hanleRowTableData(column.id, item.order[column.id]);
                               return (
                                 <TableCell
                                   key={index}

@@ -76,7 +76,7 @@ const ModalHubManagerAdd = (props) => {
 
     useEffect(() => {
         const fetchHub = async () => {
-            API.get(`${HUB_ENDPOINT}`)
+            API.get(`${HUB_ENDPOINT}?page=1&limit=50&hub_manager_phone=none`)
                 .then(async response => {
                     if (response.ok) {
                         const fetchData = await response.json();
@@ -87,7 +87,7 @@ const ModalHubManagerAdd = (props) => {
         fetchHub();
     }, [dispatch]);
 
-    const hubmanager = {
+    const hubManager = {
         first_name: "",
         last_name: "",
         phone: "",
@@ -96,8 +96,13 @@ const ModalHubManagerAdd = (props) => {
     }
 
     const handleCreateHubManager = async (data) => {
-        const isChanged = JSON.stringify(hubmanager) !== JSON.stringify(data);
+        const isChanged = JSON.stringify(hubManager) !== JSON.stringify(data);
         if (!isChanged) return;
+
+        if (!hub_id) {
+            alert('Hub is not empty. Please try again!');
+            return;
+        }
 
         const dataBody = {
             first_name: data.first_name,
@@ -106,21 +111,17 @@ const ModalHubManagerAdd = (props) => {
             password: data.password,
             hub_id: hub_id
         };
-        const response = await API.post(HUB_MANAGER_ENDPOINT, dataBody);
-        const fetchData = await response.json();
 
-        if (fetchData.message) {
-            alert(fetchData.message);
-            return;
+        const response = await API.post(`${HUB_MANAGER_ENDPOINT}`, dataBody);
+        if (response.ok) {
+            props.onCloseModal(true);
+        } else {
+            const fetchData = await response.json();
+            if (fetchData.message) {
+                alert(fetchData.message);
+                return;
+            }
         }
-
-        const responseHubManager = await API.get(HUB_MANAGER_ENDPOINT);
-        if (responseHubManager.ok) {
-            const fetchHubManager = await responseHubManager.json();
-            dispatch(actLoadHubManager(fetchHubManager.data));
-        }
-
-        props.onCloseModal();
     };
 
     const handleChangeHub = (event) => {
@@ -131,7 +132,7 @@ const ModalHubManagerAdd = (props) => {
         <div className={classes.container}>
             <Formik
                 validationSchema={formSchema}
-                initialValues={hubmanager}
+                initialValues={hubManager}
                 onSubmit={(data) => handleCreateHubManager(data)}
                 enableReinitialize
             >
@@ -143,14 +144,10 @@ const ModalHubManagerAdd = (props) => {
                     handleBlur,
                     touched,
                 }) => {
-
                     return (
                         <form onSubmit={handleSubmit} autoComplete="off">
                             <div className={classes.detailHeader}>
-                                <div style={{
-                                    margin: "10px",
-                                    color: 'white'
-                                }}>
+                                <div style={{ margin: "10px", color: 'white' }}>
                                     <h3>Create Hub Manager</h3>
                                 </div>
                                 <CloseIcon
@@ -236,7 +233,6 @@ const ModalHubManagerAdd = (props) => {
                                                 </Select>
                                             </FormControl>
                                         </Grid>
-
                                         <Divider />
                                         <Box display="flex" justifyContent="flex-end" p={2}>
                                             <Button

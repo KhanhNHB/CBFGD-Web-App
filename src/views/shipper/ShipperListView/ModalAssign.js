@@ -51,12 +51,14 @@ const ModalAssign = ({
     const [selectedHub, setSelectedHub] = useState(onCurrentHub);
 
     const fetchHub = async () => {
-        const response = await API.get(HUB_ENDPOINT);
-        const json = await response.json();
-        if (!json.data.length) {
-            return;
+        const response = await API.get(`${HUB_ENDPOINT}?page=1&limit=50&hub_manager_phone=none`);
+        if (response.ok) {
+            const json = await response.json();
+            if (!json.data.length) {
+                return;
+            }
+            setHubs(json.data);
         }
-        setHubs(json.data);
     };
 
     useEffect(() => {

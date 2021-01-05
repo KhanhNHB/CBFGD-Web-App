@@ -21,17 +21,17 @@ import {
 import TableContainer from '@material-ui/core/TableContainer';
 import API from '../../../api/API';
 import { ADMIN_ENDPOINT, HUB_MANAGER_ENDPOINT, INVOICE_ENDPOINT } from '../../../api/endpoint';
-import { INVOICE_STATUS, INVOICE_PRIORITY } from '../../../common';
+import { INVOICE_PRIORITY, ROLE } from '../../../common';
 import ModalInvoiceDetail from '../../../components/ModalInvoiceDetail';
 import { useSelector, useDispatch } from 'react-redux';
-import { actLoadInvoices, actLoadProviderName } from '../../../actions/index';
+import { actLoadInvoices } from '../../../actions/index';
 import ModalAssignHub from './ModalAssignHub';
 import ModalAssignShipper from './ModalAssignShipper';
 
 const columns = [
   { id: 'id', label: 'Id', minWidth: 120, align: 'left' },
-  { id: 'code', label: 'Code Invoice', minWidth: 170, align: 'left' },
-  { id: 'receiver_name', label: 'Receiver Invoice', minWidth: 240, align: 'left' },
+  { id: 'code', label: 'Code Order', minWidth: 170, align: 'left' },
+  { id: 'receiver_name', label: 'Receiver Order', minWidth: 240, align: 'left' },
   { id: 'customer_phone_number', label: 'Customer Phone Number', minWidth: 220, align: 'left' },
   { id: 'receiver_phone_number', label: 'Receiver Phone Number', minWidth: 220, align: 'left' },
   { id: 'address', label: 'Receiver Address', minWidth: 350, align: 'left' },
@@ -45,8 +45,9 @@ const columns = [
   { id: 'from_date', label: 'From Date', minWidth: 200, align: 'left' },
   { id: 'to_date', label: 'To Date', minWidth: 200, align: 'left' },
   { id: 'created_at', label: 'Created At', minWidth: 200, align: 'left' },
-  { id: 'status', label: 'Status Invoice', minWidth: 170, align: 'left' },
+  { id: 'is_active', label: 'Status Order', minWidth: 170, align: 'left' },
   { id: 'current_delivery_status', label: 'Current Delivery Status', minWidth: 220, align: 'left' },
+  { id: 'out_of_hub', label: 'Out Of Hub', minWidth: 220, align: 'left' },
 ];
 
 function descendingComparator(a, b, orderBy) {
@@ -101,11 +102,11 @@ const EnhancedTableHead = (props) => {
             </TableSortLabel>
           </TableCell>
         ))}
-        {(user && user.role === 'Hub_Manager')
+        {(user && user.roleId === ROLE.HUB_MANAGER)
           ? <TableCell align={"center"} style={{ minWidth: 200 }}>Assign Shipper</TableCell>
           : null
         }
-        {(user && user.role === 'Admin')
+        {(user && user.roleId === ROLE.ADMIN)
           ? <TableCell align={"center"} style={{ minWidth: 200 }}>Assign Hub</TableCell>
           : null
         }
@@ -183,10 +184,10 @@ const InvoicesList = ({ data, user }) => {
     setLoadingModal(true);
     if (provider_name !== 'NONE') {
       let query = null;
-      if (user && user.role === 'Admin') {
+      if (user && user.roleId === ROLE.ADMIN) {
         query = 'hub_id=none';
       } else {
-        query = `hub_id=${user.hub.id}`
+        query = `hub_id=${user.hubId}`
       }
       const response = await API.get(INVOICE_ENDPOINT + `/providers/${provider_name}?page=${newPage + 1}&limit=50&${query}`);
       if (response.ok) {
@@ -197,10 +198,10 @@ const InvoicesList = ({ data, user }) => {
       }
     } else {
       let query = null;
-      if (user && user.role === 'Admin') {
+      if (user && user.roleId === ROLE.ADMIN) {
         query = 'hub_id=none';
       } else {
-        query = `hub_id=${user.hub.id}`
+        query = `hub_id=${user.hubId}`
       }
       const response = await API.get(INVOICE_ENDPOINT + `?page=${newPage + 1}&limit=50&${query}`);
       if (response.ok) {
@@ -252,15 +253,15 @@ const InvoicesList = ({ data, user }) => {
 
   const handleAssignShipper = async (shipper_id) => {
     setLoadingModal(true);
-    const dataAssign = {
+    const dataBody = {
       shipper_id: shipper_id,
-      invoice_id: selectedInvoice
+      order_id: selectedInvoice
     };
-    const response = await API.patch(`${HUB_MANAGER_ENDPOINT}/${user.phone}/assign-shipper`, dataAssign);
+    const response = await API.patch(`${HUB_MANAGER_ENDPOINT}/${user.phone}/assign-shipper`, dataBody);
     if (response.ok) {
       if (provider_name !== 'NONE') {
-        let query = `hub_id=${user.hub.id}`;
-        const response = await API.get(INVOICE_ENDPOINT + `/providers/${provider_name}?page=${page + 1}&limit=50&${query}`);
+        const query = `hub_id=${user.hubId}`;
+        const response = await API.get(`${INVOICE_ENDPOINT}/providers/${provider_name}?page=${page + 1}&limit=50&${query}`);
         if (response.ok) {
           const fetchData = await response.json();
           const dataByProvider = { invoices: fetchData.data.items, meta: fetchData.data.meta };
@@ -269,8 +270,8 @@ const InvoicesList = ({ data, user }) => {
         }
         setLoadingModal(false);
       } else {
-        let query = `hub_id=${user.hub.id}`;
-        const response = await API.get(INVOICE_ENDPOINT + `?page=${page + 1}&limit=50&${query}`);
+        const query = `hub_id=${user.hubId}`;
+        const response = await API.get(`${INVOICE_ENDPOINT}? page = ${page + 1}& limit=50 & ${query} `);
         if (response.ok) {
           const fetchData = await response.json();
           const data = { invoices: fetchData.data.items, meta: fetchData.data.meta };
@@ -305,26 +306,43 @@ const InvoicesList = ({ data, user }) => {
   };
 
   const _rowStatus = (backgroundColor, value) => {
-    return (<div style={{
-      backgroundColor: backgroundColor,
-      color: 'white',
-      width: 85,
-      padding: 8,
-      borderRadius: 3,
-      textAlign: 'center'
-    }}>
-      {value}
-    </div>);
+    return (
+      <div style={{
+        backgroundColor: backgroundColor,
+        color: 'white',
+        width: 85,
+        padding: 8,
+        borderRadius: 3,
+        textAlign: 'center',
+      }}>
+        {value ? 'ACTIVE' : 'DEACTIVE'}
+      </div>
+    );
+  }
+
+  const _rowOutOfHub = (backgroundColor, value) => {
+    return (
+      <div style={{
+        backgroundColor: backgroundColor,
+        color: 'white',
+        width: 85,
+        padding: 8,
+        borderRadius: 3,
+        textAlign: 'center',
+      }}>
+        {value ? 'OUT HUB' : 'IN HUB'}
+      </div>
+    );
   }
 
   const _rowPriority = (backgroundColor, value) => {
     return (<div style={{
       backgroundColor: backgroundColor,
       color: 'white',
-      width: 85,
+      width: 90,
       padding: 8,
       borderRadius: 3,
-      textAlign: 'center'
+      textAlign: 'center',
     }}>
       {value ? INVOICE_PRIORITY.EXPRESS : INVOICE_PRIORITY.STANDARD}
     </div>);
@@ -342,8 +360,8 @@ const InvoicesList = ({ data, user }) => {
         return formatPrice.format(value) + " VND";
       case 'shipping_fee':
         return formatPrice.format(value) + " VND";
-      case 'status':
-        return (value === INVOICE_STATUS.ACTIVE ? _rowStatus("#1e8101", value) : _rowStatus("#d9534f", value));
+      case 'is_active':
+        return (value ? _rowStatus("#1e8101", value) : _rowStatus("#d9534f", value));
       case 'product_image':
         return (<img alt="Product" style={{ height: 60, width: 60 }} src={value} />);
       case 'created_at':
@@ -364,6 +382,8 @@ const InvoicesList = ({ data, user }) => {
             {value}
           </div>
         );
+      case "out_of_hub":
+        return (value ? _rowOutOfHub("#d9534f", value) : _rowOutOfHub("#1e8101", value));
       default:
         return value;
     }
@@ -377,20 +397,21 @@ const InvoicesList = ({ data, user }) => {
   const handleAssignHub = async (hub_id) => {
     setLoadingModal(true);
     const data = {
-      invoice_id: selectedInvoice,
+      order_id: selectedInvoice,
       hub_id: +hub_id
     };
-    await API.patch(`${ADMIN_ENDPOINT}/${user.phone}/assign-invoice-to-hub`, data)
+
+    await API.patch(`${ADMIN_ENDPOINT} /${user.phone}/assign - order - to - hub`, data)
       .then(async res => {
         if (res.ok) {
           if (provider_name !== 'NONE') {
             let query = null;
-            if (user && user.role === 'Admin') {
+            if (user && user.roleId === ROLE.ADMIN) {
               query = 'hub_id=none';
             } else {
-              query = `hub_id=${user.hub.id}`
+              query = `hub_id = ${user.hubId} `
             }
-            const response = await API.get(INVOICE_ENDPOINT + `/providers/${provider_name}?page=${page + 1}&limit=50&${query}`);
+            const response = await API.get(INVOICE_ENDPOINT + `/ providers / ${provider_name}?page = ${page + 1}& limit=50 & ${query} `);
             if (response.ok) {
               const fetchData = await response.json();
               const dataByProvider = { invoices: fetchData.data.items, meta: fetchData.data.meta };
@@ -400,12 +421,12 @@ const InvoicesList = ({ data, user }) => {
             setLoadingModal(false);
           } else {
             let query = null;
-            if (user && user.role === 'Admin') {
+            if (user && user.roleId === ROLE.ADMIN) {
               query = 'hub_id=none';
             } else {
-              query = `hub_id=${user.hub.id}`
+              query = `hub_id = ${user.hubId} `
             }
-            const response = await API.get(INVOICE_ENDPOINT + `?page=${page + 1}&limit=50&${query}`);
+            const response = await API.get(INVOICE_ENDPOINT + `? page = ${page + 1}& limit=50 & ${query} `);
             if (response.ok) {
               const fetchData = await response.json();
               const data = { invoices: fetchData.data.items, meta: fetchData.data.meta };
@@ -479,7 +500,7 @@ const InvoicesList = ({ data, user }) => {
                               </TableCell>
                             );
                           })}
-                          {(user && user.role === 'Admin')
+                          {(user && user.roleId === ROLE.ADMIN)
                             ? <TableCell key={index} align={"center"} >
                               <Button
                                 color="primary"
@@ -487,18 +508,18 @@ const InvoicesList = ({ data, user }) => {
                                 onClick={() => handleSelectedRowForAssignHub(invoice.id, invoice.hub ? invoice.hub.id : null)}
                                 style={invoice.is_assign
                                   ? {
-                                    backgroundColor: (invoice.available && invoice.status === 'ACTIVE') ? '#E69403' : '#aeb0b6',
+                                    backgroundColor: (invoice.available && invoice.is_active) ? '#E69403' : '#aeb0b6',
                                     color: 'white'
                                   }
                                   : { color: 'white' }
                                 }
-                                disabled={(invoice.available && invoice.status === 'ACTIVE') ? false : true}
+                                disabled={(invoice.available && invoice.is_active) ? false : true}
                               >
                                 {invoice.hub ? 'Assigned' : 'Assign'}
                               </Button>
                             </TableCell>
                             : null}
-                          {(user && user.role === 'Hub_Manager')
+                          {(user && user.roleId === ROLE.HUB_MANAGER)
                             ? (
                               <TableCell key={index} align={"center"} >
                                 <Button
@@ -507,12 +528,12 @@ const InvoicesList = ({ data, user }) => {
                                   onClick={() => handleSelectedRowForAssignShipper(invoice.id, invoice.shipper_id ? invoice.shipper_id : null)}
                                   style={invoice.is_assign
                                     ? {
-                                      backgroundColor: (invoice.available && invoice.status === 'ACTIVE') ? '#E69403' : '#aeb0b6',
+                                      backgroundColor: (invoice.available && invoice.is_active) ? '#E69403' : '#aeb0b6',
                                       color: 'white'
                                     }
                                     : { color: 'white' }
                                   }
-                                  disabled={(invoice.available && invoice.status === 'ACTIVE') ? false : true}
+                                  disabled={(invoice.available && invoice.is_active) ? false : true}
                                 >
                                   {invoice.is_assign ? 'Assigned' : 'Assign'}
                                 </Button>

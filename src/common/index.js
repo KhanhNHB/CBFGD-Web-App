@@ -5,16 +5,16 @@ export const GENDER = {
 
 export const USER_TOKEN = 'USER_TOKEN';
 export const USER_DEVICE_TOKEN = 'USER_DEVICE_TOKEN';
-export const ACCESS_TOKEN_FABRIC = 'ACCESS_TOKEN_FABRIC';
 
 export const RESPONSE_STATUS = {
-    FORBIDDEN: 403
+    FORBIDDEN: 401
 };
 
 export const ROLE = {
-    CUSTOMER: 'Customer',
-    SHIPPER: 'Shipper',
-    ADMIN: 'Admin'
+    ADMIN: 1,
+    HUB_MANAGER: 2,
+    SHIPPER: 3,
+    CUSTOMER: 4
 }
 
 export const STATUS = {
@@ -29,8 +29,8 @@ export const INVOICE_STATUS = {
 }
 
 export const INVOICE_PRIORITY = {
-    STANDARD: 'Standard',
-    EXPRESS: 'Express'
+    STANDARD: 'STANDARD',
+    EXPRESS: 'EXPRESS'
 }
 
 export const DELIVERY_STATUS = {

@@ -23,7 +23,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import API from '../../../api/API';
 import { actChangeKeyword, actLoadAssignStatus, actLoadInvoices, actLoadProvider, actLoadProviderName } from '../../../actions/index';
 import { INVOICE_ENDPOINT, PROVIDER_ENDPOINT } from '../../../api/endpoint';
-import { ACCESS_TOKEN_FABRIC, RESPONSE_STATUS, USER_DEVICE_TOKEN, USER_TOKEN } from '../../../common';
+import { RESPONSE_STATUS, ROLE, USER_DEVICE_TOKEN, USER_TOKEN } from '../../../common';
 import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router-dom';
 
@@ -75,11 +75,10 @@ const Toolbar = ({ onHandleFileUpload, onHandleFileChange, user, ...rest }) => {
   };
 
   useEffect(() => {
-    API.get(PROVIDER_ENDPOINT)
+    API.get(`${PROVIDER_ENDPOINT}`)
       .then(async response => {
         if (response.status === RESPONSE_STATUS.FORBIDDEN) {
           Cookies.remove(USER_TOKEN);
-          Cookies.remove(ACCESS_TOKEN_FABRIC);
           Cookies.remove(USER_DEVICE_TOKEN);
           navigate('/', { replace: true });
         }
@@ -97,10 +96,10 @@ const Toolbar = ({ onHandleFileUpload, onHandleFileChange, user, ...rest }) => {
     setLoadingModal(true);
     if (selectedProvider !== 'NONE') {
       let query = null;
-      if (user && user.role === 'Admin') {
+      if (user && user.roleId === ROLE.ADMIN) {
         query = 'page=1&limit=50&hub_id=none';
       } else {
-        query = `page=1&limit=50&hub_id=${user.hub.id}`
+        query = `page=1&limit=50&hub_id=${user.hubId}`
       }
       API.get(`${INVOICE_ENDPOINT}/providers/${selectedProvider}?${query}`)
         .then(async response => {
@@ -113,10 +112,10 @@ const Toolbar = ({ onHandleFileUpload, onHandleFileChange, user, ...rest }) => {
         });
     } else {
       let query = null;
-      if (user && user.role === 'Admin') {
+      if (user && user.roleId === ROLE.ADMIN) {
         query = 'page=1&limit=50&hub_id=none';
       } else {
-        query = `page=1&limit=50&hub_id=${user.hub.id}`
+        query = `page=1&limit=50&hub_id=${user.hubId}`
       }
       API.get(`${INVOICE_ENDPOINT}?${query}`)
         .then(async response => {
@@ -150,7 +149,7 @@ const Toolbar = ({ onHandleFileUpload, onHandleFileChange, user, ...rest }) => {
 
   return (
     <div className={clsx(classes.root)} {...rest}>
-      {(user && user.role === 'Admin')
+      {(user && user.roleId === ROLE.ADMIN)
         ? <Box
           display="flex"
           justifyContent="flex-end"
@@ -193,7 +192,7 @@ const Toolbar = ({ onHandleFileUpload, onHandleFileChange, user, ...rest }) => {
                 onChange={(event) => onChangeKeyword(event)}
               />
             </Box>
-            {user && user.role === 'Admin'
+            {user && user.roleId === ROLE.ADMIN
               ? <FormControl variant="outlined" className={classes.formControl}>
                 <InputLabel id="demo-simple-select-outlined-label">Asign Status</InputLabel>
                 <Select

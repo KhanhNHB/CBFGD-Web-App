@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import clsx from 'clsx';
 import PropTypes from 'prop-types';
 import datetimeUtils from '../../../utils/datetimeUtils';
@@ -15,15 +15,16 @@ import {
   Button,
   Modal,
   TableSortLabel,
-  CircularProgress
+  CircularProgress,
+  Snackbar
 } from '@material-ui/core';
 
 import API from '../../../api/API';
 import ModalAssign from './ModalAssign';
 import { useDispatch } from 'react-redux';
 import {
-  ACCESS_TOKEN_FABRIC,
   RESPONSE_STATUS,
+  ROLE,
   STATUS,
   USER_DEVICE_TOKEN,
   USER_TOKEN
@@ -35,13 +36,14 @@ import { ADMIN_ENDPOINT, SHIPPER_ENDPOINT } from '../../../api/endpoint';
 import ModalShipperDetail from '../../../components/ModalShipperDetail';
 import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router-dom';
+import Alert from '@material-ui/lab/Alert';
 
 const columns = [
   { id: 'avatar', label: 'Avatar', minWidth: 120, align: 'left' },
   { id: 'last_name', label: 'Last name', minWidth: 200, align: 'left' },
   { id: 'first_name', label: 'First name', minWidth: 200, align: 'left' },
   { id: 'phone', label: 'Phone', minWidth: 200, align: 'left' },
-  { id: 'status', label: 'Status', minWidth: 120, align: 'left' },
+  { id: 'is_active', label: 'Status', minWidth: 120, align: 'left' },
 ];
 
 const EnhancedTableHead = (props) => {
@@ -112,11 +114,12 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const ShipperList = ({ className, shippers, user, ...rest }) => {
+const ShipperList = ({ className, data, user, ...rest }) => {
+  let totalPage = 0;
   const rowsPerPage = 50;
   const classes = useStyles();
   const dispatch = useDispatch();
-  const [page, setPage] = useState(0);
+  const [page, setPage] = useState(totalPage);
   const [order, setOrder] = useState('asc');
   const [shipper, setShipper] = useState({});
   const [orderBy, setOrderBy] = useState('id');
@@ -126,7 +129,16 @@ const ShipperList = ({ className, shippers, user, ...rest }) => {
   const [selectedShipper, setSelectedShipper] = useState(null);
   const [visibleModalShipperDetail, setVisibleModalShipperDetail] = useState(false);
   const [loadingModal, setLoadingModal] = useState(false);
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [messageSuccess, setMessageSuccess] = useState('');
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (data.shippers) {
+      totalPage = +data.meta.totalPages;
+      setPage(0);
+    }
+  }, [data]);
 
   const openModalFormAdd = () => {
     setModalOpenAdd(true);
@@ -134,22 +146,19 @@ const ShipperList = ({ className, shippers, user, ...rest }) => {
 
   const onCloseModalAdd = async (isChanged) => {
     if (isChanged) {
-      API.get(`${SHIPPER_ENDPOINT}?hub_manager_phone=none`)
-        .then(async response => {
-          if (response.status === RESPONSE_STATUS.FORBIDDEN) {
-            Cookies.remove(USER_TOKEN);
-            Cookies.remove(ACCESS_TOKEN_FABRIC);
-            Cookies.remove(USER_DEVICE_TOKEN);
-            navigate('/', { replace: true });
-          }
-          if (response.ok) {
-            const fetchData = await response.json();
-            const shippersData = fetchData.data;
-            if (shippersData.length > 0) {
-              dispatch(actLoadShipper(shippersData));
-            }
-          }
-        });
+      const response = await API.get(`${SHIPPER_ENDPOINT}?page=1&limit=50&hub_manager_phone=none`);
+      if (response.ok) {
+        const fetchData = await response.json();
+        const data = { shippers: fetchData.data.items, meta: fetchData.data.meta };
+        setMessageSuccess("Create Shipper Sucess!");
+        setOpenSnackbar(true);
+        dispatch(actLoadShipper(data));
+      }
+      if (response.status === RESPONSE_STATUS.FORBIDDEN) {
+        Cookies.remove(USER_TOKEN);
+        Cookies.remove(USER_DEVICE_TOKEN);
+        navigate('/', { replace: true });
+      }
     }
     setModalOpenAdd(false);
   }
@@ -189,22 +198,20 @@ const ShipperList = ({ className, shippers, user, ...rest }) => {
     };
 
     const response = await API.patch(`${ADMIN_ENDPOINT}/${user.phone}/assign-shipper-to-hub`, data);
-    const patchData = await response.json();
-    if (patchData.message) {
-      alert(patchData.message);
+    if (response.ok) {
+      const repsonseShipper = await API.get(`${SHIPPER_ENDPOINT}?page=1&limit=50&hub_manager_phone=none`);
+      if (repsonseShipper.ok) {
+        const fetchData = await repsonseShipper.json();
+        const data = { shippers: fetchData.data.items, meta: fetchData.data.meta };
+        setMessageSuccess(`Assign Shipper ${selectedShipper} To Hub ${hub_id} Sucess!`);
+        setOpenSnackbar(true);
+        dispatch(actLoadShipper(data));
+      }
     } else {
-      API.get(`${SHIPPER_ENDPOINT}?hub_manager_phone=none`)
-        .then(async response => {
-          if (response.ok) {
-            const fetchData = await response.json();
-            const shippersData = fetchData.data;
-            if (shippersData.length > 0) {
-              dispatch(actLoadShipper(shippersData));
-            }
-          }
-        }).catch(err => {
-          alert(err.message);
-        });
+      const patchData = await response.json();
+      if (patchData.message) {
+        alert(patchData.message);
+      }
     }
     setSelectedShipper(null);
     handleInvisibleModal();
@@ -221,20 +228,21 @@ const ShipperList = ({ className, shippers, user, ...rest }) => {
       textAlign: 'center'
 
     }}>
-      {value.toUpperCase()}
+      {value ? 'ACTIVE' : 'DEACTIVE'}
     </div>);
   }
 
   const _hanleRowTableData = (column, value) => {
     switch (column) {
-      case 'status':
-        return (value === STATUS.AVAILABLE
+      case 'is_active':
+        return (value
           ? _rowStatus("#1e8101", value)
-          : value === STATUS.PENDING
-            ? _rowStatus("#d9534f", value)
-            : _rowStatus("#f0ad4f", value));
+          : _rowStatus("#f0ad4f", value));
       case 'avatar':
-        return (<img alt="User Avatar" style={{ height: 45, width: 60 }} src={value ? value : 'https://res.cloudinary.com/dvehkdedj/image/upload/v1598777976/269-2697881_computer-icons-user-clip-art-transparent-png-icon_yqpi0g.png'} />);
+        return (<img alt="User Avatar" style={{ height: 45, width: 60 }} src={value
+          ? value
+          : 'https://res.cloudinary.com/dvehkdedj/image/upload/v1598777976/269-2697881_computer-icons-user-clip-art-transparent-png-icon_yqpi0g.png'} />
+        );
       case 'created_at':
         return datetimeUtils.DisplayDateTimeFormat(value);
       case 'updated_at':
@@ -255,11 +263,18 @@ const ShipperList = ({ className, shippers, user, ...rest }) => {
     setOrderBy(property);
   };
 
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setOpenSnackbar(false);
+  };
+
   return (
     <div className={classes.boundary}>
       <div style={{ marginBottom: 10 }}>
         {
-          (user && user.role === 'Admin')
+          (user && user.roleId === ROLE.ADMIN)
           && <Button
             color="primary"
             variant="contained"
@@ -281,8 +296,8 @@ const ShipperList = ({ className, shippers, user, ...rest }) => {
                 onRequestSort={handleRequestSort}
               />
               <TableBody>
-                {(shippers && shippers.length)
-                  ? shippers.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((shipper, index) => {
+                {(data && data.shippers && data.shippers.length)
+                  ? data.shippers.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((shipper, index) => {
                     return (
                       <TableRow hover role="checkbox" tabIndex={-1} key={shipper.phone}>
                         {columns.map((column, index) => {
@@ -299,7 +314,7 @@ const ShipperList = ({ className, shippers, user, ...rest }) => {
                           );
                         })}
                         <TableCell align={"left"}>
-                          {(user && user.role === 'Admin')
+                          {(user && user.roleId === ROLE.ADMIN)
                             ?
                             <Button
                               color="primary"
@@ -321,14 +336,17 @@ const ShipperList = ({ className, shippers, user, ...rest }) => {
             </Table>
           </TableContainer>
         </Box>
-        <TablePagination
-          rowsPerPageOptions={[0]}
-          component="div"
-          count={shippers.length}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onChangePage={handleChangePage}
-        />
+        {(data && data.shippers && data.shippers.length)
+          ? <TablePagination
+            rowsPerPageOptions={[0]}
+            component="div"
+            count={data.shippers.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onChangePage={handleChangePage}
+          />
+          : null
+        }
       </Card>
       <Modal open={visiableModal}>
         <div className={classes.modal}>
@@ -356,13 +374,26 @@ const ShipperList = ({ className, shippers, user, ...rest }) => {
       <Modal open={loadingModal} className={classes.loadingModal}>
         <CircularProgress />
       </Modal>
+      <Snackbar
+        anchorOrigin={{
+          vertical: 'top',
+          horizontal: 'right'
+        }}
+        open={openSnackbar}
+        autoHideDuration={3000}
+        onClose={handleCloseSnackbar}
+        message={`Import Sucess!`}
+      >
+        <Alert onClose={handleCloseSnackbar} severity='success'>
+          {messageSuccess}
+        </Alert>
+      </Snackbar>
     </div>
   );
 };
 
 ShipperList.propTypes = {
   className: PropTypes.string,
-  shippers: PropTypes.array.isRequired
 };
 
 export default ShipperList;

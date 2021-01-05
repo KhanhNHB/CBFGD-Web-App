@@ -11,11 +11,16 @@ import Toolbar from './Toolbar';
 import InvoicesList from './InvoicesList';
 import axios from 'axios';
 import {
-  INVOICE_ENDPOINT, PROVIDER_ENDPOINT
+  INVOICE_ENDPOINT,
+  PROVIDER_ENDPOINT
 } from '../../../api/endpoint';
 import Cookies from 'js-cookie';
 import API from '../../../api/API';
-import { ACCESS_TOKEN_FABRIC, RESPONSE_STATUS, USER_DEVICE_TOKEN, USER_TOKEN } from '../../../common';
+import {
+  RESPONSE_STATUS,
+  USER_DEVICE_TOKEN,
+  USER_TOKEN
+} from '../../../common';
 import { actLoadInvoices, actLoadProvider, actLoadProviderName } from '../../../actions';
 import { useDispatch, useSelector } from 'react-redux';
 import LinearProgress from '@material-ui/core/LinearProgress';
@@ -49,11 +54,11 @@ function Alert(props) {
 const Invoices = () => {
   const classes = useStyles();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const data = useSelector(state => state.invoice.invoices);
+  const user = useSelector(state => state.profile.profile);
   const [fileSelected, setFileSelected] = useState(null);
   const [loadingModal, setLoadingModal] = useState(false);
-  const user = useSelector(state => state.profile.profile);
-  const navigate = useNavigate();
   const [openSnackbar, setOpenSnackbar] = useState(false);
 
   const onHandleFileUpload = () => {
@@ -78,7 +83,6 @@ const Invoices = () => {
           .then(async response => {
             if (response.status === RESPONSE_STATUS.FORBIDDEN) {
               Cookies.remove(USER_TOKEN);
-              Cookies.remove(ACCESS_TOKEN_FABRIC);
               Cookies.remove(USER_DEVICE_TOKEN);
               navigate('/', { replace: true });
             }
@@ -109,7 +113,6 @@ const Invoices = () => {
         .then(async response => {
           if (response.status === RESPONSE_STATUS.FORBIDDEN) {
             Cookies.remove(USER_TOKEN);
-            Cookies.remove(ACCESS_TOKEN_FABRIC);
             Cookies.remove(USER_DEVICE_TOKEN);
             navigate('/', { replace: true });
           }
@@ -150,7 +153,7 @@ const Invoices = () => {
   return (
     <Page
       className={classes.root}
-      title="Invoices">
+      title="Orders">
       <Container maxWidth={false}>
         {user && <Toolbar onHandleFileUpload={onHandleFileUpload} onHandleFileChange={onFileChange} user={user} />}
         <Box mt={3}>

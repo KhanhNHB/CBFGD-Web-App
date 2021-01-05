@@ -24,6 +24,7 @@ import datetimeUtils from '../utils/datetimeUtils';
 const formSchema = Yup.object().shape({
     first_name: Yup.string().required("First name is not empty"),
     last_name: Yup.string().required("First name is not empty"),
+    password: Yup.string().required("Password is not empty"),
     phone: Yup.string().required("Phone is not empty").min(7),
     identify_number: Yup.string().required("Identify number is not empty").min(8),
     license_number: Yup.string().required("License number is not empty").min(8),
@@ -98,14 +99,16 @@ const ModalShipperAdd = (props) => {
             identify_number: data.identify_number,
             license_number: data.license_number
         };
-        const response = await API.post(SHIPPER_ENDPOINT, dataBody);
-        const fetchData = await response.json();
-
-        if (fetchData.message) {
-            alert(fetchData.message);
-            return;
+        const response = await API.post(`${SHIPPER_ENDPOINT}`, dataBody);
+        if (response.ok) {
+            props.onCloseModal(true);
+        } else {
+            const fetchData = await response.json();
+            if (fetchData.message) {
+                alert(fetchData.message);
+                return;
+            }
         }
-        props.onCloseModal(isChanged);
     }
 
     return (
@@ -131,7 +134,7 @@ const ModalShipperAdd = (props) => {
                                     margin: "10px",
                                     color: 'white'
                                 }}>
-                                    <h3>Create shipper</h3>
+                                    <h3>Create Shipper</h3>
                                 </div>
                                 <CloseIcon
                                     className={classes.closeBtn}
@@ -187,13 +190,14 @@ const ModalShipperAdd = (props) => {
                                         <Grid item xs={12} sm={6}>
                                             <TextField
                                                 fullWidth
-                                                placeholder="Password (*)"
+                                                label="Password (*)"
                                                 name="password"
-                                                value={values.password}
+                                                placeholder="Input shipper password"
                                                 onChange={handleChange}
                                                 onBlur={handleBlur}
-                                                variant="outlined"
                                                 type="password"
+                                                value={values.password}
+                                                variant="outlined"
                                                 helperText={errors.password}
                                                 error={(errors.password && touched.password) ? true : false}
                                             />

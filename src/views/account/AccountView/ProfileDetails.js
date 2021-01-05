@@ -10,7 +10,7 @@ import * as Yup from 'yup';
 import API from '../../../api/API';
 import { ADMIN_ENDPOINT } from '../../../api/endpoint';
 import Cookies from 'js-cookie';
-import { ACCESS_TOKEN_FABRIC, USER_DEVICE_TOKEN, USER_TOKEN } from '../../../common';
+import { USER_DEVICE_TOKEN, USER_TOKEN } from '../../../common';
 import { useNavigate } from 'react-router-dom';
 
 const useStyles = makeStyles((theme) => ({
@@ -25,7 +25,6 @@ const formSchema = Yup.object().shape({
   first_name: Yup.string().required("First name is not empty"),
   last_name: Yup.string().required("Last name is not empty"),
   email: Yup.string().email("Email is incorrect"),
-  phone: Yup.number().required("Phone is not empty").min(7),
   DOB: Yup.date()
 });
 
@@ -45,31 +44,30 @@ const ProfileDetails = ({ user, className }) => {
     if (!isChanged) return;
 
     const dataBody = {
-      name: (data.last_name).trim() + " " + data.first_name,
+      first_name: data.first_name.trim(),
+      last_name: data.last_name.trim(),
       gender: data.gender === 'Other' ? '' : data.gender,
+      DOB: data.DOB,
       email: data.email,
-      address: data.address,
-      phone: +data.phone,
-      DOB: data.DOB
+      address: data.address
     };
 
-    const response = await API.put(ADMIN_ENDPOINT + `/${user.phone}`, dataBody);
+    const response = await API.put(`${ADMIN_ENDPOINT}/${user.phone}`, dataBody);
+    if (response.ok) {
+      const updatedData = await response.json();
+      const messageError = updatedData.message;
 
-    const updatedData = await response.json();
-    const messageError = updatedData.message;
-    if (messageError) {
-      if (updatedData.message.includes('Duplicate')) {
-        alert('Phone is existed. Please try again.');
-      } else {
+      if (messageError) {
         alert(updatedData.message);
+        return;
       }
-      return;
-    }
 
-    Cookies.remove(USER_TOKEN);
-    Cookies.remove(ACCESS_TOKEN_FABRIC);
-    Cookies.remove(USER_DEVICE_TOKEN);
-    navigate('/', { replace: true });
+
+
+      Cookies.remove(USER_TOKEN);
+      Cookies.remove(USER_DEVICE_TOKEN);
+      navigate('/', { replace: true });
+    }
   }
 
   return (

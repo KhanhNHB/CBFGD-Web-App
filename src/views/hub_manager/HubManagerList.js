@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import clsx from 'clsx';
 import PropTypes from 'prop-types';
 import datetimeUtils from '../../utils/datetimeUtils';
@@ -15,23 +15,24 @@ import {
     Button,
     Modal,
     TableSortLabel,
+    Snackbar,
 } from '@material-ui/core';
 
 import { useDispatch } from 'react-redux';
-import { STATUS } from '../../common/index';
 import TableContainer from '@material-ui/core/TableContainer';
 import ModalHubManagerAdd from '../../components/ModalHubManagerAdd';
 import ModalAssignHub from './ModalAssignHub';
 import { ADMIN_ENDPOINT, HUB_MANAGER_ENDPOINT } from '../../api/endpoint';
 import API from '../../api/API';
 import { actLoadHubManager } from '../../actions';
+import Alert from '@material-ui/lab/Alert';
 
 const columns = [
     { id: 'avatar', label: 'Avatar', minWidth: 120, align: 'left' },
     { id: 'last_name', label: 'Last name', minWidth: 200, align: 'left' },
     { id: 'first_name', label: 'First name', minWidth: 200, align: 'left' },
     { id: 'phone', label: 'Phone', minWidth: 200, align: 'left' },
-    { id: 'status', label: 'Status', minWidth: 120, align: 'left' },
+    { id: 'is_active', label: 'Status', minWidth: 120, align: 'left' },
 ];
 
 const EnhancedTableHead = (props) => {
@@ -102,23 +103,44 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-const HubManagerList = ({ className, hubmanagers, user, ...rest }) => {
-    const rowsPerPage = 50;
+const HubManagerList = ({ className, data, user, ...rest }) => {
     const classes = useStyles();
     const dispatch = useDispatch();
-    const [page, setPage] = useState(0);
+    let totalPage = 0;
+    const [page, setPage] = useState(totalPage);
+    const rowsPerPage = 50;
     const [order, setOrder] = useState('asc');
     const [orderBy, setOrderBy] = useState('id');
     const [currentHub, setCurrentHub] = useState(null);
     const [modalOpenAdd, setModalOpenAdd] = useState(false);
     const [visiableModalHub, setVisibleModalHub] = useState(false);
     const [selectedHubManager, setSelectedHubManager] = useState(null);
+    const [openSnackbar, setOpenSnackbar] = useState(false);
+
+    useEffect(() => {
+        if (data.hub_managers && data.hub_managers.length) {
+            totalPage = +data.meta.totalPages;
+            setPage(0);
+        }
+    }, []);
 
     const openModalFormAdd = () => {
         setModalOpenAdd(true);
     }
 
-    const onCloseModalAdd = async () => {
+    const onCloseModalAdd = async (isChanged) => {
+        if (isChanged) {
+            const response = await API.get(`${HUB_MANAGER_ENDPOINT}?page=1&limit=50`);
+            if (response.ok) {
+                const fetchData = await response.json();
+                const data = {
+                    hub_managers: fetchData.data.items,
+                    meta: fetchData.data.meta
+                };
+                dispatch(actLoadHubManager(data));
+                setOpenSnackbar(true);
+            }
+        }
         setModalOpenAdd(false);
     }
 
@@ -150,20 +172,21 @@ const HubManagerList = ({ className, hubmanagers, user, ...rest }) => {
             textAlign: 'center'
 
         }}>
-            {value.toUpperCase()}
+            {value ? 'ACTIVE' : 'DEACTIVE'}
         </div>);
     }
 
     const _hanleRowTableData = (column, value) => {
         switch (column) {
-            case 'status':
-                return (value === STATUS.AVAILABLE
+            case 'is_active':
+                return (value
                     ? _rowStatus("#1e8101", value)
-                    : value === STATUS.PENDING
-                        ? _rowStatus("#d9534f", value)
-                        : _rowStatus("#f0ad4f", value));
+                    : _rowStatus("#f0ad4f", value));
             case 'avatar':
-                return (<img alt="User Avatar" style={{ height: 45, width: 60 }} src={value ? value : 'https://res.cloudinary.com/dvehkdedj/image/upload/v1598777976/269-2697881_computer-icons-user-clip-art-transparent-png-icon_yqpi0g.png'} />);
+                return (<img alt="User Avatar" style={{ height: 45, width: 60 }} src={value
+                    ? value
+                    : 'https://res.cloudinary.com/dvehkdedj/image/upload/v1598777976/269-2697881_computer-icons-user-clip-art-transparent-png-icon_yqpi0g.png'}
+                />);
             case 'created_at':
                 return datetimeUtils.DisplayDateTimeFormat(value);
             default:
@@ -188,7 +211,7 @@ const HubManagerList = ({ className, hubmanagers, user, ...rest }) => {
         if (patchData.message) {
             alert(patchData.message);
         } else {
-            API.get(`${HUB_MANAGER_ENDPOINT}`)
+            API.get(`${HUB_MANAGER_ENDPOINT}?page=1&limit=50`)
                 .then(async response => {
                     if (response.ok) {
                         const fetchData = await response.json();
@@ -203,6 +226,13 @@ const HubManagerList = ({ className, hubmanagers, user, ...rest }) => {
         }
         setSelectedHubManager(null);
         handleInvisibleModalHub();
+    };
+
+    const handleCloseSnackbar = (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        setOpenSnackbar(false);
     };
 
     return (
@@ -228,51 +258,58 @@ const HubManagerList = ({ className, hubmanagers, user, ...rest }) => {
                                 onRequestSort={handleRequestSort}
                             />
                             <TableBody>
-                                {hubmanagers.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((hubmanager, index) => {
-                                    return (
-                                        <TableRow hover role="checkbox" tabIndex={-1} key={hubmanager.phone}>
-                                            {columns.map((column, index) => {
-                                                let value;
-                                                if (column.id === 'hub') {
-                                                    value = _hanleRowTableData(column.id, hubmanager.hub.name);
-                                                } else {
-                                                    value = _hanleRowTableData(column.id, hubmanager[column.id]);
-                                                }
-                                                return (
-                                                    <TableCell
-                                                        align={column.align}
-                                                        id={index}
-                                                        key={index}
-                                                    >
-                                                        {value}
+                                {(data && data.hub_managers)
+                                    ? data.hub_managers.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                                        .map((hub_manager, index) => {
+                                            return (
+                                                <TableRow hover role="checkbox" tabIndex={-1} key={hub_manager.phone}>
+                                                    {columns.map((column, index) => {
+                                                        let value;
+                                                        if (column.id === 'hub') {
+                                                            value = _hanleRowTableData(column.id, hub_manager.hub.name);
+                                                        } else {
+                                                            value = _hanleRowTableData(column.id, hub_manager[column.id]);
+                                                        }
+                                                        return (
+                                                            <TableCell
+                                                                align={column.align}
+                                                                id={index}
+                                                                key={index}
+                                                            >
+                                                                {value}
+                                                            </TableCell>
+                                                        );
+                                                    })}
+                                                    <TableCell align={"left"}>
+                                                        <Button
+                                                            color="primary"
+                                                            variant="contained"
+                                                            onClick={() => handleSelectedRow(hub_manager.id, hub_manager.hub ? hub_manager.hub.id : null)}
+                                                            style={{ color: 'white' }}
+                                                        >
+                                                            {hub_manager.hub.name}
+                                                        </Button>
                                                     </TableCell>
-                                                );
-                                            })}
-                                            <TableCell align={"left"}>
-                                                <Button
-                                                    color="primary"
-                                                    variant="contained"
-                                                    onClick={() => handleSelectedRow(hubmanager.id, hubmanager.hub ? hubmanager.hub.id : null)}
-                                                    style={{ color: 'white' }}
-                                                >
-                                                    {hubmanager.hub.name}
-                                                </Button>
-                                            </TableCell>
-                                        </TableRow>
-                                    );
-                                })}
+                                                </TableRow>
+                                            );
+                                        })
+                                    : null
+                                }
                             </TableBody>
                         </Table>
                     </TableContainer>
                 </Box>
-                <TablePagination
-                    rowsPerPageOptions={[0]}
-                    component="div"
-                    count={hubmanagers.length}
-                    rowsPerPage={rowsPerPage}
-                    page={page}
-                    onChangePage={handleChangePage}
-                />
+                {data && data.hub_managers.length
+                    ?
+                    <TablePagination
+                        rowsPerPageOptions={[0]}
+                        component="div"
+                        count={data.hub_managers.length}
+                        rowsPerPage={rowsPerPage}
+                        page={page}
+                        onChangePage={handleChangePage}
+                    />
+                    : null}
             </Card>
             <Modal open={modalOpenAdd}>
                 <div className={classes.modal}>
@@ -289,13 +326,26 @@ const HubManagerList = ({ className, hubmanagers, user, ...rest }) => {
                     />
                 </div>
             </Modal>
+            <Snackbar
+                anchorOrigin={{
+                    vertical: 'top',
+                    horizontal: 'right'
+                }}
+                open={openSnackbar}
+                autoHideDuration={3000}
+                onClose={handleCloseSnackbar}
+                message={`Import Sucess!`}
+            >
+                <Alert onClose={handleCloseSnackbar} severity='success'>
+                    Create Hub Manager Sucess!
+                </Alert>
+            </Snackbar>
         </div>
     );
 };
 
 HubManagerList.propTypes = {
     className: PropTypes.string,
-    hubmanagers: PropTypes.array.isRequired
 };
 
 export default HubManagerList;
