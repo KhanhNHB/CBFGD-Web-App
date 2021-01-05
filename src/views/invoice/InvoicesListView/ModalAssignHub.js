@@ -52,7 +52,7 @@ const ModalAssignHub = ({
     const [selectedHub, setSelectedHub] = useState(onCurrentHub);
 
     const fetchHub = async () => {
-        const response = await API.get(`${HUB_ENDPOINT}/recommend/invoices/${onSelectedInvoice}`);
+        const response = await API.get(`${HUB_ENDPOINT}/recommend/orders/${onSelectedInvoice}`);
         if (response.ok) {
             const fetchData = await response.json();
             if (!fetchData.data.length) {
@@ -62,7 +62,6 @@ const ModalAssignHub = ({
         }
     };
 
-    console.log(hubs);
     useEffect(() => {
         fetchHub();
     }, []);

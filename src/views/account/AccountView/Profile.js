@@ -28,7 +28,10 @@ const Profile = ({ user, className }) => {
           display="flex"
           flexDirection="column"
         >
-          <Avatar className={classes.avatar} src={user.avatar ? user.avatar : 'https://res.cloudinary.com/dvehkdedj/image/upload/v1598777976/269-2697881_computer-icons-user-clip-art-transparent-png-icon_yqpi0g.png'} />
+          <Avatar className={classes.avatar} src={user.avatar
+            ? user.avatar
+            : 'https://res.cloudinary.com/dvehkdedj/image/upload/v1598777976/269-2697881_computer-icons-user-clip-art-transparent-png-icon_yqpi0g.png'}
+          />
           <Typography
             color="textPrimary"
             gutterBottom

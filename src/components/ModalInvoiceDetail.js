@@ -13,7 +13,6 @@ import CloseIcon from '@material-ui/icons/Close';
 import datetimeUtils from '../utils/datetimeUtils';
 import axios from 'axios';
 import Cookies from 'js-cookie';
-import { ACCESS_TOKEN_FABRIC } from "../common";
 import clsx from 'clsx';
 import { Check } from "react-feather";
 import PropTypes from 'prop-types';
@@ -173,20 +172,20 @@ const ModalInvoiceDetail = (props) => {
             }
         }
 
-        axios.get(`${BASE_URL_FABRIC}/channels/mychannel/chaincodes/fabinvoice?args=["${props.invoice.provider.name}${props.invoice.code}"]&fcn=getHistoryForAsset&peer=peer0.org1.example.com`, {
-            headers: {
-                'Authorization': 'Bearer ' + Cookies.get(ACCESS_TOKEN_FABRIC),
-            },
-        }).then(response => {
-            if (response.status === 200) {
-                if (!response.data && !response.data.length) {
-                    return;
-                }
-                setDeliveringProcess(response.data);
-                handleStep(response.data);
-                setLoading(false);
-            }
-        });
+        // axios.get(`${BASE_URL_FABRIC}/channels/mychannel/chaincodes/fabinvoice?args=["${props.invoice.provider.name}${props.invoice.code}"]&fcn=getHistoryForAsset&peer=peer0.org1.example.com`, {
+        //     headers: {
+        //         'Authorization': 'Bearer ' + Cookies.get(ACCESS_TOKEN_FABRIC),
+        //     },
+        // }).then(response => {
+        //     if (response.status === 200) {
+        //         if (!response.data && !response.data.length) {
+        //             return;
+        //         }
+        //         setDeliveringProcess(response.data);
+        //         handleStep(response.data);
+        //         setLoading(false);
+        //     }
+        // });
     }, [props.invoice.code, props.invoice.provider.name]);
 
     function getStepContent(label) {

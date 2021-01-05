@@ -16,7 +16,7 @@ import ShipperList from './ShipperList';
 import API from '../../../api/API';
 import { useSelector, useDispatch } from 'react-redux';
 import { actLoadProfile, actLoadShipper } from '../../../actions/index';
-import { ACCESS_TOKEN_FABRIC, RESPONSE_STATUS, USER_DEVICE_TOKEN, USER_TOKEN } from '../../../common';
+import { RESPONSE_STATUS, ROLE, USER_DEVICE_TOKEN, USER_TOKEN } from '../../../common';
 import { useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
 
@@ -45,37 +45,33 @@ const ShipperListView = () => {
   const classes = useStyles();
   const navigate = useNavigate();
   const [loadingModal, setLoadingModal] = useState(false);
-  const shippers = useSelector(state => state.shipper.shippers);
+  const data = useSelector(state => state.shipper.shippers);
   const [user, setUser] = useState(null);
 
   useEffect(() => {
     setLoadingModal(true);
 
     const fetchShipper = async (user) => {
-      let query = null;
-      if (user.role === 'Admin') {
-        query = 'hub_manager_phone=none';
+      let query = 'page=1&limit=50&hub_manager_phone=';
+      if (user.roleId === ROLE.ADMIN) {
+        query += 'none';
       } else {
-        query = `hub_manager_phone=${user.phone}`;
+        query += `${user.phone}`;
       }
 
-      API.get(`${SHIPPER_ENDPOINT}?${query}`)
-        .then(async response => {
-          if (response.status === RESPONSE_STATUS.FORBIDDEN) {
-            Cookies.remove(USER_TOKEN);
-            Cookies.remove(ACCESS_TOKEN_FABRIC);
-            Cookies.remove(USER_DEVICE_TOKEN);
-            navigate('/', { replace: true });
-          }
-          if (response.ok) {
-            const fetchData = await response.json();
-            const shippersData = fetchData.data;
-            if (shippersData.length > 0) {
-              dispatch(actLoadShipper(shippersData));
-            }
-          }
-          setLoadingModal(false);
-        });
+      const response = await API.get(`${SHIPPER_ENDPOINT}?${query}`);
+      if (response.ok) {
+        const fetchData = await response.json();
+        const data = { shippers: fetchData.data.items, meta: fetchData.data.meta };
+        dispatch(actLoadShipper(data));
+      } else {
+        if (response.status === RESPONSE_STATUS.FORBIDDEN) {
+          Cookies.remove(USER_TOKEN);
+          Cookies.remove(USER_DEVICE_TOKEN);
+          navigate('/', { replace: true });
+        }
+      }
+      setLoadingModal(false);
     }
 
     const readCookie = async () => {
@@ -103,7 +99,7 @@ const ShipperListView = () => {
       <Container maxWidth={false}>
         <Box mt={3}>
           <Grid container spacing={3}>
-            <ShipperList shippers={shippers} user={user} />
+            <ShipperList data={data} user={user} />
           </Grid>
         </Box>
       </Container>

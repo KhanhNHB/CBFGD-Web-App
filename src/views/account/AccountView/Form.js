@@ -94,6 +94,7 @@ export const Form = ({
                                 fullWidth
                                 label="Phone Number (*)"
                                 name="phone"
+                                disabled={true}
                                 placeholder="Input your phone"
                                 onChange={handleChange}
                                 onBlur={handleBlur}

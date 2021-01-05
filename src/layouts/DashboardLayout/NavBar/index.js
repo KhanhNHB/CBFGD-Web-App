@@ -19,12 +19,13 @@ import {
 } from 'react-feather';
 import NavItem from './NavItem';
 import { useSelector } from 'react-redux';
+import { ROLE } from '../../../common';
 
 const itemsAdmin = [
   {
     href: '/app/invoices-list',
     icon: ShoppingBagIcon,
-    title: 'Invoices'
+    title: 'Orders'
   },
   {
     href: '/app/shipper',
@@ -39,7 +40,7 @@ const itemsAdmin = [
   {
     href: '/app/shipping-area',
     icon: MapIcon,
-    title: 'Shipping Area'
+    title: 'Hubs'
   },
   {
     href: '/app/hub-manager',
@@ -52,7 +53,7 @@ const itemsHubManager = [
   {
     href: '/app/invoices-list',
     icon: ShoppingBagIcon,
-    title: 'Invoices'
+    title: 'Orders'
   },
   {
     href: '/app/shipper',
@@ -67,7 +68,7 @@ const itemsHubManager = [
   {
     href: '/app/shipping-area',
     icon: MapIcon,
-    title: 'Shipping Area'
+    title: 'Hubs'
   }
 ];
 
@@ -126,7 +127,7 @@ const NavBar = ({ onMobileClose, openMobile }) => {
           variant="h5"
         >
           {
-            profile && `${profile.role}`
+            profile && `${profile.roleId === ROLE.ADMIN ? 'Admin' : 'Hub Manager'}`
           }
         </Typography>
       </Box>
@@ -134,7 +135,7 @@ const NavBar = ({ onMobileClose, openMobile }) => {
       <Box p={2}>
         <List>
           {
-            (profile && profile.role === 'Admin')
+            (profile && profile.roleId === ROLE.ADMIN)
               ? itemsAdmin.map((item) => (
                 <NavItem
                   href={item.href}

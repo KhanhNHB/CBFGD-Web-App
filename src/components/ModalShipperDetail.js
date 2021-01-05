@@ -65,11 +65,12 @@ const useStyles = makeStyles((theme) => ({
         color: 'white'
     },
     detailHeader: {
-        backgroundColor: "#00bdb6",
         display: "flex",
+        flex: 1,
+        justifyContent: 'space-between',
+        backgroundColor: "#00bdb6",
         borderTopLeftRadius: "5px",
         borderTopRightRadius: "5px",
-        flexDirection: "row-reverse",
     },
     buttonSave: {
         marginTop: 20,
@@ -105,7 +106,7 @@ const ModalShipperDetail = (props) => {
     const [loading, setLoading] = useState(false);
 
     const fetchInvoiceShipperByAssignedAt = async (date) => {
-        const response = await API.get(`${SHIPPER_ENDPOINT}/${shipper.phone}/invoices?assigned_at=${date}`);
+        const response = await API.get(`${SHIPPER_ENDPOINT}/${shipper.phone}/orders?assigned_at=${date}`);
         const fetchData = await response.json();
         if (response.ok) {
             setBag(fetchData.data);
@@ -130,6 +131,12 @@ const ModalShipperDetail = (props) => {
     return (
         <div className={classes.container}>
             <div className={classes.detailHeader}>
+                <div style={{
+                    margin: "10px",
+                    color: 'white'
+                }}>
+                    <h3>Shipper Information</h3>
+                </div>
                 <CloseIcon className={classes.closeBtn} onClick={() => props.onCloseModal()} />
             </div>
             <div className={classes.wrapperDetail}>

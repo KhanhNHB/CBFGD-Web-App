@@ -22,7 +22,7 @@ import {
 import { useDispatch } from 'react-redux';
 import { actLoadProfile, actSignIn } from '../../actions';
 import Cookies from 'js-cookie';
-import { ACCESS_TOKEN_FABRIC, USER_DEVICE_TOKEN, USER_TOKEN } from '../../common';
+import { ROLE, USER_DEVICE_TOKEN, USER_TOKEN } from '../../common';
 import { messaging } from '../../init-fcm';
 
 const useStyles = makeStyles((theme) => ({
@@ -83,12 +83,13 @@ const LoginView = () => {
 
     setIsLoading(true);
 
-    const response = await API.post(LOGIN_ENDPOINT, {
+    const dataBody = {
       phone: username,
       password: password,
-      role: role
-    });
+      role: +role
+    };
 
+    const response = await API.post(LOGIN_ENDPOINT, dataBody);
     const json = await response.json();
 
     if (json.message) {
@@ -107,9 +108,9 @@ const LoginView = () => {
             };
 
             const userData = json.data;
-            if (userData.user && userData.user.role === 'Admin') {
+            if (userData.user && userData.user.roleId === ROLE.ADMIN) {
               await API.post(`${ADMIN_ENDPOINT}/${userData.user.id}/token`, data);
-            } else if (userData.user && userData.user.role === 'Hub_Manager') {
+            } else if (userData.user && userData.user.roleId === ROLE.HUB_MANAGER) {
               await API.post(`${HUB_MANAGER_ENDPOINT}/${userData.user.id}/token`, data);
             }
             Cookies.set(USER_DEVICE_TOKEN, token);
@@ -126,7 +127,6 @@ const LoginView = () => {
     setIsLoading(false);
 
     Cookies.set(USER_TOKEN, json.data.access_token);
-    Cookies.set(ACCESS_TOKEN_FABRIC, json.data.user.access_token_fabric);
     dispatch(actSignIn(json.data.access_token));
     navigate('/app/invoices-list', { replace: true });
   }
@@ -197,8 +197,8 @@ const LoginView = () => {
               }}
             >
               <option aria-label="Select Role" value="" />
-              <option value={"admin"}>Administrator</option>
-              <option value={"hub_manager"}>Hub Manager</option>
+              <option value={1}>Administrator</option>
+              <option value={2}>Hub Manager</option>
             </Select>
           </FormControl>
           <Box my={2}>

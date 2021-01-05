@@ -12,6 +12,7 @@ import {
 } from '@material-ui/core';
 import API from '../../../api/API';
 import { SHIPPER_ENDPOINT } from '../../../api/endpoint';
+import { ROLE } from '../../../common';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -46,18 +47,17 @@ const ModalAssignShipper = ({
     onCurrentShipper,
 }) => {
     const classes = useStyles();
-    const [shippers, setShippers] = useState([]);
+    const [data, setData] = useState([]);
     const [selectedShipper, setSelectedShipper] = useState(onCurrentShipper);
 
     useEffect(() => {
         const fetchShipper = async () => {
-            if (user && user.role === 'Hub_Manager') {
-                const response = await API.get(`${SHIPPER_ENDPOINT}?hub_manager_phone=${user.phone}`);
-                const json = await response.json();
-                if (!json.data.length) {
-                    return;
+            if (user && user.roleId === ROLE.HUB_MANAGER) {
+                const response = await API.get(`${SHIPPER_ENDPOINT}?page=1&limit=50&hub_manager_phone=${user.phone}`);
+                if (response.ok) {
+                    const fetchData = await response.json();
+                    setData(fetchData.data);
                 }
-                setShippers(json.data);
             }
         };
         fetchShipper();
@@ -78,20 +78,25 @@ const ModalAssignShipper = ({
         <div className={classes.root}>
             <List className={classes.container} subheader={<li />}>
                 <FormControl component="fieldset" className={classes.formControl}>
-                    <FormLabel component="legend">List Shipper</FormLabel>
+                    <FormLabel component="legend" style={{ fontWeight: 'bold' }}>List Shipper</FormLabel>
                     <RadioGroup
                         aria-label="List shipper"
                         onChange={handleChange}
                         value={selectedShipper}
                     >
-                        {shippers.map((shipper, index) => (
-                            <FormControlLabel
-                                key={index}
-                                value={+shipper.id}
-                                control={<Radio />}
-                                label={shipper.last_name + " " + shipper.first_name}
-                            />
-                        ))}
+                        {(data && data.items && data.items.length)
+                            ?
+                            data.items.map((shipper, index) => (
+                                <FormControlLabel
+                                    key={index}
+                                    value={+shipper.id}
+                                    control={<Radio />}
+                                    label={shipper.last_name + " " + shipper.first_name}
+                                />
+                            ))
+                            : <p>List Shipper Is Empty!</p>
+                        }
+
                     </RadioGroup>
                 </FormControl>
             </List>

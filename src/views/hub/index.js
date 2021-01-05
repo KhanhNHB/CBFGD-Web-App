@@ -3,10 +3,10 @@ import { Map, GoogleApiWrapper, Marker, Circle, InfoWindow } from 'google-maps-r
 import API from '../../api/API';
 import { HUB_ENDPOINT, INVOICE_ENDPOINT, PROFILE_ENDPOINT } from '../../api/endpoint';
 import { useDispatch, useSelector } from 'react-redux';
-import { actGetListHub, actLoadProfile } from '../../actions';
+import { actGetListHub, actLoadInvoices, actLoadProfile } from '../../actions';
 import { Box, Button, Container, Modal } from '@material-ui/core';
 import ModalHubAdd from '../../components/ModalHubAdd';
-import { ACCESS_TOKEN_FABRIC, RESPONSE_STATUS, USER_DEVICE_TOKEN, USER_TOKEN } from '../../common';
+import { ROLE, USER_TOKEN } from '../../common';
 import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router-dom';
 import formatPrice from '../../utils/formatPrice';
@@ -23,7 +23,7 @@ export function MapContainer(props) {
   const [openHub, setOpenHub] = useState(false);
   const [name, setName] = useState('');
   const [radius, setRadius] = useState('');
-  const [status, setStatus] = useState('Available');
+  const [status, setStatus] = useState('Active');
   const [id, setId] = useState('');
   const [user, setUser] = useState(null);
   const [showingInfoWindow, setShowingInfoWindow] = useState(false);
@@ -39,7 +39,7 @@ export function MapContainer(props) {
     setName('');
     setRadius('');
     setId('');
-    setStatus('Available');
+    setStatus('Active');
     handleOpenHub(true);
   }
 
@@ -48,6 +48,34 @@ export function MapContainer(props) {
   }
 
   useEffect(() => {
+    const fetchOrder = async (user) => {
+      let query = "none";
+      if (user.roleId === ROLE.HUB_MANAGER) {
+        query = user.hubId;
+      }
+
+      const response = await API.get(`${INVOICE_ENDPOINT}/status/available?hub_id=${query}`);
+      if (response.ok) {
+        const fetchData = await response.json();
+        setInvoiceLocation(fetchData.data);
+        dispatch(actLoadInvoices(fetchData.data));
+      }
+    };
+
+    const fetchHub = async (user) => {
+      let query = 'none';
+      if (user.roleId === ROLE.HUB_MANAGER) {
+        query = user.phone;
+      }
+
+      const response = await API.get(`${HUB_ENDPOINT}?page=1&limit=50&hub_manager_phone=${query}`);
+      if (response.ok) {
+        const fetchData = await response.json();
+        fetchOrder(user);
+        dispatch(actGetListHub(fetchData.data));
+      }
+    };
+
     const readCookie = async () => {
       const user = Cookies.get(USER_TOKEN);
       if (user) {
@@ -58,33 +86,11 @@ export function MapContainer(props) {
         if (response.ok) {
           const fetchData = await response.json();
           setUser(fetchData.data);
+          fetchHub(fetchData.data);
           dispatch(actLoadProfile(fetchData.data));
         }
       }
     };
-
-    API.get(`${HUB_ENDPOINT}`)
-      .then(async response => {
-        if (response.status === RESPONSE_STATUS.FORBIDDEN) {
-          Cookies.remove(USER_TOKEN);
-          Cookies.remove(ACCESS_TOKEN_FABRIC);
-          Cookies.remove(USER_DEVICE_TOKEN);
-          navigate('/', { replace: true });
-        }
-        if (response.ok) {
-          const fetchData = await response.json();
-          dispatch(actGetListHub(fetchData.data));
-        }
-      });
-
-    API.get(`${INVOICE_ENDPOINT}/status/available`)
-      .then(async response => {
-        if (response.ok) {
-          const fetchData = await response.json();
-          setInvoiceLocation(fetchData.data);
-          // dispatch(actLoadInvoices(fetchData.data));
-        }
-      });
 
     readCookie();
   }, [dispatch, navigate]);
@@ -94,7 +100,7 @@ export function MapContainer(props) {
     setName(evt.title);
     setRadius(evt.radius);
     setStatus(evt.status);
-    if (user && user.role === 'Admin') {
+    if (user && user.roleId === ROLE.ADMIN) {
       handleOpenHub(true);
     }
   };
@@ -128,7 +134,6 @@ export function MapContainer(props) {
       setSelectedPlace(props.invoice);
       setActiveMarker(marker);
       setShowingInfoWindow(true);
-      console.log(props);
     }
 
     if (invoiceLocation && invoiceLocation.length) {
@@ -192,7 +197,6 @@ export function MapContainer(props) {
               )
               : ''
             }
-
           </div>
         </InfoWindow>
         {displayInvoiceMarkers()}
@@ -206,7 +210,7 @@ export function MapContainer(props) {
             justifyContent="flex-end"
             style={{ float: "left", marginLeft: '10%', marginTop: 10 }}
           >
-            {(user && user.role === 'Admin')
+            {(user && user.roleId === ROLE.ADMIN)
               ? <Button color="primary" onClick={handleOpenAddHub} variant="contained" style={{
                 color: 'white',
                 height: 45,
@@ -234,5 +238,5 @@ export function MapContainer(props) {
 }
 
 export default GoogleApiWrapper({
-  apiKey: 'AIzaSyAtGg0XWituHRy95vbyislioKh59n_PxHY'
+  apiKey: 'AIzaSyD0yJI0AiNhUii3PUU11HzNJdFLsFQncao'
 })(MapContainer);
