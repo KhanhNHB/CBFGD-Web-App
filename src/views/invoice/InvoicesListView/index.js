@@ -159,8 +159,22 @@ const Invoices = () => {
         <Box mt={3}>
           {loadingModal && <LinearProgress />}
           <Grid container spacing={3}>
-            {(data && user) && <InvoicesList data={data} user={user} />}
+            {(data && user) &&
+              <div>
+                <h3>List Order</h3>
+                <InvoicesList data={data} user={user} />
+              </div>
+            }
           </Grid>
+          {/* {loadingModal && <LinearProgress />}
+          <Grid container spacing={3}>
+            {(data && user) &&
+              <div style={{ marginTop: 10 }}>
+                <h3>List Order Invalid Address</h3>
+                <InvoicesList data={data} user={user} />
+              </div>
+            }
+          </Grid> */}
         </Box>
       </Container>
       <Snackbar

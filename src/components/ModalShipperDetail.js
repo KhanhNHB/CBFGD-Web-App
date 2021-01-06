@@ -217,7 +217,7 @@ const ModalShipperDetail = (props) => {
                                 marginLeft: 10,
                                 marginBottom: 15
                             }}>
-                                Total Invoice: {(bag && bag.delivery_status.length) ? bag.delivery_status.length : 0}
+                                Total Order: {(bag && bag.delivery_status.length) ? bag.delivery_status.length : 0}
                             </div>
                         </div>
                         {(bag && <Bags bag={bag} />)}

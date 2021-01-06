@@ -17,6 +17,7 @@ import {
   Modal,
   TableSortLabel,
   CircularProgress,
+  Snackbar,
 } from '@material-ui/core';
 import TableContainer from '@material-ui/core/TableContainer';
 import API from '../../../api/API';
@@ -27,6 +28,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { actLoadInvoices } from '../../../actions/index';
 import ModalAssignHub from './ModalAssignHub';
 import ModalAssignShipper from './ModalAssignShipper';
+import Alert from '@material-ui/lab/Alert';
 
 const columns = [
   { id: 'id', label: 'Id', minWidth: 120, align: 'left' },
@@ -36,18 +38,10 @@ const columns = [
   { id: 'receiver_phone_number', label: 'Receiver Phone Number', minWidth: 220, align: 'left' },
   { id: 'address', label: 'Receiver Address', minWidth: 350, align: 'left' },
   { id: 'priority', label: 'Priority', minWidth: 80, align: 'left' },
-  { id: 'note', label: 'Note', minWidth: 120, align: 'left' },
-  { id: 'product_name', label: 'Product Name', minWidth: 200, align: 'left' },
-  { id: 'product_image', label: 'Phoduct Image', minWidth: 200, align: 'left' },
-  { id: 'total_amount', label: 'Total Amount', minWidth: 170, align: 'left' },
-  { id: 'quantity', label: 'Quantity', minWidth: 80, align: 'left' },
-  { id: 'shipping_fee', label: 'Shipping Fee', minWidth: 170, align: 'left' },
-  { id: 'from_date', label: 'From Date', minWidth: 200, align: 'left' },
-  { id: 'to_date', label: 'To Date', minWidth: 200, align: 'left' },
-  { id: 'created_at', label: 'Created At', minWidth: 200, align: 'left' },
   { id: 'is_active', label: 'Status Order', minWidth: 170, align: 'left' },
   { id: 'current_delivery_status', label: 'Current Delivery Status', minWidth: 220, align: 'left' },
   { id: 'out_of_hub', label: 'Out Of Hub', minWidth: 220, align: 'left' },
+  { id: 'is_invalid_address', label: 'Invalid Address', minWidth: 220, align: 'left' },
 ];
 
 function descendingComparator(a, b, orderBy) {
@@ -166,6 +160,8 @@ const InvoicesList = ({ data, user }) => {
   const [currentHub, setCurrentHub] = useState(null);
   const [currentShipper, setCurrentShipper] = useState(null);
   const selectAssignHubStatus = useSelector(state => state.assignHubStatus.selectAssignHubStatus);
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [message, setMessage] = useState('');
 
   useEffect(() => {
     if (data.invoices) {
@@ -189,10 +185,13 @@ const InvoicesList = ({ data, user }) => {
       } else {
         query = `hub_id=${user.hubId}`
       }
-      const response = await API.get(INVOICE_ENDPOINT + `/providers/${provider_name}?page=${newPage + 1}&limit=50&${query}`);
+      const response = await API.get(`${INVOICE_ENDPOINT}/providers/${provider_name}?page=${newPage + 1}&limit=50&${query}`);
       if (response.ok) {
         const fetchData = await response.json();
-        const dataByProvider = { invoices: fetchData.data.items, meta: fetchData.data.meta };
+        const dataByProvider = {
+          invoices: fetchData.data.items,
+          meta: fetchData.data.meta
+        };
         dispatch(actLoadInvoices(dataByProvider));
         setPage(+newPage);
       }
@@ -203,10 +202,13 @@ const InvoicesList = ({ data, user }) => {
       } else {
         query = `hub_id=${user.hubId}`
       }
-      const response = await API.get(INVOICE_ENDPOINT + `?page=${newPage + 1}&limit=50&${query}`);
+      const response = await API.get(`${INVOICE_ENDPOINT}?page=${newPage + 1}&limit=50&${query}`);
       if (response.ok) {
         const fetchData = await response.json();
-        const data = { invoices: fetchData.data.items, meta: fetchData.data.meta };
+        const data = {
+          invoices: fetchData.data.items,
+          meta: fetchData.data.meta
+        };
         dispatch(actLoadInvoices(data));
         setPage(+newPage);
       }
@@ -254,11 +256,13 @@ const InvoicesList = ({ data, user }) => {
   const handleAssignShipper = async (shipper_id) => {
     setLoadingModal(true);
     const dataBody = {
-      shipper_id: shipper_id,
-      order_id: selectedInvoice
+      order_id: selectedInvoice,
+      shipper_id: shipper_id
     };
     const response = await API.patch(`${HUB_MANAGER_ENDPOINT}/${user.phone}/assign-shipper`, dataBody);
     if (response.ok) {
+      setMessage(`Assign Order ${selectedInvoice} for Shipper ${shipper_id} success`);
+      setOpenSnackbar(true);
       if (provider_name !== 'NONE') {
         const query = `hub_id=${user.hubId}`;
         const response = await API.get(`${INVOICE_ENDPOINT}/providers/${provider_name}?page=${page + 1}&limit=50&${query}`);
@@ -335,6 +339,21 @@ const InvoicesList = ({ data, user }) => {
     );
   }
 
+  const _rowInvalidAddress = (backgroundColor, value) => {
+    return (
+      <div style={{
+        backgroundColor: backgroundColor,
+        color: 'white',
+        width: 85,
+        padding: 8,
+        borderRadius: 3,
+        textAlign: 'center',
+      }}>
+        {value ? 'INVALID' : 'VALID'}
+      </div>
+    );
+  }
+
   const _rowPriority = (backgroundColor, value) => {
     return (<div style={{
       backgroundColor: backgroundColor,
@@ -384,6 +403,9 @@ const InvoicesList = ({ data, user }) => {
         );
       case "out_of_hub":
         return (value ? _rowOutOfHub("#d9534f", value) : _rowOutOfHub("#1e8101", value));
+      case "is_invalid_address":
+        return (value ? _rowInvalidAddress("#d9534f", value) : _rowInvalidAddress("#1e8101", value));
+
       default:
         return value;
     }
@@ -401,9 +423,11 @@ const InvoicesList = ({ data, user }) => {
       hub_id: +hub_id
     };
 
-    await API.patch(`${ADMIN_ENDPOINT} /${user.phone}/assign - order - to - hub`, data)
+    await API.patch(`${ADMIN_ENDPOINT}/${user.phone}/assign-order-to-hub`, data)
       .then(async res => {
         if (res.ok) {
+          setMessage(`Assign Order ${selectedInvoice} for Hub ${hub_id} success`);
+          setOpenSnackbar(true);
           if (provider_name !== 'NONE') {
             let query = null;
             if (user && user.roleId === ROLE.ADMIN) {
@@ -411,7 +435,7 @@ const InvoicesList = ({ data, user }) => {
             } else {
               query = `hub_id = ${user.hubId} `
             }
-            const response = await API.get(INVOICE_ENDPOINT + `/ providers / ${provider_name}?page = ${page + 1}& limit=50 & ${query} `);
+            const response = await API.get(`${INVOICE_ENDPOINT}/providers/${provider_name}?page=${page + 1}&limit=50&${query}`);
             if (response.ok) {
               const fetchData = await response.json();
               const dataByProvider = { invoices: fetchData.data.items, meta: fetchData.data.meta };
@@ -426,7 +450,7 @@ const InvoicesList = ({ data, user }) => {
             } else {
               query = `hub_id = ${user.hubId} `
             }
-            const response = await API.get(INVOICE_ENDPOINT + `? page = ${page + 1}& limit=50 & ${query} `);
+            const response = await API.get(`${INVOICE_ENDPOINT}?page=${page + 1}&limit=50&${query}`);
             if (response.ok) {
               const fetchData = await response.json();
               const data = { invoices: fetchData.data.items, meta: fetchData.data.meta };
@@ -460,6 +484,13 @@ const InvoicesList = ({ data, user }) => {
       return invoice.hub !== null;
     });
   }
+
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setOpenSnackbar(false);
+  };
 
   return (
     <>
@@ -508,12 +539,12 @@ const InvoicesList = ({ data, user }) => {
                                 onClick={() => handleSelectedRowForAssignHub(invoice.id, invoice.hub ? invoice.hub.id : null)}
                                 style={invoice.is_assign
                                   ? {
-                                    backgroundColor: (invoice.available && invoice.is_active) ? '#E69403' : '#aeb0b6',
+                                    backgroundColor: (invoice.available && invoice.is_active && !invoice.is_invalid_address) ? '#E69403' : '#aeb0b6',
                                     color: 'white'
                                   }
                                   : { color: 'white' }
                                 }
-                                disabled={(invoice.available && invoice.is_active) ? false : true}
+                                disabled={(invoice.available && invoice.is_active && !invoice.is_invalid_address) ? false : true}
                               >
                                 {invoice.hub ? 'Assigned' : 'Assign'}
                               </Button>
@@ -528,12 +559,12 @@ const InvoicesList = ({ data, user }) => {
                                   onClick={() => handleSelectedRowForAssignShipper(invoice.id, invoice.shipper_id ? invoice.shipper_id : null)}
                                   style={invoice.is_assign
                                     ? {
-                                      backgroundColor: (invoice.available && invoice.is_active) ? '#E69403' : '#aeb0b6',
+                                      backgroundColor: (invoice.available && invoice.is_active && !invoice.is_invalid_address) ? '#E69403' : '#aeb0b6',
                                       color: 'white'
                                     }
                                     : { color: 'white' }
                                   }
-                                  disabled={(invoice.available && invoice.is_active) ? false : true}
+                                  disabled={(invoice.available && invoice.is_active && !invoice.is_invalid_address) ? false : true}
                                 >
                                   {invoice.is_assign ? 'Assigned' : 'Assign'}
                                 </Button>
@@ -597,6 +628,20 @@ const InvoicesList = ({ data, user }) => {
       <Modal open={loadingModal} className={classes.loadingModal}>
         <CircularProgress />
       </Modal>
+      <Snackbar
+        anchorOrigin={{
+          vertical: 'top',
+          horizontal: 'right'
+        }}
+        open={openSnackbar}
+        autoHideDuration={3000}
+        onClose={handleCloseSnackbar}
+        message={`Import Sucess!`}
+      >
+        <Alert onClose={handleCloseSnackbar} severity='success'>
+          {message}
+        </Alert>
+      </Snackbar>
     </>
   );
 };

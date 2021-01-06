@@ -34,11 +34,12 @@ const useStyles = makeStyles((theme) => ({
         color: 'white'
     },
     detailHeader: {
-        backgroundColor: "#00bdb6",
         display: "flex",
+        flex: 1,
+        justifyContent: 'space-between',
+        backgroundColor: "#00bdb6",
         borderTopLeftRadius: "5px",
         borderTopRightRadius: "5px",
-        flexDirection: "row-reverse",
     },
     wrapperLeft: {
         backgroundColor: "white",
@@ -79,24 +80,25 @@ const ModalShipperAdd = (props) => {
     const handleAddHub = async () => {
         if (!id) {
             const responseHub = await API.post(`${HUB_ENDPOINT}`, {
-                name: name,
+                address: name,
                 radius: radius.toString(),
                 is_active: status === 'Active' ? true : false,
             });
+            const fetchHubData = await responseHub.json();
             if (responseHub.ok) {
-                const fetchHubData = await responseHub.json();
-                if (!fetchHubData.message) {
-                    dispatch(actCreateHub(fetchHubData.data));
-                    const response = await API.get(`${HUB_ENDPOINT}?page=1&limit=50&hub_manager_phone=none`);
-                    if (response.ok) {
-                        const fetchHub = await response.json();
-                        dispatch(actGetListHub(fetchHub.data));
-                    }
-                    setName('');
-                    setRadius('');
-                    setId('');
-                    props.onCLoseHub();
+                dispatch(actCreateHub(fetchHubData.data));
+                const response = await API.get(`${HUB_ENDPOINT}?page=1&limit=50&hub_manager_phone=none`);
+                if (response.ok) {
+                    const fetchHub = await response.json();
+                    dispatch(actGetListHub(fetchHub.data));
                 }
+                setName('');
+                setRadius('');
+                setId('');
+                props.onCLoseHub(true);
+                return;
+            } else {
+                alert(fetchHubData.message);
                 return;
             }
         } else {
@@ -106,14 +108,9 @@ const ModalShipperAdd = (props) => {
                 is_active: status === 'Active' ? true : false,
             });
 
-            if (responseUpdateStatusHub.ok) {
-                const fetchData = await responseUpdateStatusHub.json();
-                const message = fetchData.message;
-                if (message) {
-                    alert(message);
-                    return;
-                }
+            const fetchData = await responseUpdateStatusHub.json();
 
+            if (responseUpdateStatusHub.ok) {
                 dispatch(actCreateHub(fetchData.data));
                 const responseFetchHub = await API.get(`${HUB_ENDPOINT}?page=1&limit=50&hub_manager_phone=none`);
                 if (responseFetchHub.ok) {
@@ -123,7 +120,10 @@ const ModalShipperAdd = (props) => {
                 setName('');
                 setRadius('');
                 setId('');
-                props.onCLoseHub();
+                props.onCLoseHub(true);
+            } else {
+                alert(fetchData.message);
+                return;
             }
         }
     };
@@ -138,6 +138,9 @@ const ModalShipperAdd = (props) => {
     return (
         <div className={classes.container}>
             <div className={classes.detailHeader}>
+                <div style={{ margin: "10px", color: 'white' }}>
+                    <h3>Create Hub</h3>
+                </div>
                 <CloseIcon
                     className={classes.closeBtn}
                     onClick={() => props.onCLoseHub()}
@@ -186,7 +189,7 @@ const ModalShipperAdd = (props) => {
                             direction="row"
                             justify="flex-end"
                             alignItems="flex-end">
-                            <Grid xs={6} sm={3}>
+                            <Grid item xs={6} sm={3}>
                                 <Button
                                     color="primary"
                                     variant="contained"

@@ -97,7 +97,7 @@ const ModalAssignHub = ({
                                     key={index}
                                     value={+hub.id}
                                     control={<Radio />}
-                                    label={hub.name}
+                                    label={hub.address}
                                 />
                             })}
                         </RadioGroup>

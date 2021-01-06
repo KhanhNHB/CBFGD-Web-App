@@ -35,6 +35,7 @@ const useStyles = makeStyles((theme) => ({
         borderRight: "1px solid #e0e0e0",
         borderBottom: "3px solid #e0e0e0",
         borderBottomLeftRadius: "5px",
+        overflow: 'auto'
     },
     wrapperRight: {
         backgroundColor: "white",
@@ -74,11 +75,12 @@ const useStyles = makeStyles((theme) => ({
         color: "#00bdb6",
     },
     detailHeader: {
-        backgroundColor: "#00bdb6",
         display: "flex",
+        flex: 1,
+        justifyContent: 'space-between',
+        backgroundColor: "#00bdb6",
         borderTopLeftRadius: "5px",
         borderTopRightRadius: "5px",
-        flexDirection: "row-reverse",
     }
 }));
 
@@ -215,21 +217,35 @@ const ModalInvoiceDetail = (props) => {
         setActiveStep((prevActiveStep) => prevActiveStep - 1);
     };
 
+    console.log(props.invoice);
     return (
         <div className={classes.container}>
             <div className={classes.detailHeader}>
+                <div style={{ margin: "10px", color: 'white' }}>
+                    <h3>Order Information</h3>
+                </div>
                 <CloseIcon
                     className={classes.closeBtn}
                     onClick={() => props.onCloseModal()}
                 />
             </div>
             <div className={classes.wrapperLeft}>
-                <h2 className={classes.titleText}>Invoice Detail</h2>
-                <p className={classes.detailRow}><span><b>Invoice Code:</b> </span><span>{props.invoice.code}</span></p>
+                <h2 className={classes.titleText}>Order Detail</h2>
+                <p className={classes.detailRow}><span><b>Order Code:</b> </span><span>{props.invoice.code}</span></p>
                 <p className={classes.detailRow}><span><b>Receiver Name:</b> </span><span>{props.invoice.receiver_name}</span></p>
                 <p className={classes.detailRow}><span></span><b>Customer Phone Number:</b> <span>{props.invoice.customer_phone_number}</span></p>
                 <p className={classes.detailRow}><span></span><b>Receiver Phone Number:</b> <span>{props.invoice.receiver_phone_number}</span></p>
                 <p className={classes.detailRow}><span><b>Receiver Address:</b> </span><span>{props.invoice.address}</span></p>
+                <p className={classes.detailRow}><span><b>Current Delivery Status:</b> </span><span>{props.invoice.current_delivery_status}</span></p>
+                <p className={classes.detailRow}><img src={props.invoice.product_image} alt="image" width={60} height={60} /></p>
+                <p className={classes.detailRow}><span><b>Product Name:</b> </span><span>{props.invoice.product_name}</span></p>
+                <p className={classes.detailRow}><span><b>Quantity:</b> </span><span>{props.invoice.quantity}</span></p>
+                <p className={classes.detailRow}><span><b>Shipping Fee:</b> </span><span>{props.invoice.shipping_fee}</span></p>
+                <p className={classes.detailRow}><span><b>Total Amount:</b> </span><span>{props.invoice.total_amount}</span></p>
+                <p className={classes.detailRow}><span><b>Provider Name:</b> </span><span>{props.invoice.provider.name}</span></p>
+                <p className={classes.detailRow}><span><b>From Date:</b> </span><span>{datetimeUtils.DisplayDateTimeFormat(props.invoice.from_date)}</span></p>
+                <p className={classes.detailRow}><span><b>To Date:</b> </span><span>{datetimeUtils.DisplayDateTimeFormat(props.invoice.to_date)}</span></p>
+                <p className={classes.detailRow}><span><b>Created At:</b> </span><span>{datetimeUtils.DisplayDateTimeFormat(props.invoice.created_at)}</span></p>
             </div>
             <div className={classes.wrapperRight}>
                 {loading

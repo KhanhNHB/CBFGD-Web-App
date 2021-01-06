@@ -4,12 +4,13 @@ import API from '../../api/API';
 import { HUB_ENDPOINT, INVOICE_ENDPOINT, PROFILE_ENDPOINT } from '../../api/endpoint';
 import { useDispatch, useSelector } from 'react-redux';
 import { actGetListHub, actLoadInvoices, actLoadProfile } from '../../actions';
-import { Box, Button, Container, Modal } from '@material-ui/core';
+import { Box, Button, Container, Modal, Snackbar } from '@material-ui/core';
 import ModalHubAdd from '../../components/ModalHubAdd';
 import { ROLE, USER_TOKEN } from '../../common';
 import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router-dom';
 import formatPrice from '../../utils/formatPrice';
+import Alert from '@material-ui/lab/Alert';
 
 export function MapContainer(props) {
   const dispatch = useDispatch();
@@ -30,6 +31,7 @@ export function MapContainer(props) {
   const [activeMarker, setActiveMarker] = useState(null);
   const [selectedPlace, setSelectedPlace] = useState(null);
   const [invoiceLocation, setInvoiceLocation] = useState([]);
+  const [openSnackbar, setOpenSnackbar] = useState(false);
 
   const handleOpenHub = () => {
     setOpenHub(true);
@@ -43,7 +45,10 @@ export function MapContainer(props) {
     handleOpenHub(true);
   }
 
-  const handleCloseHub = () => {
+  const handleCloseHub = (isChange) => {
+    if (isChange) {
+      setOpenSnackbar(true);
+    }
     setOpenHub(false);
   }
 
@@ -114,11 +119,11 @@ export function MapContainer(props) {
             lat: store.latitude,
             lng: store.longitude,
           }}
-          title={store.name}
+          title={store.address}
           id={store.id}
           radius={store.radius}
           status={store.status}
-          label={((store.name).length > 20) ? (((store.name).substring(0, 20 - 3)) + '...') : store.name}
+          label={((store.address).length > 20) ? (((store.address).substring(0, 20 - 3)) + '...') : store.address}
           style={{ color: 'white' }}
           onClick={onMarkerClick}
           {...props}
@@ -169,6 +174,14 @@ export function MapContainer(props) {
       />
     })
   }
+
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setOpenSnackbar(false);
+
+  };
 
   return (
     <>
@@ -232,6 +245,20 @@ export function MapContainer(props) {
             id={id}
           />
         </Modal>
+        <Snackbar
+          anchorOrigin={{
+            vertical: 'top',
+            horizontal: 'right'
+          }}
+          open={openSnackbar}
+          autoHideDuration={3000}
+          onClose={handleCloseSnackbar}
+          message={`Import Sucess!`}
+        >
+          <Alert onClose={handleCloseSnackbar} severity='success'>
+            Create Hub Sucess!
+        </Alert>
+        </Snackbar>
       </div>
     </>
   );

@@ -116,6 +116,7 @@ const HubManagerList = ({ className, data, user, ...rest }) => {
     const [visiableModalHub, setVisibleModalHub] = useState(false);
     const [selectedHubManager, setSelectedHubManager] = useState(null);
     const [openSnackbar, setOpenSnackbar] = useState(false);
+    const [message, setMessage] = useState('');
 
     useEffect(() => {
         if (data.hub_managers && data.hub_managers.length) {
@@ -139,6 +140,7 @@ const HubManagerList = ({ className, data, user, ...rest }) => {
                 };
                 dispatch(actLoadHubManager(data));
                 setOpenSnackbar(true);
+                setMessage('Create Hub Manager Sucess!');
             }
         }
         setModalOpenAdd(false);
@@ -208,21 +210,21 @@ const HubManagerList = ({ className, data, user, ...rest }) => {
 
         const response = await API.patch(`${ADMIN_ENDPOINT}/${user.phone}/assign-hub-manager-to-hub`, data);
         const patchData = await response.json();
-        if (patchData.message) {
-            alert(patchData.message);
+        if (response.ok) {
+            const responseHubManager = await API.get(`${HUB_MANAGER_ENDPOINT}?page=1&limit=50`);
+            const fetchData = await responseHubManager.json();
+            if (responseHubManager.ok) {
+                const hubManagerData = {
+                    hub_managers: fetchData.data.items,
+                    meta: fetchData.data.meta
+                };
+                dispatch(actLoadHubManager(hubManagerData));
+                setOpenSnackbar(true);
+                setMessage(`Update Hub Manager ${selectedHubManager} to hub ${hub_id} Sucess!`);
+            }
         } else {
-            API.get(`${HUB_MANAGER_ENDPOINT}?page=1&limit=50`)
-                .then(async response => {
-                    if (response.ok) {
-                        const fetchData = await response.json();
-                        const hubManagerData = fetchData.data;
-                        if (hubManagerData.length > 0) {
-                            dispatch(actLoadHubManager(hubManagerData));
-                        }
-                    }
-                }).catch(err => {
-                    alert(err.message);
-                });
+            alert(patchData.message);
+            return;
         }
         setSelectedHubManager(null);
         handleInvisibleModalHub();
@@ -287,7 +289,7 @@ const HubManagerList = ({ className, data, user, ...rest }) => {
                                                             onClick={() => handleSelectedRow(hub_manager.id, hub_manager.hub ? hub_manager.hub.id : null)}
                                                             style={{ color: 'white' }}
                                                         >
-                                                            {hub_manager.hub.name}
+                                                            {hub_manager.hub.address}
                                                         </Button>
                                                     </TableCell>
                                                 </TableRow>
@@ -337,7 +339,7 @@ const HubManagerList = ({ className, data, user, ...rest }) => {
                 message={`Import Sucess!`}
             >
                 <Alert onClose={handleCloseSnackbar} severity='success'>
-                    Create Hub Manager Sucess!
+                    {message}
                 </Alert>
             </Snackbar>
         </div>
