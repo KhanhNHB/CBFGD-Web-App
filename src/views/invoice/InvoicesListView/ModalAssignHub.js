@@ -86,7 +86,7 @@ const ModalAssignHub = ({
     const value = (item) => {
         return (
             <>
-                <div><span style={{ fontWeight: 'bold' }}>Address: </span>{item.hub.name}</div>
+                <div><span style={{ fontWeight: 'bold' }}>Address: </span>{item.hub.address}</div>
                 <div><span style={{ color: 'red' }}>Distance To Hub: </span><span style={{ fontWeight: 'bold' }}>{item.distance} Km</span></div>
             </>
         );

@@ -76,13 +76,11 @@ const ModalHubManagerAdd = (props) => {
 
     useEffect(() => {
         const fetchHub = async () => {
-            API.get(`${HUB_ENDPOINT}?page=1&limit=50&hub_manager_phone=none`)
-                .then(async response => {
-                    if (response.ok) {
-                        const fetchData = await response.json();
-                        dispatch(actGetListHub(fetchData.data));
-                    }
-                });
+            const response = await API.get(`${HUB_ENDPOINT}?page=1&limit=50&hub_manager_phone=none`);
+            if (response.ok) {
+                const fetchData = await response.json();
+                dispatch(actGetListHub(fetchData.data));
+            }
         }
         fetchHub();
     }, [dispatch]);
@@ -227,7 +225,7 @@ const ModalHubManagerAdd = (props) => {
                                                 >
                                                     {
                                                         hubLocation.map((hub, index) => {
-                                                            return (<MenuItem key={index} value={hub.id}>{hub.name}</MenuItem>)
+                                                            return (<MenuItem key={index} value={hub.id}>{hub.address}</MenuItem>)
                                                         })
                                                     }
                                                 </Select>
