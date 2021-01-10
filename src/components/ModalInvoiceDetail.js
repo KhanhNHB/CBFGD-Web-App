@@ -7,43 +7,36 @@ import {
     StepContent,
     StepLabel,
     Stepper,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
 } from "@material-ui/core";
-import { BASE_URL_FABRIC } from "../api/endpoint";
+import { IMAGE_ENDPOINT, INVOICE_ENDPOINT } from "../api/endpoint";
 import CloseIcon from '@material-ui/icons/Close';
 import datetimeUtils from '../utils/datetimeUtils';
-import axios from 'axios';
-import Cookies from 'js-cookie';
 import clsx from 'clsx';
 import { Check } from "react-feather";
 import PropTypes from 'prop-types';
+import API from "../api/API";
+import { withStyles } from "@material-ui/styles";
+import formatPrice from "../utils/formatPrice";
 
 const useStyles = makeStyles((theme) => ({
     container: {
-        width: "80%",
-        height: "80%",
-        position: "absolute",
-        left: "50%",
-        top: "50%",
-        transform: "translate(-50%, -50%)",
-        padding: "10px",
+        margin: 10,
+        overflowY: "auto",
     },
-    wrapperLeft: {
+    wrapperDetail: {
         backgroundColor: "white",
-        width: "50%",
-        height: "100%",
-        float: "left",
-        borderRight: "1px solid #e0e0e0",
-        borderBottom: "3px solid #e0e0e0",
+        overflowY: "auto",
+    },
+    wrapperTransaction: {
+        overflowY: "auto",
+        height: 700,
         borderBottomLeftRadius: "5px",
-        overflow: 'auto'
-    },
-    wrapperRight: {
-        backgroundColor: "white",
-        width: "50%",
-        height: "100%",
-        float: "right",
-        overflow: "auto",
-        borderBottom: "3px solid #e0e0e0",
         borderBottomRightRadius: "5px",
     },
     titleText: {
@@ -85,7 +78,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function getSteps() {
-    return ['IN_WAREHOUSE', 'TO_DELIVERY', 'DELIVERING', 'COMPLETED', 'CANCELLED', 'REFUND'];
+    return ['IN_WAREHOUSE', 'TO_DELIVERY', 'DELIVERING', 'COMPLETED', 'CANCELLED', 'RETURN'];
 }
 
 const useQontoStepIconStyles = makeStyles({
@@ -114,12 +107,10 @@ const useQontoStepIconStyles = makeStyles({
 function QontoStepIcon(props) {
     const classes = useQontoStepIconStyles();
     const { active, completed } = props;
-
     return (
-        <div
-            className={clsx(classes.root, {
-                [classes.active]: active,
-            })}
+        <div className={clsx(classes.root, {
+            [classes.active]: active,
+        })}
         >
             {completed ? <Check className={classes.completed} /> : <div className={classes.circle} />}
         </div>
@@ -131,6 +122,24 @@ QontoStepIcon.propTypes = {
     completed: PropTypes.bool,
 };
 
+const StyledTableCell = withStyles((theme) => ({
+    head: {
+        backgroundColor: 'lightgrey',
+        color: theme.palette.common.black,
+    },
+    body: {
+        fontSize: 14,
+    },
+}))(TableCell);
+
+const StyledTableRow = withStyles((theme) => ({
+    root: {
+        '&:nth-of-type(odd)': {
+            backgroundColor: theme.palette.action.hover,
+        },
+    },
+}))(TableRow);
+
 const ModalInvoiceDetail = (props) => {
     const classes = useStyles();
     const [deliveringProcess, setDeliveringProcess] = useState([]);
@@ -138,13 +147,14 @@ const ModalInvoiceDetail = (props) => {
     const [maxStep, setMaxStep] = useState(0);
     const [activeStep, setActiveStep] = useState(0);
     const steps = getSteps();
+    const order = props.invoice;
 
     useEffect(() => {
         setLoading(true);
 
         const handleStep = (data) => {
-            if (!data || !data.length) return;
-            switch (data[0].Value.status) {
+            if (!data.delivery_status || !data.delivery_status.length) return;
+            switch (data.delivery_status[0].status) {
                 case 'IN_WAREHOUSE':
                     setMaxStep(0);
                     setActiveStep(0);
@@ -165,7 +175,7 @@ const ModalInvoiceDetail = (props) => {
                     setMaxStep(4);
                     setActiveStep(4);
                     return;
-                case 'REFUND':
+                case 'RETURN':
                     setMaxStep(5);
                     setActiveStep(5);
                     return;
@@ -174,39 +184,100 @@ const ModalInvoiceDetail = (props) => {
             }
         }
 
-        // axios.get(`${BASE_URL_FABRIC}/channels/mychannel/chaincodes/fabinvoice?args=["${props.invoice.provider.name}${props.invoice.code}"]&fcn=getHistoryForAsset&peer=peer0.org1.example.com`, {
-        //     headers: {
-        //         'Authorization': 'Bearer ' + Cookies.get(ACCESS_TOKEN_FABRIC),
-        //     },
-        // }).then(response => {
-        //     if (response.status === 200) {
-        //         if (!response.data && !response.data.length) {
-        //             return;
-        //         }
-        //         setDeliveringProcess(response.data);
-        //         handleStep(response.data);
-        //         setLoading(false);
-        //     }
-        // });
-    }, [props.invoice.code, props.invoice.provider.name]);
+        const fetchHistory = async () => {
+            const response = await API.get(`${INVOICE_ENDPOINT}/${props.invoice.id}/histories`);
+            const fetchData = await response.json();
+            if (response.ok) {
+                if (!fetchData.data && !fetchData.data.length) {
+                    return;
+                }
+                setDeliveringProcess(fetchData.data);
+                handleStep(fetchData.data);
+                setLoading(false);
+            }
+        }
+
+        fetchHistory();
+    }, [props.invoice.id, props.invoice.code, props.invoice.provider.name]);
 
     function getStepContent(label) {
-        return deliveringProcess.map(transaction => {
-            if (transaction.Value.status === label) {
-                return (
-                    <>
-                        <p style={{ marginTop: 5, marginBottom: 5 }}><span style={{ fontWeight: 'bold' }}>Code: </span>{transaction.Value.code}</p>
-                        <p style={{ marginTop: 5, marginBottom: 5 }}><span style={{ fontWeight: 'bold' }}>Provider: </span> {transaction.Value.provider}</p>
-                        <p style={{ marginTop: 5, marginBottom: 5 }}><span style={{ fontWeight: 'bold' }}>Status: </span>{transaction.Value.status}</p>
-                        <p style={{ marginTop: 5, marginBottom: 5 }}><span style={{ fontWeight: 'bold' }}>Shipper Name: </span>{transaction.Value.owner ? transaction.Value.owner : 'none'}</p>
-                        <p style={{ marginTop: 5, marginBottom: 5 }}><span style={{ fontWeight: 'bold' }}>Shipper Phone: </span>{transaction.Value.shipper_phone ? transaction.Value.shipper_phone : 'none'}</p>
-                        <p style={{ marginTop: 5, marginBottom: 5 }}><span style={{ fontWeight: 'bold' }}>Created At: </span>{datetimeUtils.DisplayDateTimeFormat(transaction.Value.created_at)}</p>
-                        <p style={{ marginTop: 5, marginBottom: 5, overflowY: 'auto' }}><span style={{ fontWeight: 'bold' }}>Transaction ID: </span>{transaction.TxId}</p>
-                    </>
-                );
-            }
-            return null;
-        });
+        const deliveries_status = deliveringProcess.delivery_status;
+        if (deliveries_status && deliveries_status.length) {
+            return deliveries_status.map(transaction => {
+                if (transaction.status === label) {
+                    return (
+                        <div>
+                            <p style={{ marginTop: 5, marginBottom: 5 }}>
+                                <span style={{ fontWeight: 'bold' }}>Created At: </span>
+                                {datetimeUtils.DisplayDateTimeFormat(transaction.created_at)}
+                            </p>
+                            {(transaction.status === 'COMPLETED') &&
+                                <p style={{ marginTop: 5, marginBottom: 5 }}>
+                                    <span style={{ fontWeight: 'bold' }}>Note: </span>
+                                    {transaction.note ? transaction.note : 'none'}
+                                </p>
+                            }
+                            <p style={{ marginTop: 5, marginBottom: 5 }}>
+                                <span style={{ fontWeight: 'bold' }}>Shipper Phone: </span>
+                                {transaction.account ? transaction.account.phone : 'none'}
+                            </p>
+                            <p style={{ marginTop: 5, marginBottom: 5 }}>
+                                <span style={{ fontWeight: 'bold' }}>Shipper Name: </span>
+                                {transaction.account ? transaction.account.last_name + ' ' + transaction.account.first_name : 'none'}
+                            </p>
+                            {(transaction.status === 'COMPLETED') &&
+                                <div style={{
+                                    marginTop: 5,
+                                    marginBottom: 5,
+                                }}>
+                                    <div>
+                                        <span style={{ fontWeight: 'bold' }}>Latitude: </span>
+                                        <p style={{ display: 'inline-block' }}>{transaction.latitude}</p>
+                                    </div>
+                                    <div>
+                                        <span style={{ fontWeight: 'bold' }}>Longitude: </span>
+                                        <p style={{ display: 'inline-block' }}>{transaction.longitude}</p>
+                                    </div>
+                                    <span style={{ fontWeight: 'bold' }}>Evidence: </span>
+                                    {transaction.evidences.map(evidence => {
+                                        return (
+                                            <div style={{
+                                                display: 'flex',
+                                                flexDirection: 'row',
+                                                justifyContent: 'space-between',
+                                                alignItems: 'center'
+                                            }}>
+                                                <div>
+                                                    <a href={`${IMAGE_ENDPOINT}/${evidence.order_image_path}`} target="_blank">
+                                                        <img
+                                                            src={`${IMAGE_ENDPOINT}/${evidence.order_image_path}`}
+                                                            width={120}
+                                                            height={120} alt='gds/images'
+                                                        />
+                                                    </a>
+                                                    <p>Order Image</p>
+                                                </div>
+                                                <div>
+                                                    <img
+                                                        src={`${IMAGE_ENDPOINT}/${evidence.sign_image_path}`}
+                                                        width={120}
+                                                        height={120}
+                                                        alt='gds/images'
+                                                    />
+                                                    <p>Sign Image</p>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            }
+                        </div>
+                    );
+                }
+                return null;
+            });
+        }
+        return null;
     }
 
     const handleNext = () => {
@@ -217,90 +288,130 @@ const ModalInvoiceDetail = (props) => {
         setActiveStep((prevActiveStep) => prevActiveStep - 1);
     };
 
-    console.log(props.invoice);
     return (
         <div className={classes.container}>
             <div className={classes.detailHeader}>
-                <div style={{ margin: "10px", color: 'white' }}>
+                <div style={{
+                    margin: "10px",
+                    color: 'white'
+                }}>
                     <h3>Order Information</h3>
                 </div>
-                <CloseIcon
-                    className={classes.closeBtn}
-                    onClick={() => props.onCloseModal()}
-                />
+                <CloseIcon className={classes.closeBtn} onClick={() => props.onCloseModal()} />
             </div>
-            <div className={classes.wrapperLeft}>
-                <h2 className={classes.titleText}>Order Detail</h2>
-                <p className={classes.detailRow}><span><b>Order Code:</b> </span><span>{props.invoice.code}</span></p>
-                <p className={classes.detailRow}><span><b>Receiver Name:</b> </span><span>{props.invoice.receiver_name}</span></p>
-                <p className={classes.detailRow}><span></span><b>Customer Phone Number:</b> <span>{props.invoice.customer_phone_number}</span></p>
-                <p className={classes.detailRow}><span></span><b>Receiver Phone Number:</b> <span>{props.invoice.receiver_phone_number}</span></p>
-                <p className={classes.detailRow}><span><b>Receiver Address:</b> </span><span>{props.invoice.address}</span></p>
-                <p className={classes.detailRow}><span><b>Current Delivery Status:</b> </span><span>{props.invoice.current_delivery_status}</span></p>
-                <p className={classes.detailRow}><img src={props.invoice.product_image} alt="image" width={60} height={60} /></p>
-                <p className={classes.detailRow}><span><b>Product Name:</b> </span><span>{props.invoice.product_name}</span></p>
-                <p className={classes.detailRow}><span><b>Quantity:</b> </span><span>{props.invoice.quantity}</span></p>
-                <p className={classes.detailRow}><span><b>Shipping Fee:</b> </span><span>{props.invoice.shipping_fee}</span></p>
-                <p className={classes.detailRow}><span><b>Total Amount:</b> </span><span>{props.invoice.total_amount}</span></p>
-                <p className={classes.detailRow}><span><b>Provider Name:</b> </span><span>{props.invoice.provider.name}</span></p>
-                <p className={classes.detailRow}><span><b>From Date:</b> </span><span>{datetimeUtils.DisplayDateTimeFormat(props.invoice.from_date)}</span></p>
-                <p className={classes.detailRow}><span><b>To Date:</b> </span><span>{datetimeUtils.DisplayDateTimeFormat(props.invoice.to_date)}</span></p>
-                <p className={classes.detailRow}><span><b>Created At:</b> </span><span>{datetimeUtils.DisplayDateTimeFormat(props.invoice.created_at)}</span></p>
+            <div className={classes.wrapperDetail}>
+                <TableContainer>
+                    <Table aria-label="customized table" >
+                        <TableHead title="Shipper Detail" style={{ color: 'white' }}>
+                            <TableRow>
+                                <StyledTableCell align="center">ID</StyledTableCell>
+                                <StyledTableCell align="center">Order Code</StyledTableCell>
+                                <StyledTableCell align="center">Provider Name</StyledTableCell>
+                                <StyledTableCell align="center">Receiver Name</StyledTableCell>
+                                <StyledTableCell align="center">Customer Phone Number</StyledTableCell>
+                                <StyledTableCell align="center">Receiver Phone Number</StyledTableCell>
+                                <StyledTableCell align="center">Receiver Address</StyledTableCell>
+                                <StyledTableCell align="center">Current Delivery Status</StyledTableCell>
+                                <StyledTableCell align="center">Product Image</StyledTableCell>
+                                <StyledTableCell align="center">Product Name</StyledTableCell>
+                                <StyledTableCell align="center">Quantity</StyledTableCell>
+                                <StyledTableCell align="center">Shipping Fee</StyledTableCell>
+                                <StyledTableCell align="center">Total Amount</StyledTableCell>
+                                <StyledTableCell align="center">From Date</StyledTableCell>
+                                <StyledTableCell align="center">To Date</StyledTableCell>
+                                <StyledTableCell align="center">Created At</StyledTableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            <StyledTableRow>
+                                <StyledTableCell align="center">{order.id}</StyledTableCell>
+                                <StyledTableCell align="center">{order.code}</StyledTableCell>
+                                <StyledTableCell align="center">{order.provider.name}</StyledTableCell>
+                                <StyledTableCell align="center">{order.receiver_name}</StyledTableCell>
+                                <StyledTableCell align="center">{order.customer_phone_number}</StyledTableCell>
+                                <StyledTableCell align="center">{order.receiver_phone_number}</StyledTableCell>
+                                <StyledTableCell align="center">{order.address}</StyledTableCell>
+                                <StyledTableCell align="center" style={{
+                                    color: order.current_delivery_status === 'COMPLETED'
+                                        ? '#1e8101'
+                                        : order.current_delivery_status === 'RETURN'
+                                            ? 'red'
+                                            : 'black'
+                                }}>
+                                    {order.current_delivery_status}
+                                </StyledTableCell>
+                                <StyledTableCell align="center"><img src={order.product_image} alt="image" width={60} height={60} /></StyledTableCell>
+                                <StyledTableCell align="center">{order.product_name}</StyledTableCell>
+                                <StyledTableCell align="center">{order.quantity}</StyledTableCell>
+                                <StyledTableCell align="center">{formatPrice.format(order.shipping_fee)}</StyledTableCell>
+                                <StyledTableCell align="center">{formatPrice.format(order.total_amount)}</StyledTableCell>
+                                <StyledTableCell align="center">{datetimeUtils.DisplayDateTimeFormat(order.from_date)}</StyledTableCell>
+                                <StyledTableCell align="center">{datetimeUtils.DisplayDateTimeFormat(order.to_date)}</StyledTableCell>
+                                <StyledTableCell align="center">{datetimeUtils.DisplayDateTimeFormat(order.created_at)}</StyledTableCell>
+                            </StyledTableRow>
+                        </TableBody>
+                    </Table>
+                </TableContainer>
             </div>
-            <div className={classes.wrapperRight}>
-                {loading
-                    ? (
-                        <>
-                            <div style={{
-                                height: '100%',
-                                display: 'flex',
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                            }}>
-                                <CircularProgress />
-                            </div>
-                        </>
-                    )
-                    : (
-                        <>
-                            <h2 className={classes.titleText}>Delivery Status Detail</h2>
-                            <Stepper activeStep={activeStep} orientation="vertical">
-                                {steps.map((label, index) => (
-                                    <Step key={label}>
-                                        <StepLabel StepIconComponent={QontoStepIcon}>{label}</StepLabel>
-                                        <StepContent>
-                                            {getStepContent(label)}
-                                            <div className={classes.actionsContainer}>
-                                                <div>
-                                                    <Button
-                                                        disabled={activeStep === 0}
-                                                        onClick={handleBack}
-                                                        className={classes.button}
-
-                                                    >
-                                                        Back
+            <div style={{
+                height: '100%',
+                backgroundColor: 'white',
+                borderBottomLeftRadius: "5px",
+                borderBottomRightRadius: "5px",
+            }}>
+                <div className={classes.wrapperTransaction}>
+                    {loading
+                        ? (
+                            <>
+                                <div style={{
+                                    height: '100%',
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                }}>
+                                    <CircularProgress />
+                                </div>
+                            </>
+                        )
+                        : (
+                            <>
+                                <Stepper activeStep={activeStep} alternativeLabel>
+                                    {steps.map((label, index) => (
+                                        <Step key={label}>
+                                            <StepLabel StepIconComponent={QontoStepIcon}>{label}</StepLabel>
+                                            <StepContent>
+                                                {getStepContent(label)}
+                                                <div className={classes.actionsContainer}>
+                                                    <div>
+                                                        <Button
+                                                            disabled={activeStep === 0}
+                                                            onClick={handleBack}
+                                                            className={classes.button}
+                                                        >
+                                                            Back
                                                     </Button>
-                                                    <Button
-                                                        disabled={activeStep === maxStep}
-                                                        variant="contained"
-                                                        color="primary"
-                                                        onClick={handleNext}
-                                                        className={classes.button}
-                                                        style={{ color: (activeStep !== maxStep) && 'white' }}
-                                                    >
-                                                        Next
+                                                        <Button
+                                                            disabled={activeStep === maxStep}
+                                                            variant="contained"
+                                                            color="primary"
+                                                            onClick={handleNext}
+                                                            className={classes.button}
+                                                            style={{ color: (activeStep !== maxStep) && 'white' }}
+                                                        >
+                                                            Next
                                                     </Button>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </StepContent>
-                                    </Step>
-                                ))}
-                            </Stepper>
-                        </>
-                    )
-                }
+                                            </StepContent>
+                                        </Step>
+                                    ))}
+                                </Stepper>
+                            </>
+                        )
+                    }
+                </div>
             </div>
-        </div >
+        </div>
     );
 };
 export default ModalInvoiceDetail;

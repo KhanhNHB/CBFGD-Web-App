@@ -160,10 +160,9 @@ const Invoices = () => {
           {loadingModal && <LinearProgress />}
           <Grid container spacing={3}>
             {(data && user) &&
-              <div>
-                <h3>List Order</h3>
+              <>
                 <InvoicesList data={data} user={user} />
-              </div>
+              </>
             }
           </Grid>
           {/* {loadingModal && <LinearProgress />}
