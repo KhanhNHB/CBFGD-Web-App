@@ -40,8 +40,7 @@ const columns = [
   { id: 'priority', label: 'Priority', minWidth: 80, align: 'left' },
   { id: 'is_active', label: 'Status Order', minWidth: 170, align: 'left' },
   { id: 'current_delivery_status', label: 'Current Delivery Status', minWidth: 220, align: 'left' },
-  { id: 'out_of_hub', label: 'Out Of Hub', minWidth: 220, align: 'left' },
-  { id: 'is_invalid_address', label: 'Invalid Address', minWidth: 220, align: 'left' },
+  { id: 'out_of_hub', label: 'Out Of Hub', minWidth: 170, align: 'left' },
 ];
 
 function descendingComparator(a, b, orderBy) {
@@ -122,7 +121,7 @@ const useStyles = makeStyles((theme) => ({
     marginRight: theme.spacing(2)
   },
   container: {
-    maxHeight: 440,
+    maxHeight: 700,
   },
   modal: {
     display: 'flex',
@@ -275,7 +274,7 @@ const InvoicesList = ({ data, user }) => {
         setLoadingModal(false);
       } else {
         const query = `hub_id=${user.hubId}`;
-        const response = await API.get(`${INVOICE_ENDPOINT}? page = ${page + 1}& limit=50 & ${query} `);
+        const response = await API.get(`${INVOICE_ENDPOINT}?page=${page + 1}&limit=50&${query}`);
         if (response.ok) {
           const fetchData = await response.json();
           const data = { invoices: fetchData.data.items, meta: fetchData.data.meta };
@@ -339,21 +338,6 @@ const InvoicesList = ({ data, user }) => {
     );
   }
 
-  const _rowInvalidAddress = (backgroundColor, value) => {
-    return (
-      <div style={{
-        backgroundColor: backgroundColor,
-        color: 'white',
-        width: 85,
-        padding: 8,
-        borderRadius: 3,
-        textAlign: 'center',
-      }}>
-        {value ? 'INVALID' : 'VALID'}
-      </div>
-    );
-  }
-
   const _rowPriority = (backgroundColor, value) => {
     return (<div style={{
       backgroundColor: backgroundColor,
@@ -401,11 +385,8 @@ const InvoicesList = ({ data, user }) => {
             {value}
           </div>
         );
-      case "out_of_hub":
+      case 'out_of_hub':
         return (value ? _rowOutOfHub("#d9534f", value) : _rowOutOfHub("#1e8101", value));
-      case "is_invalid_address":
-        return (value ? _rowInvalidAddress("#d9534f", value) : _rowInvalidAddress("#1e8101", value));
-
       default:
         return value;
     }
@@ -532,7 +513,8 @@ const InvoicesList = ({ data, user }) => {
                             );
                           })}
                           {(user && user.roleId === ROLE.ADMIN)
-                            ? <TableCell key={index} align={"center"} >
+                            ?
+                            <TableCell key={index} align={"center"} >
                               <Button
                                 color="primary"
                                 variant="contained"
@@ -549,7 +531,8 @@ const InvoicesList = ({ data, user }) => {
                                 {invoice.hub ? 'Assigned' : 'Assign'}
                               </Button>
                             </TableCell>
-                            : null}
+                            : null
+                          }
                           {(user && user.roleId === ROLE.HUB_MANAGER)
                             ? (
                               <TableCell key={index} align={"center"} >
@@ -617,13 +600,13 @@ const InvoicesList = ({ data, user }) => {
           />
         </div>
       </Modal>
-      <Modal open={visibleModalInvoiceDetail}>
-        <div>
-          <ModalInvoiceDetail
-            invoice={invoiceDetail}
-            onCloseModal={handleInvisibleModalInvoiceDetail}
-          />
-        </div>
+      <Modal open={visibleModalInvoiceDetail} style={{
+        overflowX: 'auto'
+      }}>
+        <ModalInvoiceDetail
+          invoice={invoiceDetail}
+          onCloseModal={handleInvisibleModalInvoiceDetail}
+        />
       </Modal>
       <Modal open={loadingModal} className={classes.loadingModal}>
         <CircularProgress />

@@ -15,11 +15,5 @@ export const INVOICE_ENDPOINT = `${BASE_URL}/orders`;
 export const PROVIDER_ENDPOINT = `${BASE_URL}/providers`;
 export const PROFILE_ENDPOINT = `${BASE_URL}/auth/profile`;
 export const DELIVERIES_STATUS_ENDPOINT = `${BASE_URL}/deliveries-status`;
-// API Google
-// export const BASE_URL_FABRIC = `http://34.126.123.79:4000`;
-// API AWS
-// export const BASE_URL_FABRIC = `https://aws.api.fabric.gds.cloudns.asia`;
-// API IPv.4
-// export const BASE_URL_FABRIC = "http://192.168.43.21:4000";
-// export const BASE_URL_FABRIC = `http://192.168.1.5:4000`;
-export const BASE_URL_FABRIC = `http://localhost:4000`;
+
+export const IMAGE_ENDPOINT = `${BASE_URL}/gds/images`;

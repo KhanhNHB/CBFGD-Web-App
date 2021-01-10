@@ -177,7 +177,6 @@ const ModalShipperDetail = (props) => {
                     </Table>
                 </TableContainer>
             </div>
-
             <div className={classes.wrapperBag}>
                 {loading
                     ? <div style={{
