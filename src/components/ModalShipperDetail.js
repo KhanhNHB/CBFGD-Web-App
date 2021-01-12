@@ -35,7 +35,6 @@ const useStyles = makeStyles((theme) => ({
     wrapperDetail: {
         backgroundColor: "white",
         width: "100%",
-        height: "30%",
         overflowY: "auto",
         borderRight: "1px solid #e0e0e0",
         borderBottom: "3px solid #e0e0e0",
@@ -128,6 +127,22 @@ const ModalShipperDetail = (props) => {
         fetchInvoiceShipperByAssignedAt(datetimeUtils.DisplayDatePicker(new Date(date)));
     };
 
+    const _rowStatus = (backgroundColor, value) => {
+        return (
+            <div style={{
+                backgroundColor: backgroundColor,
+                color: 'white',
+                width: 85,
+                padding: 8,
+                borderRadius: 3,
+                textAlign: 'center',
+            }}>
+                {value ? 'ACTIVE' : 'DEACTIVE'}
+            </div>
+        );
+    }
+
+
     return (
         <div className={classes.container}>
             <div className={classes.detailHeader}>
@@ -165,11 +180,17 @@ const ModalShipperDetail = (props) => {
                                 <StyledTableCell align="center">{shipper.phone}</StyledTableCell>
                                 <StyledTableCell align="center">{shipper.email}</StyledTableCell>
                                 <StyledTableCell align="center">{shipper.address}</StyledTableCell>
-                                <StyledTableCell align="center">{shipper.DOB}</StyledTableCell>
+                                <StyledTableCell align="center">{datetimeUtils.DisplayDateFormat(shipper.DOB)}</StyledTableCell>
                                 <StyledTableCell align="center">{shipper.gender}</StyledTableCell>
                                 <StyledTableCell align="center">{shipper.identify_number}</StyledTableCell>
                                 <StyledTableCell align="center">{shipper.license_number}</StyledTableCell>
-                                <StyledTableCell align="center">{shipper.status}</StyledTableCell>
+                                <StyledTableCell align="center">
+                                    {
+                                        shipper.is_active
+                                            ? _rowStatus("#1e8101", shipper.is_active)
+                                            : _rowStatus("#d9534f", shipper.is_active)
+                                    }
+                                </StyledTableCell>
                                 <StyledTableCell align="center">{datetimeUtils.DisplayDateTimeFormat(shipper.created_at)}</StyledTableCell>
                                 <StyledTableCell align="center">{shipper.updated_at ? datetimeUtils.DisplayDateTimeFormat(shipper.updated_at) : ''}</StyledTableCell>
                             </StyledTableRow>
