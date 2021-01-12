@@ -18,14 +18,12 @@ import {
   CircularProgress,
   Snackbar
 } from '@material-ui/core';
-
 import API from '../../../api/API';
 import ModalAssign from './ModalAssign';
 import { useDispatch } from 'react-redux';
 import {
   RESPONSE_STATUS,
   ROLE,
-  STATUS,
   USER_DEVICE_TOKEN,
   USER_TOKEN
 } from '../../../common/index';
@@ -45,6 +43,33 @@ const columns = [
   { id: 'phone', label: 'Phone', minWidth: 200, align: 'left' },
   { id: 'is_active', label: 'Status', minWidth: 120, align: 'left' },
 ];
+
+function descendingComparator(a, b, orderBy) {
+  if (b[orderBy] < a[orderBy]) {
+    return -1;
+  }
+  if (b[orderBy] > a[orderBy]) {
+    return 1;
+  }
+  return 0;
+}
+
+function getComparator(order, orderBy) {
+  return order === 'desc'
+    ? (a, b) => descendingComparator(a, b, orderBy)
+    : (a, b) => -descendingComparator(a, b, orderBy);
+}
+
+function stableSort(array, comparator) {
+  const stabilizedThis = array.map((el, index) => [el, index]);
+  stabilizedThis.sort((a, b) => {
+    const order = comparator(a[0], b[0]);
+    if (order !== 0) return order;
+    return a[1] - b[1];
+  });
+  return stabilizedThis.map((el) => el[0]);
+}
+
 
 const EnhancedTableHead = (props) => {
   const { order, orderBy, onRequestSort } = props;
@@ -89,13 +114,14 @@ const useStyles = makeStyles((theme) => ({
   root: {},
   boundary: {
     display: 'flex',
+    width: '100%',
     flexDirection: 'column',
   },
   avatar: {
     marginRight: theme.spacing(2)
   },
   container: {
-    maxHeight: 440,
+    maxHeight: 700,
   },
   modal: {
     display: 'flex',
@@ -285,54 +311,63 @@ const ShipperList = ({ className, data, user, ...rest }) => {
           </Button>
         }
       </div>
-      <Card className={clsx(classes.root, className)} {...rest} >
+      <Card className={clsx(classes.root)} >
         <Box>
           <TableContainer className={classes.container}>
-            <Table stickyHeader aria-label="sticky table">
+            <Table aria-label="sticky table">
               <EnhancedTableHead
                 classes={classes}
                 order={order}
                 orderBy={orderBy}
                 onRequestSort={handleRequestSort}
               />
-              <TableBody>
-                {(data && data.shippers && data.shippers.length)
-                  ? data.shippers.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((shipper, index) => {
-                    return (
-                      <TableRow hover role="checkbox" tabIndex={-1} key={shipper.phone}>
-                        {columns.map((column, index) => {
-                          const value = _hanleRowTableData(column.id, shipper[column.id]);
-                          return (
-                            <TableCell
-                              align={column.align}
-                              id={index}
-                              key={index}
-                              onClick={() => handleClickShipperItem(shipper)}
-                            >
-                              {value}
-                            </TableCell>
-                          );
-                        })}
-                        <TableCell align={"left"}>
+              {(data && data.shippers && data.shippers.length)
+                ?
+                <>
+                  <TableBody>
+                    {stableSort(data.shippers, getComparator(order, orderBy)).map((shipper, index) => {
+                      return (
+                        <TableRow
+                          hover
+                          role="checkbox"
+                          tabIndex={-1}
+                          key={shipper.phone}
+                        >
+                          {columns.map((column, index) => {
+                            const value = _hanleRowTableData(column.id, shipper[column.id]);
+                            return (
+                              <TableCell
+                                align={column.align}
+                                id={index}
+                                key={index}
+                                onClick={() => handleClickShipperItem(shipper)}
+                              >
+                                {value}
+                              </TableCell>
+                            );
+                          })}
                           {(user && user.roleId === ROLE.ADMIN)
                             ?
-                            <Button
-                              color="primary"
-                              variant="contained"
-                              onClick={() => handleSelectedRow(shipper.phone, shipper.hub ? shipper.hub.id : null)}
-                              style={{ color: 'white' }}
-                            >
-                              {shipper.hub ? 'Assigned' : 'Assign'}
-                            </Button>
-                            : <p>{shipper.hub ? shipper.hub.name : ''}</p>
+                            <TableCell align={"left"}>
+                              <Button
+                                color="primary"
+                                variant="contained"
+                                onClick={() => handleSelectedRow(shipper.phone, shipper.hub ? shipper.hub.id : null)}
+                                style={{ color: 'white' }}
+                              >
+                                {shipper.hub ? 'Assigned' : 'Assign'}
+                              </Button>
+                              <p>{shipper.hub ? shipper.hub.name : ''}</p>
+                            </TableCell>
+                            : null
                           }
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })
-                  : null
-                }
-              </TableBody>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </>
+                : null
+              }
             </Table>
           </TableContainer>
         </Box>

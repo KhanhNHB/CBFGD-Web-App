@@ -189,8 +189,8 @@ const Bags = ({ bag }) => {
         return formatPrice.format(value) + " VND";
       case 'shipping_fee':
         return formatPrice.format(value) + " VND";
-      case 'status':
-        return (value === INVOICE_STATUS.ACTIVE ? _rowStatus("#1e8101", value) : _rowStatus("#d9534f", value));
+      case 'is_active':
+        return (value ? _rowStatus("#1e8101", 'ACTIVE') : _rowStatus("#d9534f", 'DEACTIVE'));
       case 'product_image':
         return (<img alt="Product" style={{ height: 60, width: 60 }} src={value} />);
       case 'created_at':
