@@ -142,7 +142,7 @@ const StyledTableRow = withStyles((theme) => ({
 
 const ModalInvoiceDetail = (props) => {
     const classes = useStyles();
-    const [deliveringProcess, setDeliveringProcess] = useState([]);
+    const [orderTransaction, setOrderTransaction] = useState([]);
     const [loading, setLoading] = useState(false);
     const [maxStep, setMaxStep] = useState(0);
     const [activeStep, setActiveStep] = useState(0);
@@ -191,7 +191,7 @@ const ModalInvoiceDetail = (props) => {
                 if (!fetchData.data && !fetchData.data.length) {
                     return;
                 }
-                setDeliveringProcess(fetchData.data);
+                setOrderTransaction(fetchData.data);
                 handleStep(fetchData.data);
                 setLoading(false);
             }
@@ -201,9 +201,9 @@ const ModalInvoiceDetail = (props) => {
     }, [props.invoice.id, props.invoice.code, props.invoice.provider.name]);
 
     function getStepContent(label) {
-        const deliveries_status = deliveringProcess.delivery_status;
-        if (deliveries_status && deliveries_status.length) {
-            return deliveries_status.map(transaction => {
+        const delivery_status = orderTransaction.delivery_status;
+        if (delivery_status && delivery_status.length) {
+            return orderTransaction.delivery_status.map(transaction => {
                 if (transaction.status === label) {
                     return (
                         <div>
@@ -239,36 +239,32 @@ const ModalInvoiceDetail = (props) => {
                                         <p style={{ display: 'inline-block' }}>{transaction.longitude}</p>
                                     </div>
                                     <span style={{ fontWeight: 'bold' }}>Evidence: </span>
-                                    {transaction.evidences.map(evidence => {
-                                        return (
-                                            <div style={{
-                                                display: 'flex',
-                                                flexDirection: 'row',
-                                                justifyContent: 'space-between',
-                                                alignItems: 'center'
-                                            }}>
-                                                <div>
-                                                    <a href={`${IMAGE_ENDPOINT}/${evidence.order_image_path}`} target="_blank">
-                                                        <img
-                                                            src={`${IMAGE_ENDPOINT}/${evidence.order_image_path}`}
-                                                            width={120}
-                                                            height={120} alt='gds/images'
-                                                        />
-                                                    </a>
-                                                    <p>Order Image</p>
-                                                </div>
-                                                <div>
-                                                    <img
-                                                        src={`${IMAGE_ENDPOINT}/${evidence.sign_image_path}`}
-                                                        width={120}
-                                                        height={120}
-                                                        alt='gds/images'
-                                                    />
-                                                    <p>Sign Image</p>
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
+                                    <div style={{
+                                        display: 'flex',
+                                        flexDirection: 'row',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'center'
+                                    }}>
+                                        <div>
+                                            <a href={`${IMAGE_ENDPOINT}/${orderTransaction.evidence.order_image_path}`} target="_blank">
+                                                <img
+                                                    src={`${IMAGE_ENDPOINT}/${orderTransaction.evidence.order_image_path}`}
+                                                    width={120}
+                                                    height={120} alt='gds/images'
+                                                />
+                                            </a>
+                                            <p>Order Image</p>
+                                        </div>
+                                        <div>
+                                            <img
+                                                src={`${IMAGE_ENDPOINT}/${orderTransaction.evidence.sign_image_path}`}
+                                                width={120}
+                                                height={120}
+                                                alt='gds/images'
+                                            />
+                                            <p>Sign Image</p>
+                                        </div>
+                                    </div>
                                 </div>
                             }
                         </div>
@@ -319,6 +315,7 @@ const ModalInvoiceDetail = (props) => {
                                 <StyledTableCell align="center">Total Amount</StyledTableCell>
                                 <StyledTableCell align="center">From Date</StyledTableCell>
                                 <StyledTableCell align="center">To Date</StyledTableCell>
+                                <StyledTableCell align="center">Note</StyledTableCell>
                                 <StyledTableCell align="center">Created At</StyledTableCell>
                             </TableRow>
                         </TableHead>
@@ -347,6 +344,7 @@ const ModalInvoiceDetail = (props) => {
                                 <StyledTableCell align="center">{formatPrice.format(order.total_amount)}</StyledTableCell>
                                 <StyledTableCell align="center">{datetimeUtils.DisplayDateTimeFormat(order.from_date)}</StyledTableCell>
                                 <StyledTableCell align="center">{datetimeUtils.DisplayDateTimeFormat(order.to_date)}</StyledTableCell>
+                                <StyledTableCell align="center">{order.note}</StyledTableCell>
                                 <StyledTableCell align="center">{datetimeUtils.DisplayDateTimeFormat(order.created_at)}</StyledTableCell>
                             </StyledTableRow>
                         </TableBody>
