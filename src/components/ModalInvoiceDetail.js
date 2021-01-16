@@ -246,9 +246,9 @@ const ModalInvoiceDetail = (props) => {
                                         alignItems: 'center'
                                     }}>
                                         <div>
-                                            <a href={`${IMAGE_ENDPOINT}/${orderTransaction.evidence.order_image_path}`}>
+                                            <a href={`${IMAGE_ENDPOINT}/${orderTransaction.receipt_order_image_path}`}>
                                                 <img
-                                                    src={`${IMAGE_ENDPOINT}/${orderTransaction.evidence.order_image_path}`}
+                                                    src={`${IMAGE_ENDPOINT}/${orderTransaction.receipt_order_image_path}`}
                                                     width={120}
                                                     height={120}
                                                     alt='gds/evidence-order'
@@ -257,9 +257,9 @@ const ModalInvoiceDetail = (props) => {
                                             <p>Order Image</p>
                                         </div>
                                         <div>
-                                            <a href={`${IMAGE_ENDPOINT}/${orderTransaction.evidence.sign_image_path}`}>
+                                            <a href={`${IMAGE_ENDPOINT}/${orderTransaction.receipt_sign_image_path}`}>
                                                 <img
-                                                    src={`${IMAGE_ENDPOINT}/${orderTransaction.evidence.sign_image_path}`}
+                                                    src={`${IMAGE_ENDPOINT}/${orderTransaction.receipt_sign_image_path}`}
                                                     width={120}
                                                     height={120}
                                                     alt='gds/evidence-order'

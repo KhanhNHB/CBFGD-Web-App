@@ -79,6 +79,7 @@ const useStyles = makeStyles((theme) => ({
     boundary: {
         display: 'flex',
         flexDirection: 'column',
+        width: '100%',
     },
     avatar: {
         marginRight: theme.spacing(2)
