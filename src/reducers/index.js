@@ -9,6 +9,7 @@ import CreateHub from './createhub';
 import shipper from './shipper';
 import hubmanager from './hubmanager';
 import assignHubStatus from './assignHubStatus';
+import assignOrderToShipperStatus from './assignOrderToShipperStatus';
 const appReducers = combineReducers({
         user,
         shippers,
@@ -19,6 +20,7 @@ const appReducers = combineReducers({
         CreateHub,
         shipper,
         hubmanager,
-        assignHubStatus
+        assignHubStatus,
+        assignOrderToShipperStatus
 });
 export default appReducers;

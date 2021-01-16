@@ -350,10 +350,23 @@ const ShipperList = ({ className, data, user, ...rest }) => {
                             ?
                             <TableCell align={"left"}>
                               <Button
+                                disabled={shipper.is_active ? false : true}
                                 color="primary"
                                 variant="contained"
                                 onClick={() => handleSelectedRow(shipper.phone, shipper.hub ? shipper.hub.id : null)}
-                                style={{ color: 'white' }}
+                                style={
+                                  shipper.is_active
+                                  && (
+                                    shipper.hub
+                                      ? {
+                                        backgroundColor: '#E69403',
+                                        color: 'white'
+                                      }
+                                      : {
+                                        color: 'white'
+                                      }
+                                  )
+                                }
                               >
                                 {shipper.hub ? 'Assigned' : 'Assign'}
                               </Button>

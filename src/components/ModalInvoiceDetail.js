@@ -246,22 +246,25 @@ const ModalInvoiceDetail = (props) => {
                                         alignItems: 'center'
                                     }}>
                                         <div>
-                                            <a href={`${IMAGE_ENDPOINT}/${orderTransaction.evidence.order_image_path}`} target="_blank">
+                                            <a href={`${IMAGE_ENDPOINT}/${orderTransaction.evidence.order_image_path}`}>
                                                 <img
                                                     src={`${IMAGE_ENDPOINT}/${orderTransaction.evidence.order_image_path}`}
                                                     width={120}
-                                                    height={120} alt='gds/images'
+                                                    height={120}
+                                                    alt='gds/evidence-order'
                                                 />
                                             </a>
                                             <p>Order Image</p>
                                         </div>
                                         <div>
-                                            <img
-                                                src={`${IMAGE_ENDPOINT}/${orderTransaction.evidence.sign_image_path}`}
-                                                width={120}
-                                                height={120}
-                                                alt='gds/images'
-                                            />
+                                            <a href={`${IMAGE_ENDPOINT}/${orderTransaction.evidence.sign_image_path}`}>
+                                                <img
+                                                    src={`${IMAGE_ENDPOINT}/${orderTransaction.evidence.sign_image_path}`}
+                                                    width={120}
+                                                    height={120}
+                                                    alt='gds/evidence-order'
+                                                />
+                                            </a>
                                             <p>Sign Image</p>
                                         </div>
                                     </div>
@@ -337,7 +340,7 @@ const ModalInvoiceDetail = (props) => {
                                 }}>
                                     {order.current_delivery_status}
                                 </StyledTableCell>
-                                <StyledTableCell align="center"><img src={order.product_image} alt="image" width={60} height={60} /></StyledTableCell>
+                                <StyledTableCell align="center"><img src={order.product_image} alt="product" width={60} height={60} /></StyledTableCell>
                                 <StyledTableCell align="center">{order.product_name}</StyledTableCell>
                                 <StyledTableCell align="center">{order.quantity}</StyledTableCell>
                                 <StyledTableCell align="center">{formatPrice.format(order.shipping_fee)}</StyledTableCell>
