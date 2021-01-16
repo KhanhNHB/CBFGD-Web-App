@@ -18,7 +18,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { useDispatch, useSelector } from 'react-redux';
-import { actGetListHub, actLoadHubManager } from '../actions';
+import { actGetListHub } from '../actions';
 
 const formSchema = Yup.object().shape({
     first_name: Yup.string().required("First name is not empty"),

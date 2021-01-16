@@ -16,7 +16,7 @@ import {
   TableSortLabel,
 } from '@material-ui/core';
 import TableContainer from '@material-ui/core/TableContainer';
-import { INVOICE_STATUS, INVOICE_PRIORITY } from '../common';
+import { INVOICE_PRIORITY } from '../common';
 
 const columns = [
   { id: 'id', label: 'Id', minWidth: 120, align: 'left' },

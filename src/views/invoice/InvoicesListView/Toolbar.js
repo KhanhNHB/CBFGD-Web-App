@@ -21,7 +21,7 @@ import {
 import { Search as SearchIcon } from 'react-feather';
 import { useSelector, useDispatch } from 'react-redux';
 import API from '../../../api/API';
-import { actChangeKeyword, actLoadAssignStatus, actLoadInvoices, actLoadProvider, actLoadProviderName } from '../../../actions/index';
+import { actChangeKeyword, actLoadAssignHubStatus, actLoadAssignOrderToShipperStatus, actLoadInvoices, actLoadProvider, actLoadProviderName } from '../../../actions/index';
 import { INVOICE_ENDPOINT, PROVIDER_ENDPOINT } from '../../../api/endpoint';
 import { RESPONSE_STATUS, ROLE, USER_DEVICE_TOKEN, USER_TOKEN } from '../../../common';
 import Cookies from 'js-cookie';
@@ -61,6 +61,7 @@ const Toolbar = ({ onHandleFileUpload, onHandleFileChange, user, ...rest }) => {
   const providers = useSelector(state => state.providers.providers);
   const selectedProvider = useSelector(state => state.providers.provider_name);
   const selectAssignHubStatus = useSelector(state => state.assignHubStatus.selectAssignHubStatus);
+  const selectAssignOrderToShipperStatus = useSelector(state => state.assignOrderToShipperStatus.selectAssignOrderToShipperStatus);
 
   // useEffect(() => {
   //   dispatch(actLoadProviderName(selectedProvider));
@@ -70,8 +71,11 @@ const Toolbar = ({ onHandleFileUpload, onHandleFileChange, user, ...rest }) => {
     dispatch(actLoadProviderName(event.target.value));
   };
 
-  const handleChangeAssignStatus = (event) => {
-    dispatch(actLoadAssignStatus(event.target.value));
+  const handleChangeAssignHubStatus = (event) => {
+    dispatch(actLoadAssignHubStatus(event.target.value));
+  };
+  const handleChangeAssignOrderToShipperStatus = (event) => {
+    dispatch(actLoadAssignOrderToShipperStatus(event.target.value));
   };
 
   useEffect(() => {
@@ -94,6 +98,7 @@ const Toolbar = ({ onHandleFileUpload, onHandleFileChange, user, ...rest }) => {
 
   useEffect(() => {
     setLoadingModal(true);
+    console.log(user)
     if (selectedProvider !== 'NONE') {
       let query = null;
       if (user && user.roleId === ROLE.ADMIN) {
@@ -121,6 +126,7 @@ const Toolbar = ({ onHandleFileUpload, onHandleFileChange, user, ...rest }) => {
         .then(async response => {
           if (response.ok) {
             const fetchData = await response.json();
+            console.log(fetchData);
             const data = { invoices: fetchData.data.items, meta: fetchData.data.meta };
             dispatch(actLoadInvoices(data));
           }
@@ -192,20 +198,35 @@ const Toolbar = ({ onHandleFileUpload, onHandleFileChange, user, ...rest }) => {
                 onChange={(event) => onChangeKeyword(event)}
               />
             </Box>
-            {user && user.roleId === ROLE.ADMIN
-              ? <FormControl variant="outlined" className={classes.formControl}>
+            {
+              user && user.roleId === ROLE.ADMIN
+              && <FormControl variant="outlined" className={classes.formControl}>
                 <InputLabel id="demo-simple-select-outlined-label">Asign Status</InputLabel>
                 <Select
                   labelId="demo-simple-select-outlined-label"
                   id="demo-simple-select-outlined"
                   label="Asign Status"
                   value={selectAssignHubStatus}
-                  onChange={handleChangeAssignStatus}
+                  onChange={handleChangeAssignHubStatus}
                 >
                   {elementAssignStatusMenuItem}
                 </Select>
               </FormControl>
-              : null
+            }
+            {
+              user && user.roleId === ROLE.HUB_MANAGER
+              && <FormControl variant="outlined" className={classes.formControl}>
+                <InputLabel id="demo-simple-select-outlined-label">Asign Status</InputLabel>
+                <Select
+                  labelId="demo-simple-select-outlined-label"
+                  id="demo-simple-select-outlined"
+                  label="Asign Status"
+                  value={selectAssignOrderToShipperStatus}
+                  onChange={handleChangeAssignOrderToShipperStatus}
+                >
+                  {elementAssignStatusMenuItem}
+                </Select>
+              </FormControl>
             }
             <FormControl variant="outlined" className={classes.formControl}>
               <InputLabel id="demo-simple-select-outlined-label">Provider</InputLabel>

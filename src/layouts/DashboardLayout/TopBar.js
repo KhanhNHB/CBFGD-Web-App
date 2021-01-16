@@ -17,7 +17,7 @@ import InputIcon from '@material-ui/icons/Input';
 import Logo from '../../components/Logo';
 import Cookies from 'js-cookie';
 import { USER_DEVICE_TOKEN, USER_TOKEN } from '../../common';
-import { actLoadAssignStatus, actLoadProviderName } from '../../actions';
+import { actChangeKeyword, actLoadAssignHubStatus, actLoadAssignOrderToShipperStatus, actLoadProviderName } from '../../actions';
 import { useDispatch } from 'react-redux';
 
 const useStyles = makeStyles((theme) => ({
@@ -54,7 +54,9 @@ const TopBar = ({
     Cookies.remove(USER_TOKEN);
     Cookies.remove(USER_DEVICE_TOKEN);
     dispatch(actLoadProviderName("NONE"));
-    dispatch(actLoadAssignStatus("NONE"));
+    dispatch(actLoadAssignHubStatus("NONE"));
+    dispatch(actLoadAssignOrderToShipperStatus("NONE"));
+    dispatch(actChangeKeyword(''));
     navigate('/', { replace: true });
   }
 

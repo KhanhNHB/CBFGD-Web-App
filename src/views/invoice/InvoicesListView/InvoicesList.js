@@ -159,6 +159,7 @@ const InvoicesList = ({ data, user }) => {
   const [currentHub, setCurrentHub] = useState(null);
   const [currentShipper, setCurrentShipper] = useState(null);
   const selectAssignHubStatus = useSelector(state => state.assignHubStatus.selectAssignHubStatus);
+  const selectAssignOrderToShipperStatus = useSelector(state => state.assignOrderToShipperStatus.selectAssignOrderToShipperStatus);
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [message, setMessage] = useState('');
 
@@ -452,7 +453,7 @@ const InvoicesList = ({ data, user }) => {
   let filterData = data.invoices;
   if (keyword) {
     filterData = filterData.filter((invoice) => {
-      return invoice.code.toLowerCase().indexOf(keyword.toLowerCase()) !== -1;
+      return invoice.code.toLowerCase().indexOf(keyword.trim().toLowerCase()) !== -1;
     });
   }
 
@@ -463,6 +464,16 @@ const InvoicesList = ({ data, user }) => {
   } else if (selectAssignHubStatus === 'ASSIGNED') {
     filterData = filterData.filter((invoice) => {
       return invoice.hub !== null;
+    });
+  }
+
+  if (selectAssignOrderToShipperStatus === 'NOT ASSIGN') {
+    filterData = filterData.filter((invoice) => {
+      return invoice.is_assign === false;
+    });
+  } else if (selectAssignOrderToShipperStatus === 'ASSIGNED') {
+    filterData = filterData.filter((invoice) => {
+      return invoice.is_assign === true;
     });
   }
 
@@ -521,12 +532,18 @@ const InvoicesList = ({ data, user }) => {
                                 onClick={() => handleSelectedRowForAssignHub(invoice.id, invoice.hub ? invoice.hub.id : null)}
                                 style={invoice.is_assign
                                   ? {
-                                    backgroundColor: (invoice.available && invoice.is_active && !invoice.is_invalid_address) ? '#E69403' : '#aeb0b6',
+                                    backgroundColor: (invoice.available && invoice.is_active && !invoice.is_invalid_address)
+                                      ? (invoice.current_delivery_status === 'IN_WAREHOUSE' || invoice.current_delivery_status === 'CANCELLED') ? '#E69403' : '#aeb0b6'
+                                      : '#aeb0b6',
                                     color: 'white'
                                   }
                                   : { color: 'white' }
                                 }
-                                disabled={(invoice.available && invoice.is_active && !invoice.is_invalid_address) ? false : true}
+                                disabled={
+                                  (invoice.available && invoice.is_active && !invoice.is_invalid_address)
+                                    ? (invoice.current_delivery_status === 'IN_WAREHOUSE' || invoice.current_delivery_status === 'CANCELLED') ? false : true
+                                    : true
+                                }
                               >
                                 {invoice.hub ? 'Assigned' : 'Assign'}
                               </Button>
@@ -542,12 +559,18 @@ const InvoicesList = ({ data, user }) => {
                                   onClick={() => handleSelectedRowForAssignShipper(invoice.id, invoice.shipper_id ? invoice.shipper_id : null)}
                                   style={invoice.is_assign
                                     ? {
-                                      backgroundColor: (invoice.available && invoice.is_active && !invoice.is_invalid_address) ? '#E69403' : '#aeb0b6',
+                                      backgroundColor: (invoice.available && invoice.is_active && !invoice.is_invalid_address)
+                                        ? (invoice.current_delivery_status === 'IN_WAREHOUSE' || invoice.current_delivery_status === 'CANCELLED') ? '#E69403' : '#aeb0b6'
+                                        : '#aeb0b6',
                                       color: 'white'
                                     }
                                     : { color: 'white' }
                                   }
-                                  disabled={(invoice.available && invoice.is_active && !invoice.is_invalid_address) ? false : true}
+                                  disabled={
+                                    (invoice.available && invoice.is_active && !invoice.is_invalid_address)
+                                      ? (invoice.current_delivery_status === 'IN_WAREHOUSE' || invoice.current_delivery_status === 'CANCELLED') ? false : true
+                                      : true
+                                  }
                                 >
                                   {invoice.is_assign ? 'Assigned' : 'Assign'}
                                 </Button>

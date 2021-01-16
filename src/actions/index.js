@@ -89,9 +89,16 @@ export const actLoadHubManager = (hubmanger) => {
     }
 };
 
-export const actLoadAssignStatus = (selectAssignHubStatus) => {
+export const actLoadAssignHubStatus = (selectAssignHubStatus) => {
     return {
         type: types.CHANGE_ASSIGN_HUB_STATUS,
         selectAssignHubStatus,
+    }
+};
+
+export const actLoadAssignOrderToShipperStatus = (selectAssignOrderToShipperStatus) => {
+    return {
+        type: types.CHANGE_ASSIGN_ORDER_TO_SHIPPER_STATUS,
+        selectAssignOrderToShipperStatus,
     }
 };
