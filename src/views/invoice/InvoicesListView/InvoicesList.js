@@ -40,7 +40,7 @@ const columns = [
   { id: 'priority', label: 'Priority', minWidth: 80, align: 'left' },
   { id: 'is_active', label: 'Status Order', minWidth: 170, align: 'left' },
   { id: 'current_delivery_status', label: 'Current Delivery Status', minWidth: 220, align: 'left' },
-  { id: 'out_of_hub', label: 'Out Of Hub', minWidth: 170, align: 'left' },
+  // { id: 'out_of_hub', label: 'Out Of Hub', minWidth: 170, align: 'left' },
 ];
 
 function descendingComparator(a, b, orderBy) {

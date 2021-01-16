@@ -95,7 +95,7 @@ const ModalShipperAdd = (props) => {
                 setName('');
                 setRadius('');
                 setId('');
-                props.onCLoseHub(true);
+                props.onCLoseHub(true, true);
                 return;
             } else {
                 alert(fetchHubData.message);
@@ -120,7 +120,7 @@ const ModalShipperAdd = (props) => {
                 setName('');
                 setRadius('');
                 setId('');
-                props.onCLoseHub(true);
+                props.onCLoseHub(true, false);
             } else {
                 alert(fetchData.message);
                 return;

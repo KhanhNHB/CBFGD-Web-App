@@ -72,7 +72,7 @@ function stableSort(array, comparator) {
 
 
 const EnhancedTableHead = (props) => {
-  const { order, orderBy, onRequestSort } = props;
+  const { order, orderBy, onRequestSort, user } = props;
   const createSortHandler = (property) => (event) => {
     onRequestSort(event, property);
   };
@@ -97,7 +97,7 @@ const EnhancedTableHead = (props) => {
             </TableSortLabel>
           </TableCell>
         ))}
-        <TableCell align={"left"} style={{ minWidth: 200 }}>Hub</TableCell>
+        {(user && user.roleId === ROLE.ADMIN) && <TableCell align={"left"} style={{ minWidth: 200 }}>Hub</TableCell>}
       </TableRow>
     </TableHead>
   );
@@ -320,6 +320,7 @@ const ShipperList = ({ className, data, user, ...rest }) => {
                 order={order}
                 orderBy={orderBy}
                 onRequestSort={handleRequestSort}
+                user={user}
               />
               {(data && data.shippers && data.shippers.length)
                 ?

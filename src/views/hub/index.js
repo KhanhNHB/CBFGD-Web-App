@@ -32,6 +32,7 @@ export function MapContainer(props) {
   const [selectedPlace, setSelectedPlace] = useState(null);
   const [invoiceLocation, setInvoiceLocation] = useState([]);
   const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [message, setMessage] = useState('');
 
   const handleOpenHub = () => {
     setOpenHub(true);
@@ -42,11 +43,16 @@ export function MapContainer(props) {
     setRadius('');
     setId('');
     setStatus('Active');
-    handleOpenHub(true);
+    handleOpenHub();
   }
 
-  const handleCloseHub = (isChange) => {
+  const handleCloseHub = (isChange, isCreated) => {
     if (isChange) {
+      if (isCreated) {
+        setMessage('Create Hub Sucess!');
+      } else {
+        setMessage('Update Hub Sucess!');
+      }
       setOpenSnackbar(true);
     }
     setOpenHub(false);
@@ -106,7 +112,7 @@ export function MapContainer(props) {
     setRadius(evt.radius);
     setStatus(evt.status);
     if (user && user.roleId === ROLE.ADMIN) {
-      handleOpenHub(true);
+      handleOpenHub();
     }
   };
 
@@ -256,8 +262,8 @@ export function MapContainer(props) {
           message={`Import Sucess!`}
         >
           <Alert onClose={handleCloseSnackbar} severity='success'>
-            Create Hub Sucess!
-        </Alert>
+            {message}
+          </Alert>
         </Snackbar>
       </div>
     </>
