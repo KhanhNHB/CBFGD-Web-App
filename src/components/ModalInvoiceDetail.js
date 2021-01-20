@@ -192,6 +192,7 @@ const ModalInvoiceDetail = (props) => {
                     return;
                 }
                 setOrderTransaction(fetchData.data);
+                // Tao cay
                 handleStep(fetchData.data);
                 setLoading(false);
             }
