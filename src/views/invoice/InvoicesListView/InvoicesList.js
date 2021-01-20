@@ -502,6 +502,9 @@ const InvoicesList = ({ data, user }) => {
                 <>
                   <TableBody>
                     {stableSort(filterData, getComparator(order, orderBy)).map((invoice, index) => {
+                      if (invoice.code === '6733740') {
+                        console.log(invoice);
+                      }
                       return (
                         <TableRow
                           hover
@@ -533,7 +536,7 @@ const InvoicesList = ({ data, user }) => {
                                 style={invoice.is_assign
                                   ? {
                                     backgroundColor: (invoice.available && invoice.is_active && !invoice.is_invalid_address)
-                                      ? (invoice.current_delivery_status === 'IN_WAREHOUSE' || invoice.current_delivery_status === 'CANCELLED') ? '#E69403' : '#aeb0b6'
+                                      ? (invoice.current_delivery_status === 'IN_WAREHOUSE' || invoice.current_delivery_status === 'FAIL_1' || invoice.current_delivery_status === 'FAIL_2') ? '#E69403' : '#aeb0b6'
                                       : '#aeb0b6',
                                     color: 'white'
                                   }
@@ -541,7 +544,7 @@ const InvoicesList = ({ data, user }) => {
                                 }
                                 disabled={
                                   (invoice.available && invoice.is_active && !invoice.is_invalid_address)
-                                    ? (invoice.current_delivery_status === 'IN_WAREHOUSE' || invoice.current_delivery_status === 'CANCELLED') ? false : true
+                                    ? (invoice.current_delivery_status === 'IN_WAREHOUSE' || invoice.current_delivery_status === 'FAIL_1' || invoice.current_delivery_status === 'FAIL_2') ? false : true
                                     : true
                                 }
                               >
@@ -560,7 +563,7 @@ const InvoicesList = ({ data, user }) => {
                                   style={invoice.is_assign
                                     ? {
                                       backgroundColor: (invoice.available && invoice.is_active && !invoice.is_invalid_address)
-                                        ? (invoice.current_delivery_status === 'IN_WAREHOUSE' || invoice.current_delivery_status === 'CANCELLED') ? '#E69403' : '#aeb0b6'
+                                        ? (invoice.current_delivery_status === 'IN_WAREHOUSE' || invoice.current_delivery_status === 'FAIL_1' || invoice.current_delivery_status === 'FAIL_2') ? '#E69403' : '#aeb0b6'
                                         : '#aeb0b6',
                                       color: 'white'
                                     }
@@ -568,7 +571,7 @@ const InvoicesList = ({ data, user }) => {
                                   }
                                   disabled={
                                     (invoice.available && invoice.is_active && !invoice.is_invalid_address)
-                                      ? (invoice.current_delivery_status === 'IN_WAREHOUSE' || invoice.current_delivery_status === 'CANCELLED') ? false : true
+                                      ? (invoice.current_delivery_status === 'IN_WAREHOUSE' || invoice.current_delivery_status === 'FAIL_1' || invoice.current_delivery_status === 'FAIL_2') ? false : true
                                       : true
                                   }
                                 >
