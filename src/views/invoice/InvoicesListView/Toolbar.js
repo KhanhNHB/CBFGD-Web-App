@@ -98,7 +98,6 @@ const Toolbar = ({ onHandleFileUpload, onHandleFileChange, user, ...rest }) => {
 
   useEffect(() => {
     setLoadingModal(true);
-    console.log(user)
     if (selectedProvider !== 'NONE') {
       let query = null;
       if (user && user.roleId === ROLE.ADMIN) {
@@ -126,7 +125,6 @@ const Toolbar = ({ onHandleFileUpload, onHandleFileChange, user, ...rest }) => {
         .then(async response => {
           if (response.ok) {
             const fetchData = await response.json();
-            console.log(fetchData);
             const data = { invoices: fetchData.data.items, meta: fetchData.data.meta };
             dispatch(actLoadInvoices(data));
           }
