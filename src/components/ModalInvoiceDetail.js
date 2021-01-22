@@ -215,8 +215,10 @@ const ModalInvoiceDetail = (props) => {
                 }
             }
 
-            if (newStep.length === 1) {
+            if (newStep[1] === 'IN_WAREHOUSE') {
                 newStep = ['IN_WAREHOUSE', 'TO_DELIVERY', 'DELIVERING', 'COMPLETED'];
+                newMaxStep = 0;
+                newActiveStep = 0;
             }
 
             setSteps(newStep);
