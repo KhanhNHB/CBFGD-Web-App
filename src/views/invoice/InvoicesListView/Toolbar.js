@@ -153,7 +153,7 @@ const Toolbar = ({ onHandleFileUpload, onHandleFileChange, user, ...rest }) => {
 
   return (
     <div className={clsx(classes.root)} {...rest}>
-      {/* {(user && user.roleId === ROLE.ADMIN)
+      {(user && user.roleId === ROLE.ADMIN)
         ? <Box
           display="flex"
           justifyContent="flex-end"
@@ -172,7 +172,7 @@ const Toolbar = ({ onHandleFileUpload, onHandleFileChange, user, ...rest }) => {
         </Button>
         </Box>
         : null
-      } */}
+      }
       <Box mt={3}>
         <Card>
           <CardContent className={classes.content}>
