@@ -77,10 +77,6 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-function getSteps() {
-    return ['IN_WAREHOUSE', 'TO_DELIVERY', 'DELIVERING', 'COMPLETED', 'CANCELLED', 'RETURN'];
-}
-
 const useQontoStepIconStyles = makeStyles({
     root: {
         color: '#eaeaf0',
@@ -146,43 +142,42 @@ const ModalInvoiceDetail = (props) => {
     const [loading, setLoading] = useState(false);
     const [maxStep, setMaxStep] = useState(0);
     const [activeStep, setActiveStep] = useState(0);
-    const steps = getSteps();
+    const [steps, setSteps] = useState(['IN_WAREHOUSE', 'TO_DELIVERY', 'DELIVERING', 'COMPLETED']);
     const order = props.invoice;
 
     useEffect(() => {
         setLoading(true);
-
-        const handleStep = (data) => {
-            if (!data.delivery_status || !data.delivery_status.length) return;
-            switch (data.delivery_status[0].status) {
-                case 'IN_WAREHOUSE':
-                    setMaxStep(0);
-                    setActiveStep(0);
-                    return;
-                case 'TO_DELIVERY':
-                    setMaxStep(1);
-                    setActiveStep(1);
-                    return;
-                case 'DELIVERING':
-                    setMaxStep(2);
-                    setActiveStep(2);
-                    return;
-                case 'COMPLETED':
-                    setMaxStep(3);
-                    setActiveStep(3);
-                    return;
-                case 'CANCELLED':
-                    setMaxStep(4);
-                    setActiveStep(4);
-                    return;
-                case 'RETURN':
-                    setMaxStep(5);
-                    setActiveStep(5);
-                    return;
-                default:
-                    return
-            }
-        }
+        // const handleStep = (data) => {
+        //     if (!data.delivery_status || !data.delivery_status.length) return;
+        //     switch (data.delivery_status[0].status) {
+        //         case 'IN_WAREHOUSE':
+        //             setMaxStep(0);
+        //             setActiveStep(0);
+        //             return;
+        //         case 'TO_DELIVERY':
+        //             setMaxStep(1);
+        //             setActiveStep(1);
+        //             return;
+        //         case 'DELIVERING':
+        //             setMaxStep(2);
+        //             setActiveStep(2);
+        //             return;
+        //         case 'COMPLETED':
+        //             setMaxStep(3);
+        //             setActiveStep(3);
+        //             return;
+        //         case 'CANCELLED':
+        //             setMaxStep(4);
+        //             setActiveStep(4);
+        //             return;
+        //         case 'RETURN':
+        //             setMaxStep(5);
+        //             setActiveStep(5);
+        //             return;
+        //         default:
+        //             return
+        //     }
+        // };
 
         const fetchHistory = async () => {
             const response = await API.get(`${INVOICE_ENDPOINT}/${props.invoice.id}/histories`);
@@ -193,19 +188,49 @@ const ModalInvoiceDetail = (props) => {
                 }
                 setOrderTransaction(fetchData.data);
                 // Tao cay
-                handleStep(fetchData.data);
+                // handleStep(fetchData.data);
                 setLoading(false);
             }
-        }
+        };
 
         fetchHistory();
     }, [props.invoice.id, props.invoice.code, props.invoice.provider.name]);
+
+    useEffect(() => {
+        console.log(orderTransaction)
+        if (orderTransaction.delivery_status && orderTransaction.delivery_status.length > 0) {
+            let cloneDeliveryStatus = orderTransaction.delivery_status;
+            cloneDeliveryStatus.reverse();
+
+            let newStep = ['IN_WAREHOUSE'];
+            let newMaxStep = 0;
+            let newActiveStep = 0;
+
+            for (let i = 0; i < cloneDeliveryStatus.length; i++) {
+                const deliveryStatus = cloneDeliveryStatus[i];
+                if (deliveryStatus.available) {
+                    newStep = newStep.concat([deliveryStatus.status]);
+                    newMaxStep++;
+                    newActiveStep++;
+                }
+            }
+
+            if (newStep.length === 1) {
+                newStep = ['IN_WAREHOUSE', 'TO_DELIVERY', 'DELIVERING', 'COMPLETED'];
+            }
+
+            setSteps(newStep);
+            setMaxStep(newMaxStep);
+            setActiveStep(newActiveStep);
+        }
+    }, [orderTransaction])
 
     function getStepContent(label) {
         const delivery_status = orderTransaction.delivery_status;
         if (delivery_status && delivery_status.length) {
             return orderTransaction.delivery_status.map(transaction => {
                 if (transaction.status === label) {
+                    console.log(label)
                     return (
                         <div>
                             <p style={{ marginTop: 5, marginBottom: 5 }}>
@@ -247,7 +272,11 @@ const ModalInvoiceDetail = (props) => {
                                         alignItems: 'center'
                                     }}>
                                         <div>
-                                            <a href={`${IMAGE_ENDPOINT}/${orderTransaction.receipt_order_image_path}`}>
+                                            <a
+                                                href={`${IMAGE_ENDPOINT}/${orderTransaction.receipt_order_image_path}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                            >
                                                 <img
                                                     src={`${IMAGE_ENDPOINT}/${orderTransaction.receipt_order_image_path}`}
                                                     width={120}
@@ -258,7 +287,11 @@ const ModalInvoiceDetail = (props) => {
                                             <p>Order Image</p>
                                         </div>
                                         <div>
-                                            <a href={`${IMAGE_ENDPOINT}/${orderTransaction.receipt_sign_image_path}`}>
+                                            <a
+                                                href={`${IMAGE_ENDPOINT}/${orderTransaction.receipt_sign_image_path}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                            >
                                                 <img
                                                     src={`${IMAGE_ENDPOINT}/${orderTransaction.receipt_sign_image_path}`}
                                                     width={120}

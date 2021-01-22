@@ -502,9 +502,6 @@ const InvoicesList = ({ data, user }) => {
                 <>
                   <TableBody>
                     {stableSort(filterData, getComparator(order, orderBy)).map((invoice, index) => {
-                      if (invoice.code === '6733740') {
-                        console.log(invoice);
-                      }
                       return (
                         <TableRow
                           hover
