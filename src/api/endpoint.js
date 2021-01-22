@@ -1,5 +1,5 @@
-export const BASE_URL = "http://localhost:8090";
-// export const BASE_URL = "https://api.gds.fu.cloudns.asia";
+// export const BASE_URL = "http://localhost:8090";
+export const BASE_URL = "https://api.gds.fu.cloudns.asia";
 
 export const LOGIN_ENDPOINT = `${BASE_URL}/auth/signin/admins`;
 export const ADMIN_ENDPOINT = `${BASE_URL}/admins`;
