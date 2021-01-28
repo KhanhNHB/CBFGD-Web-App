@@ -197,7 +197,6 @@ const ModalInvoiceDetail = (props) => {
     }, [props.invoice.id, props.invoice.code, props.invoice.provider.name]);
 
     useEffect(() => {
-        console.log(orderTransaction)
         if (orderTransaction.delivery_status && orderTransaction.delivery_status.length > 0) {
             let cloneDeliveryStatus = orderTransaction.delivery_status;
             cloneDeliveryStatus.reverse();
@@ -232,17 +231,30 @@ const ModalInvoiceDetail = (props) => {
         if (delivery_status && delivery_status.length) {
             return orderTransaction.delivery_status.map(transaction => {
                 if (transaction.status === label) {
-                    console.log(label)
                     return (
                         <div>
                             <p style={{ marginTop: 5, marginBottom: 5 }}>
                                 <span style={{ fontWeight: 'bold' }}>Created At: </span>
                                 {datetimeUtils.DisplayDateTimeFormat(transaction.created_at)}
                             </p>
-                            {(transaction.status === 'COMPLETED') &&
+                            {
+                                ((transaction.status === 'COMPLETED')
+                                    || (transaction.status === 'FAIL_1')
+                                    || (transaction.status === 'FAIL_2')
+                                )
+                                &&
                                 <p style={{ marginTop: 5, marginBottom: 5 }}>
                                     <span style={{ fontWeight: 'bold' }}>Note: </span>
                                     {transaction.note ? transaction.note : 'none'}
+                                </p>
+                            }
+                            {
+                                ((transaction.status === 'FAIL_1')
+                                    || (transaction.status === 'FAIL_2'))
+                                &&
+                                <p style={{ marginTop: 5, marginBottom: 5 }}>
+                                    <span style={{ fontWeight: 'bold' }}>Reason: </span>
+                                    {transaction.reason ? transaction.reason : 'none'}
                                 </p>
                             }
                             <p style={{ marginTop: 5, marginBottom: 5 }}>
@@ -258,19 +270,19 @@ const ModalInvoiceDetail = (props) => {
                                     marginTop: 5,
                                     marginBottom: 5,
                                 }}>
-                                    <div>
+                                    {/* <div>
                                         <span style={{ fontWeight: 'bold' }}>Latitude: </span>
                                         <p style={{ display: 'inline-block' }}>{transaction.latitude}</p>
                                     </div>
                                     <div>
                                         <span style={{ fontWeight: 'bold' }}>Longitude: </span>
                                         <p style={{ display: 'inline-block' }}>{transaction.longitude}</p>
-                                    </div>
+                                    </div> */}
                                     <span style={{ fontWeight: 'bold' }}>Evidence: </span>
                                     <div style={{
                                         display: 'flex',
                                         flexDirection: 'row',
-                                        justifyContent: 'space-between',
+                                        // justifyContent: 'space-evenly',
                                         alignItems: 'center'
                                     }}>
                                         <div>
@@ -288,7 +300,9 @@ const ModalInvoiceDetail = (props) => {
                                             </a>
                                             <p>Order Image</p>
                                         </div>
-                                        <div>
+                                        <div style={{
+                                            marginLeft: 10
+                                        }}>
                                             <a
                                                 href={`${IMAGE_ENDPOINT}/${orderTransaction.receipt_sign_image_path}`}
                                                 target="_blank"
