@@ -241,6 +241,8 @@ const ModalInvoiceDetail = (props) => {
                                 ((transaction.status === 'COMPLETED')
                                     || (transaction.status === 'FAIL_1')
                                     || (transaction.status === 'FAIL_2')
+                                    || (transaction.status === 'FAIL_3')
+                                    || (transaction.status === 'RETURN')
                                 )
                                 &&
                                 <p style={{ marginTop: 5, marginBottom: 5 }}>
@@ -250,7 +252,10 @@ const ModalInvoiceDetail = (props) => {
                             }
                             {
                                 ((transaction.status === 'FAIL_1')
-                                    || (transaction.status === 'FAIL_2'))
+                                    || (transaction.status === 'FAIL_2')
+                                    || (transaction.status === 'FAIL_3')
+                                    || (transaction.status === 'RETURN')
+                                )
                                 &&
                                 <p style={{ marginTop: 5, marginBottom: 5 }}>
                                     <span style={{ fontWeight: 'bold' }}>Reason: </span>
