@@ -191,7 +191,7 @@ const Toolbar = ({ onHandleFileUpload, onHandleFileChange, user, ...rest }) => {
                     </InputAdornment>
                   )
                 }}
-                placeholder="Search Invoice..."
+                placeholder="Search Order..."
                 variant="outlined"
                 onChange={(event) => onChangeKeyword(event)}
               />
